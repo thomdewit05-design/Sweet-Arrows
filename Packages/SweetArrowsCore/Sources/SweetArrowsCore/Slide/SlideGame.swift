@@ -6,16 +6,18 @@
 /// faster and faster; when one has nowhere to land the run is over.
 public struct SlideGame: Sendable {
     public struct Settings: Sendable, Hashable {
-        public var width = 6
-        public var height = 6
-        public var startCandies = 8
+        public var width = 5
+        public var height = 5
+        public var startCandies = 5
         /// Seconds between candies at the start and at full speed.
-        public var startInterval = 2.4
-        public var fastestInterval = 0.7
+        public var startInterval = 3.0
+        public var fastestInterval = 1.0
         /// How long the warning shadow shows before a candy appears.
         public var warning = 1.0
         /// Candies popped per stage; every stage is a bit faster and may bring a color or a special candy.
-        public var popsPerStage = 12
+        public var popsPerStage = 10
+        /// Most colors in play at once (a small board gets too crowded with all six).
+        public var maxColors = 4
         /// Pops within this many seconds of each other build a combo.
         public var comboWindow = 3.0
 
@@ -214,7 +216,7 @@ public struct SlideGame: Sendable {
     }
 
     /// Three colors at first, one more every two stages, up to six.
-    public var colorCount: Int { min(3 + (stage + 1) / 2, CandyColor.allCases.count) }
+    public var colorCount: Int { min(3 + (stage + 1) / 2, settings.maxColors, CandyColor.allCases.count) }
 
     /// Special candies unlock as the run goes on.
     public var unlockedKinds: [Kind] {

@@ -111,7 +111,7 @@ public enum MissionKind: String, Codable, CaseIterable, Sendable {
     /// Target for a player level tier (0...4).
     func target(tier: Int) -> Int {
         let table: [Int] = switch self {
-        case .score: [600, 1200, 2000, 3200, 5000]
+        case .score: [400, 800, 1400, 2200, 3500]
         case .popCandies: [30, 50, 80, 120, 160]
         case .combo: [3, 3, 4, 4, 5]
         case .bombs: [1, 2, 3, 4, 5]
