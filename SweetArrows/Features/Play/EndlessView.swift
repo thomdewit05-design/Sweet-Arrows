@@ -104,6 +104,7 @@ struct EndlessView: View {
         }
         .onChange(of: session?.isSlowedDown) { _, slowed in scene?.showSlowDown(slowed == true) }
         .onChange(of: showsBanner) { _, _ in scene?.bottomInset = bottomInset }
+        .onDisappear { model.audio.playMusic(.menu) }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { session?.release("background") } else { session?.hold("background") }
         }
@@ -131,12 +132,15 @@ struct EndlessView: View {
         session = newSession
         scene = newScene
         model.analytics.log(.endlessStart)
+        model.audio.playMusic(.calm)
         newSession.start()
     }
 
     private func showStage(_ stage: Int) {
         stageBanner = stage
         model.audio.playCombo(min(stage + 1, 8))
+        // The music gets livelier every two speed stages.
+        model.audio.playMusic(.game(stage: stage))
         Task { @MainActor in
             try? await Task.sleep(for: .seconds(1.4))
             if stageBanner == stage { stageBanner = nil }
@@ -188,6 +192,7 @@ struct EndlessView: View {
         outcome = nil
         model.ads.maybeShowInterstitial(afterLevel: model.save.progress.endlessRuns)
         session?.restart()
+        model.audio.playMusic(.calm)
         model.analytics.log(.endlessStart)
     }
 
@@ -255,6 +260,7 @@ struct EndlessView: View {
 
     private func leave() {
         session?.hold("leaving")
+        model.audio.playMusic(.menu)
         if !model.path.isEmpty { model.path.removeLast() }
     }
 }

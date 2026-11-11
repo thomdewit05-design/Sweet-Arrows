@@ -144,6 +144,12 @@ Op verzoek van de eigenaar ("alles mag") zodat spelers blijven terugkomen:
   mee als je erop drukt. Het sterretje knippert met zijn ogen en wiebelt als je erop tikt.
   Met "Beweging verminderen" aan staat dit allemaal stil.
 
+- **Muziek die meegroeit** (`Tools/Sounds/make_music.py`, numpy): vijf zelf gesynthetiseerde loops van 30–42 s,
+  elk met een A- en B-deel. Menu: ukulele-lounge (92 BPM). In het spel per twee snelheden een levendiger stuk:
+  *Rustig* (marimba, 96 BPM), *Groove* (funky bas en klappen, 108 BPM), *Vrolijk* (8-bit, 120 BPM) en
+  *Sprint* (snelle arpeggio's en beat, 132 BPM). Wisselen gaat met een overgang van 1,2 s; terug naar het menu
+  speelt weer de lounge. Alle stukken even hard (RMS genormaliseerd), samen ongeveer 7,5 MB.
+
 ### Echte illustraties later toevoegen
 
 Alles is nu met code getekend. Komen er later echte tekeningen (bijv. van een illustrator), zet ze dan als

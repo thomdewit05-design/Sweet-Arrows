@@ -6,6 +6,25 @@ enum SoundEffect: String, CaseIterable, Sendable {
     case tap, squish, pop, bonk, crack, melt, win, lose, star, coin
 }
 
+/// Background music, synthesised by Tools/Sounds/make_music.py. The game tracks get livelier with the speed.
+enum MusicTrack: String, CaseIterable, Sendable {
+    case menu = "candy_shop_loop"
+    case calm = "game_calm"
+    case groove = "game_groove"
+    case bright = "game_bright"
+    case rush = "game_rush"
+
+    /// The game track for a speed stage (0-based): changes every two stages.
+    static func game(stage: Int) -> MusicTrack {
+        switch stage {
+        case ..<2: .calm
+        case 2..<4: .groove
+        case 4..<6: .bright
+        default: .rush
+        }
+    }
+}
+
 @MainActor
 protocol AudioService: AnyObject {
     var soundEnabled: Bool { get set }
@@ -13,6 +32,8 @@ protocol AudioService: AnyObject {
     func play(_ effect: SoundEffect)
     /// Rising xylophone tone for the n-th pop in a row (1-based).
     func playCombo(_ step: Int)
+    /// Crossfades to another background track (does nothing if it is already playing).
+    func playMusic(_ track: MusicTrack)
 }
 
 /// Plays preloaded effects through AVAudioPlayer. Uses the ambient session, so the
@@ -26,7 +47,9 @@ final class SoundEffectsService: AudioService {
 
     /// Background loop, kept low as PLAN.md asks.
     private static let musicVolume: Float = 0.25
-    private var music: AVAudioPlayer?
+    private static let crossfade: TimeInterval = 1.2
+    private var tracks: [MusicTrack: AVAudioPlayer] = [:]
+    private var currentTrack: MusicTrack = .menu
 
     private static let comboCount = 8
     private static let voices = 3
@@ -42,21 +65,46 @@ final class SoundEffectsService: AudioService {
             voices.forEach { $0.prepareToPlay() }
             players[name] = voices
         }
-        if let url = bundle.url(forResource: "candy_shop_loop", withExtension: "wav") {
-            music = try? AVAudioPlayer(contentsOf: url)
-            music?.numberOfLoops = -1
-            music?.volume = Self.musicVolume
-            music?.prepareToPlay()
+        for track in MusicTrack.allCases {
+            guard let url = bundle.url(forResource: track.rawValue, withExtension: "wav"),
+                  let player = try? AVAudioPlayer(contentsOf: url) else { continue }
+            player.numberOfLoops = -1
+            player.volume = track == currentTrack ? Self.musicVolume : 0
+            player.prepareToPlay()
+            tracks[track] = player
         }
         updateMusic()
     }
 
+    func playMusic(_ track: MusicTrack) {
+        guard track != currentTrack else { return }
+        let old = tracks[currentTrack]
+        currentTrack = track
+        guard musicEnabled else { return }
+        old?.setVolume(0, fadeDuration: Self.crossfade)
+        if let old {
+            // Pause the old track once it has faded out (unless it was picked again meanwhile).
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(Self.crossfade + 0.1))
+                guard let self, self.tracks[self.currentTrack] !== old else { return }
+                old.pause()
+            }
+        }
+        guard let next = tracks[track] else { return }
+        // Each new speed starts its track from the top, so the change is clearly heard.
+        next.currentTime = 0
+        next.volume = 0
+        next.play()
+        next.setVolume(Self.musicVolume, fadeDuration: Self.crossfade)
+    }
+
     private func updateMusic() {
-        guard let music else { return }
+        guard let music = tracks[currentTrack] else { return }
         if musicEnabled {
+            music.volume = Self.musicVolume
             if !music.isPlaying { music.play() }
-        } else if music.isPlaying {
-            music.pause()
+        } else {
+            for player in tracks.values where player.isPlaying { player.pause() }
         }
     }
 
@@ -85,4 +133,5 @@ final class SilentAudioService: AudioService {
     var musicEnabled = true
     func play(_ effect: SoundEffect) {}
     func playCombo(_ step: Int) {}
+    func playMusic(_ track: MusicTrack) {}
 }

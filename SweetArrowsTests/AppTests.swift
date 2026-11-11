@@ -47,6 +47,19 @@ struct AppTests {
         #expect(save.progress.coins == 500)
     }
 
+    @Test func musicGetsLivelierWithSpeed() {
+        #expect(MusicTrack.game(stage: 0) == .calm)
+        #expect(MusicTrack.game(stage: 1) == .calm)
+        #expect(MusicTrack.game(stage: 2) == .groove)
+        #expect(MusicTrack.game(stage: 4) == .bright)
+        #expect(MusicTrack.game(stage: 6) == .rush)
+        #expect(MusicTrack.game(stage: 20) == .rush)
+        // every track ships with the app
+        for track in MusicTrack.allCases {
+            #expect(Bundle.main.url(forResource: track.rawValue, withExtension: "wav") != nil, "\(track) missing")
+        }
+    }
+
     @Test func boostersCostCoins() {
         let save = SaveService(url: nil)
         #expect(!save.spend(.hint))
