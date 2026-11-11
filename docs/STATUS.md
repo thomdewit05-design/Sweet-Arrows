@@ -116,8 +116,9 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
 
 ## Besluiten van de eigenaar
 
-- Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows` (in `Config/Shared.xcconfig`);
-  vul daar nog je `DEVELOPMENT_TEAM` in.
+- Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;
+  een bundle-ID kan daar niet meer veranderen). Team-ID `7BDZ6994AD`. Beide in `Config/Shared.xcconfig`.
+  De aankoop-ID's houden het voorvoegsel `com.lucthomasdewit.sweetarrows.` – die hoeven niet gelijk te zijn aan de bundle-ID.
 - **8 werelden** voor de 300 levels.
 - **Ongedaan maken blijft gratis.**
 

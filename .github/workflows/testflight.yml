@@ -6,8 +6,9 @@ name: TestFlight
 # Repository secrets needed (Settings → Secrets and variables → Actions):
 #   ASC_KEY_ID            App Store Connect API key id
 #   ASC_ISSUER_ID         App Store Connect issuer id
-#   ASC_KEY_P8_BASE64     the .p8 key file, base64-encoded
-#   DEVELOPMENT_TEAM      your Apple team id
+#   ASC_KEY_P8            the .p8 key file: open it in Notepad and paste everything,
+#                         including the BEGIN/END lines (or ASC_KEY_P8_BASE64, base64-encoded)
+#   DEVELOPMENT_TEAM      optional: overrides the team id in Config/Shared.xcconfig
 #   SECRETS_XCCONFIG      contents of Config/Secrets.xcconfig (real AdMob ids)
 #   GOOGLE_SERVICE_INFO   GoogleService-Info.plist, base64-encoded (optional)
 
@@ -28,16 +29,31 @@ jobs:
         env:
           SECRETS_XCCONFIG: ${{ secrets.SECRETS_XCCONFIG }}
           GOOGLE_SERVICE_INFO: ${{ secrets.GOOGLE_SERVICE_INFO }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
         run: |
           printf '%s\n' "$SECRETS_XCCONFIG" > Config/Secrets.xcconfig
-          echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" >> Config/Secrets.xcconfig
+          # The team id also lives in Config/Shared.xcconfig; the secret only overrides it.
+          if [ -n "$DEVELOPMENT_TEAM" ]; then
+            echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" >> Config/Secrets.xcconfig
+          fi
           if [ -n "$GOOGLE_SERVICE_INFO" ]; then
             echo "$GOOGLE_SERVICE_INFO" | base64 --decode > SweetArrows/App/GoogleService-Info.plist
           fi
           mkdir -p ~/private_keys
-          echo "$ASC_KEY_P8_BASE64" | base64 --decode > ~/private_keys/AuthKey.p8
+          if [ -n "$ASC_KEY_P8" ]; then
+            printf '%s\n' "$ASC_KEY_P8" > ~/private_keys/AuthKey.p8
+          elif [ -n "$ASC_KEY_P8_BASE64" ]; then
+            echo "$ASC_KEY_P8_BASE64" | base64 --decode > ~/private_keys/AuthKey.p8
+          else
+            echo "::error::Add the ASC_KEY_P8 secret (contents of your AuthKey .p8 file)"
+            exit 1
+          fi
+          if ! grep -q "BEGIN PRIVATE KEY" ~/private_keys/AuthKey.p8; then
+            echo "::error::ASC_KEY_P8 does not look like a .p8 key (missing BEGIN PRIVATE KEY)"
+            exit 1
+          fi
       - name: Generate project
         run: xcodegen generate
       - name: Archive
@@ -60,3 +76,11 @@ jobs:
             -authenticationKeyPath ~/private_keys/AuthKey.p8 \
             -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
             -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }} | tail -n 40
+      - name: Show Apple distribution log on failure
+        if: failure()
+        run: |
+          for log in $(find "${TMPDIR:-/tmp}" -path "*xcdistributionlogs*" -name "*.log" 2>/dev/null); do
+            echo "::group::$log"
+            tail -n 80 "$log"
+            echo "::endgroup::"
+          done
