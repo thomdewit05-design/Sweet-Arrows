@@ -34,29 +34,26 @@ final class CandyNode: SKNode {
     private var ice: SKShapeNode?
     private var wrapper: SKNode?
     private var spinnerBadge: SKShapeNode?
-    private let color: CandyColor
+    private var lock: SKNode?
+    private var colorMark: SKLabelNode?
+    private var color: CandyColor
+    private let cellSize: CGFloat
+    private let style: Cosmetic
+    private let bar: Axis?
+    private weak var art: CandyArt?
 
     init(state: CandyState, cellSize: CGFloat, colorBlind: Bool, style: Cosmetic = .classicCandy, art: CandyArt? = nil) {
         candyID = state.id
         color = state.color
+        self.cellSize = cellSize
+        self.style = style
+        self.art = art
         let size = cellSize * 0.86
         let bar = state.candy.bar
-        let candyColor = state.color
+        self.bar = bar
 
-        // Body (shadow + candy + shine), as a cached texture when possible.
-        let extent = bar.map { $0 == .horizontal
-            ? CGSize(width: cellSize * 2.1, height: cellSize * 1.2)
-            : CGSize(width: cellSize * 1.2, height: cellSize * 2.1)
-        } ?? CGSize(width: cellSize * 1.2, height: cellSize * 1.2)
-        let barKey = bar?.rawValue ?? "single"
-        let bodyKey = "body-\(candyColor.rawValue)-\(barKey)-\(style.rawValue)-\(Int(cellSize * 10))"
-        let build = { CandyNode.makeBody(color: candyColor, bar: bar, cellSize: cellSize, style: style) }
         let bodyRoot = SKNode()
-        if let texture = art?.texture(key: bodyKey, extent: extent, build: build) {
-            bodyRoot.addChild(SKSpriteNode(texture: texture, size: extent))
-        } else {
-            bodyRoot.addChild(build())
-        }
+        bodyRoot.addChild(CandyNode.bodySprite(color: state.color, bar: bar, cellSize: cellSize, style: style, art: art))
         body = bodyRoot
 
         let arrowExtent = CGSize(width: size * 0.5, height: size * 0.6)
@@ -79,9 +76,128 @@ final class CandyNode: SKNode {
         if colorBlind { addColorBlindMark(size: size) }
         if state.candy.has(.rotating) { addSpinnerBadge(size: size) }
         if state.caramelIntact { addCaramel(size: size, bar: bar, cellSize: cellSize) }
+        if state.candy.has(.colorChanger) { addChangerRing(size: size) }
+        if state.candy.has(.bomb) { addBombBadge(size: size) }
+        if state.candy.has(.key) { addKeyBadge(size: size) }
+        if state.locked { addLock(size: size, bar: bar, cellSize: cellSize) }
         if state.frozen { addIce(size: size, bar: bar, cellSize: cellSize) }
         if !state.revealed { addWrapper(size: size, bar: bar, cellSize: cellSize) }
     }
+
+    /// Body (shadow + candy + shine), as a cached texture when possible.
+    private static func bodySprite(color: CandyColor, bar: Axis?, cellSize: CGFloat, style: Cosmetic, art: CandyArt?) -> SKNode {
+        let extent = bar.map { $0 == .horizontal
+            ? CGSize(width: cellSize * 2.1, height: cellSize * 1.2)
+            : CGSize(width: cellSize * 1.2, height: cellSize * 2.1)
+        } ?? CGSize(width: cellSize * 1.2, height: cellSize * 1.2)
+        let barKey = bar?.rawValue ?? "single"
+        let key = "body-\(color.rawValue)-\(barKey)-\(style.rawValue)-\(Int(cellSize * 10))"
+        let build = { CandyNode.makeBody(color: color, bar: bar, cellSize: cellSize, style: style) }
+        if let texture = art?.texture(key: key, extent: extent, build: build) {
+            return SKSpriteNode(texture: texture, size: extent)
+        }
+        return build()
+    }
+
+    /// Color changer: swap to the next color with a little squeeze.
+    func recolor(to newColor: CandyColor) {
+        guard newColor != color else { return }
+        color = newColor
+        body.removeAllChildren()
+        body.addChild(CandyNode.bodySprite(color: newColor, bar: bar, cellSize: cellSize, style: style, art: art))
+        colorMark?.text = CandyNode.colorLetters[newColor]
+        body.run(.sequence([.scale(to: 0.8, duration: 0.08), .scale(to: 1, duration: 0.12)]))
+    }
+
+    func unlock() {
+        guard let lock else { return }
+        self.lock = nil
+        lock.run(.sequence([
+            .group([.moveBy(x: 0, y: cellSize * 0.3, duration: 0.25), .fadeOut(withDuration: 0.25)]),
+            .removeFromParent(),
+        ]))
+    }
+
+    /// Bomb went off next to this candy.
+    func explode() {
+        removeAllActions()
+        run(.sequence([
+            .group([.scale(to: 1.3, duration: 0.12), .fadeAlpha(to: 0.6, duration: 0.12)]),
+            .group([.scale(to: 0.1, duration: 0.15), .fadeOut(withDuration: 0.15)]),
+            .removeFromParent(),
+        ]))
+    }
+
+    private func addChangerRing(size: CGFloat) {
+        let ring = SKShapeNode(circleOfRadius: size * 0.52)
+        ring.strokeColor = UIColor.white
+        ring.lineWidth = 3
+        ring.glowWidth = 0
+        ring.zPosition = 1.5
+        let colors: [UInt32] = [0xFF5C8A, 0xFFD23F, 0x3DDC97, 0x5B6CFF, 0xA259FF]
+        for (index, hex) in colors.enumerated() {
+            let arc = CGMutablePath()
+            let start = CGFloat(index) / CGFloat(colors.count) * 2 * .pi
+            arc.addArc(center: .zero, radius: size * 0.52, startAngle: start,
+                       endAngle: start + 2 * .pi / CGFloat(colors.count), clockwise: false)
+            let piece = SKShapeNode(path: arc)
+            piece.strokeColor = UIColor(hex: hex)
+            piece.lineWidth = 3
+            ring.addChild(piece)
+        }
+        ring.run(.repeatForever(.rotate(byAngle: -2 * .pi, duration: 6)))
+        addChild(ring)
+    }
+
+    private func addBombBadge(size: CGFloat) {
+        let badge = SKShapeNode(circleOfRadius: size * 0.16)
+        badge.fillColor = UIColor(hex: 0x2B2B3A)
+        badge.strokeColor = .white
+        badge.lineWidth = 1.5
+        badge.position = CGPoint(x: size * 0.34, y: size * 0.34)
+        badge.zPosition = 5
+        let spark = SKShapeNode(path: CandyShapes.path(for: .star, size: size * 0.2))
+        spark.fillColor = UIColor(hex: 0xFFC233)
+        spark.strokeColor = .clear
+        spark.position = CGPoint(x: size * 0.1, y: size * 0.12)
+        badge.addChild(spark)
+        spark.run(.repeatForever(.sequence([.scale(to: 1.3, duration: 0.3), .scale(to: 0.9, duration: 0.3)])))
+        addChild(badge)
+    }
+
+    private func addKeyBadge(size: CGFloat) {
+        addChild(symbolBadge("key.fill", tint: UIColor(hex: 0xFFC233), size: size,
+                             at: CGPoint(x: -size * 0.34, y: size * 0.34)))
+    }
+
+    private func addLock(size: CGFloat, bar: Axis?, cellSize: CGFloat) {
+        let node = SKNode()
+        node.zPosition = 6
+        let veil = SKShapeNode(path: CandyShapes.path(for: .circle, size: size * 1.05))
+        veil.fillColor = UIColor(hex: 0x4A2C2A, alpha: 0.35)
+        veil.strokeColor = .clear
+        node.addChild(veil)
+        node.addChild(symbolBadge("lock.fill", tint: .white, size: size * 1.6, at: .zero))
+        addChild(node)
+        lock = node
+    }
+
+    private func symbolBadge(_ name: String, tint: UIColor, size: CGFloat, at position: CGPoint) -> SKNode {
+        let config = UIImage.SymbolConfiguration(pointSize: 40, weight: .bold)
+        guard let image = UIImage(systemName: name, withConfiguration: config)?
+            .withTintColor(tint, renderingMode: .alwaysOriginal)
+        else { return SKNode() }
+        let sprite = SKSpriteNode(texture: SKTexture(image: image))
+        let scale = size * 0.26 / max(image.size.width, image.size.height)
+        sprite.size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        sprite.position = position
+        sprite.zPosition = 5
+        return sprite
+    }
+
+    static let colorLetters: [CandyColor: String] = [
+        .strawberry: "S", .lemon: "L", .mint: "M", .blueberry: "B", .orange: "O", .grape: "G",
+    ]
 
     private static func makeBody(color: CandyColor, bar: Axis?, cellSize: CGFloat, style: Cosmetic) -> SKNode {
         let size = cellSize * 0.86
@@ -284,10 +400,7 @@ final class CandyNode: SKNode {
 
     /// Extra symbol per color for color-blind players (on top of the unique shape).
     private func addColorBlindMark(size: CGFloat) {
-        let marks: [CandyColor: String] = [
-            .strawberry: "S", .lemon: "L", .mint: "M", .blueberry: "B", .orange: "O", .grape: "G",
-        ]
-        let label = SKLabelNode(text: marks[color])
+        let label = SKLabelNode(text: CandyNode.colorLetters[color])
         label.fontName = Theme.spriteFontName
         label.fontSize = size * 0.22
         label.fontColor = UIColor(hex: 0x4A2C2A)
@@ -295,6 +408,7 @@ final class CandyNode: SKNode {
         label.position = CGPoint(x: -size * 0.3, y: -size * 0.3)
         label.zPosition = 5
         addChild(label)
+        colorMark = label
     }
 }
 

@@ -5,6 +5,8 @@ import SweetArrowsCore
 enum Route: Hashable {
     case map
     case level(Int)
+    /// The endless game.
+    case endless
     /// The daily puzzle of a given day number.
     case daily(Int)
     case shop

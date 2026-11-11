@@ -47,8 +47,8 @@ private struct WorldCard: View {
                     .font(Theme.heading())
                     .foregroundStyle(.white)
                 Spacer()
-                if let element = world.newElement {
-                    Text(element.localizedName)
+                if !world.newElements.isEmpty {
+                    Text(world.newElements.map(\.localizedName).joined(separator: " · "))
                         .font(Theme.body(13))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
@@ -151,6 +151,10 @@ extension BoardElement {
         case .caramel: String(localized: "Caramel")
         case .iced: String(localized: "Ice cubes")
         case .rotating: String(localized: "Spinners")
+        case .mirror: String(localized: "Bumpers")
+        case .lock: String(localized: "Locks & keys")
+        case .bomb: String(localized: "Bombs")
+        case .colorChanger: String(localized: "Color changers")
         }
     }
 }

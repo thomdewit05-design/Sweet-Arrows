@@ -39,6 +39,9 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     /// World elements whose intro card the player has seen.
     public var seenElements: Set<BoardElement> = []
     public var starterPackBought = false
+    /// Endless mode: best score and number of runs.
+    public var endlessBest = 0
+    public var endlessRuns = 0
     /// Day number on which the VIP daily hints were last given.
     public var vipBonusDay: Int?
     public var settings = GameSettings()
@@ -53,7 +56,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public func isUnlocked(_ level: Int) -> Bool { level <= nextLevel }
 
     /// The daily reward and the shop appear after level 5 (PLAN.md, onboarding).
-    public var showsMetaFeatures: Bool { completedLevel >= 5 }
+    public var showsMetaFeatures: Bool { completedLevel >= 5 || endlessRuns >= 3 }
 
     // MARK: Changes
 
@@ -67,6 +70,16 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         let earned = Economy.coins(forStars: newStars, winStreak: winStreak)
         coins += earned
         return earned
+    }
+
+    /// Records a finished endless run. Returns true for a new best score.
+    @discardableResult
+    public mutating func recordEndless(score: Int, coins: Int) -> Bool {
+        endlessRuns += 1
+        self.coins += coins
+        guard score > endlessBest else { return false }
+        endlessBest = score
+        return true
     }
 
     public mutating func recordLoss() {
@@ -142,6 +155,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         result.ownedCosmetics = ownedCosmetics.union(other.ownedCosmetics)
         result.seenElements = seenElements.union(other.seenElements)
         result.starterPackBought = starterPackBought || other.starterPackBought
+        result.endlessBest = max(endlessBest, other.endlessBest)
+        result.endlessRuns = max(endlessRuns, other.endlessRuns)
 
         var daily = newer.dailyPuzzle
         for (day, entry) in older.dailyPuzzle.results {
@@ -159,6 +174,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case completedLevel, stars, coins, winStreak, bestWinStreak, boosters, dailyReward, dailyPuzzle
         case ownedCosmetics, board, candyStyle, seenElements, settings, updatedAt, starterPackBought, vipBonusDay
+        case endlessBest, endlessRuns
     }
 
     public init(from decoder: Decoder) throws {
@@ -177,6 +193,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         seenElements = try c.decodeIfPresent(Set<BoardElement>.self, forKey: .seenElements) ?? []
         starterPackBought = try c.decodeIfPresent(Bool.self, forKey: .starterPackBought) ?? false
         vipBonusDay = try c.decodeIfPresent(Int.self, forKey: .vipBonusDay)
+        endlessBest = try c.decodeIfPresent(Int.self, forKey: .endlessBest) ?? 0
+        endlessRuns = try c.decodeIfPresent(Int.self, forKey: .endlessRuns) ?? 0
         settings = try c.decodeIfPresent(GameSettings.self, forKey: .settings) ?? GameSettings()
         updatedAt = try c.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date(timeIntervalSince1970: 0)
     }

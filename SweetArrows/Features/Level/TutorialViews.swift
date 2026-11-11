@@ -85,6 +85,10 @@ extension BoardElement {
         case .caramel: "Caramel needs two taps: the first cracks it, the second sends it flying."
         case .iced: "Iced candies stay frozen until a neighbour leaves the board."
         case .rotating: "Spinners turn their arrow a quarter turn after every move."
+        case .mirror: "Bumpers bend a flying candy a quarter turn. Chocolate bars can't take the bend."
+        case .lock: "Locked candies open once the candy with the key has left the board."
+        case .bomb: "A bomb takes its neighbours with it. They don't go into the jar."
+        case .colorChanger: "Color changers switch to the next color after every move. Time your tap!"
         }
     }
 }

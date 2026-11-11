@@ -42,6 +42,7 @@ struct RootView: View {
                     switch route {
                     case .map: MapView()
                     case .level(let id): LevelView(mode: .campaign(id))
+                    case .endless: EndlessView()
                     case .daily(let day): LevelView(mode: .daily(day: day))
                     case .shop: ShopView()
                     case .settings: SettingsView()

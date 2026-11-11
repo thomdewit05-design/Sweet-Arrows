@@ -50,6 +50,14 @@ public enum CandyFeature: String, CaseIterable, Codable, Sendable, Comparable {
     case iced
     /// The color is hidden until the candy's path is clear.
     case wrapped
+    /// Changes to the next color of the level after every move.
+    case colorChanger
+    /// Takes its neighbours off the board when it flies (they do not go into the jar).
+    case bomb
+    /// Opens the locked candies once it has left the board.
+    case key
+    /// Cannot be tapped while a key is still on the board.
+    case locked
 
     public static func < (lhs: CandyFeature, rhs: CandyFeature) -> Bool {
         allCases.firstIndex(of: lhs)! < allCases.firstIndex(of: rhs)!

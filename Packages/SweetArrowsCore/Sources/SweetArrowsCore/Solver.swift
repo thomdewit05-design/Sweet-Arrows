@@ -1,9 +1,10 @@
 /// Proves a level can be won without bouncing and without filling the bag,
 /// and measures how tricky it is.
 ///
-/// State is two 64-bit masks (candies on the board, caramel cracked since the start),
-/// because everything else follows from them: the bag holds `removed mod 3` of every color,
-/// rotating arrows have turned once per move, and ice melts once a neighbour is gone.
+/// A state is: which candies are on the board, which caramels are cracked, what is in the jar
+/// and how many moves were made (rotating arrows and color changers follow the move count).
+/// Ice melts once a neighbour is gone and locks open once every key is gone, so those follow
+/// from the board itself.
 public struct Solver: Sendable {
     public struct Configuration: Sendable {
         /// Maximum number of distinct states to expand before giving up.
@@ -39,24 +40,32 @@ public struct Solver: Sendable {
         public var statesExplored: Int
     }
 
-    private struct Key: Hashable {
+    struct Key: Hashable {
         var present: UInt64
         var cracked: UInt64
+        /// 3 bits per color: candies of that color in the jar (0...2).
+        var bag: UInt32
+        var moves: UInt16
     }
 
     // Static description, indices 0..<n.
     private let ids: [Int]
-    private let colors: [Int]
+    private let baseColor: [Int]
     private let baseDirection: [Int]
     private let rotating: UInt64
+    private let changer: UInt64
+    private let bombs: UInt64
+    private let keys: UInt64
+    private let lockedAtRoot: UInt64
     private let caramel: UInt64           // caramel still intact at the root
     private let frozenAtRoot: UInt64
     private let neighbours: [UInt64]
     private let rays: [[UInt64]]          // [candy][direction] -> candies in the way
-    private let poleBlocked: [[Bool]]     // [candy][direction]
-    private let colorMasks: [UInt64]
+    private let rayBlocked: [[Bool]]      // [candy][direction] -> hits a pole, or a bar hits a bumper
     private let rootPresent: UInt64
-    private let rootBag: [Int]
+    private let rootBag: UInt32
+    private let rootMoves: Int
+    private let palette: [Int]            // color indices a changer cycles through
     private let capacity: Int
     private let configuration: Configuration
 
@@ -72,65 +81,94 @@ public struct Solver: Sendable {
         precondition(states.count <= 64, "Solver supports at most 64 candies")
         self.configuration = configuration
         ids = states.map(\.id)
-        colors = states.map(\.color.index)
+        baseColor = states.map(\.color.index)
         baseDirection = states.map(\.direction.index)
         capacity = game.bag.capacity
-        rootBag = CandyColor.allCases.map { game.bag.count(of: $0) }
+        rootMoves = 0
+        palette = game.level.changerPalette.map(\.index)
+        var bag: UInt32 = 0
+        for color in CandyColor.allCases {
+            bag |= UInt32(game.bag.count(of: color) % Bag.matchCount) << UInt32(color.index * 3)
+        }
+        rootBag = bag
 
         var owner: [GridPoint: Int] = [:]
         for (i, state) in states.enumerated() {
             for cell in state.cells { owner[cell] = i }
         }
-        let poles = Set(game.level.poles)
 
-        var rotating: UInt64 = 0, caramel: UInt64 = 0, frozen: UInt64 = 0
+        var rotating: UInt64 = 0, changer: UInt64 = 0, bombs: UInt64 = 0, keys: UInt64 = 0
+        var locked: UInt64 = 0, caramel: UInt64 = 0, frozen: UInt64 = 0
         var neighbours = [UInt64](repeating: 0, count: states.count)
         var rays = [[UInt64]](repeating: [0, 0, 0, 0], count: states.count)
-        var poleBlocked = [[Bool]](repeating: [false, false, false, false], count: states.count)
-        var colorMasks = [UInt64](repeating: 0, count: CandyColor.allCases.count)
+        var blocked = [[Bool]](repeating: [false, false, false, false], count: states.count)
 
         for (i, state) in states.enumerated() {
             let bit = UInt64(1) << UInt64(i)
             if state.candy.has(.rotating) { rotating |= bit }
+            if state.candy.has(.colorChanger) { changer |= bit }
+            if state.candy.has(.bomb) { bombs |= bit }
+            if state.candy.has(.key) { keys |= bit }
+            if state.locked { locked |= bit }
             if state.caramelIntact { caramel |= bit }
             if state.frozen { frozen |= bit }
-            colorMasks[state.color.index] |= bit
             for cell in state.cells {
                 for n in cell.neighbors {
                     if let j = owner[n], j != i { neighbours[i] |= UInt64(1) << UInt64(j) }
                 }
             }
             for direction in Direction.allCases {
-                for cell in state.cells {
-                    var p = cell + direction
-                    while game.level.contains(p) {
-                        if poles.contains(p) {
-                            poleBlocked[i][direction.index] = true
-                            break
-                        }
-                        if let j = owner[p], j != i {
-                            rays[i][direction.index] |= UInt64(1) << UInt64(j)
-                        }
-                        p += direction
-                    }
-                }
+                let (mask, stop) = Solver.ray(
+                    for: state, direction: direction, level: game.level, owner: owner, me: i
+                )
+                rays[i][direction.index] = mask
+                blocked[i][direction.index] = stop
             }
         }
         self.rotating = rotating
+        self.changer = changer
+        self.bombs = bombs
+        self.keys = keys
+        lockedAtRoot = locked
         self.caramel = caramel
         frozenAtRoot = frozen
         self.neighbours = neighbours
         self.rays = rays
-        self.poleBlocked = poleBlocked
-        self.colorMasks = colorMasks
+        rayBlocked = blocked
         rootPresent = states.isEmpty ? 0 : (states.count == 64 ? ~0 : (UInt64(1) << UInt64(states.count)) - 1)
+    }
+
+    /// Candies on the route of `state` flying in `direction` (bending on bumpers),
+    /// and whether the route is blocked for good (a pole, or a bar meeting a bumper, or a loop).
+    private static func ray(
+        for state: CandyState, direction start: Direction, level: Level, owner: [GridPoint: Int], me: Int
+    ) -> (UInt64, Bool) {
+        let poles = Set(level.poles)
+        let mirrors = Dictionary(level.mirrors.map { ($0.position, $0) }, uniquingKeysWith: { a, _ in a })
+        let isBar = state.cells.count > 1
+        let offsets = state.cells.map { GridPoint($0.x - state.cells[0].x, $0.y - state.cells[0].y) }
+        var anchor = state.cells[0]
+        var direction = start
+        var mask: UInt64 = 0
+        for _ in 0..<((level.width + level.height) * 4) {
+            anchor += direction
+            let footprint = offsets.map { GridPoint(anchor.x + $0.x, anchor.y + $0.y) }.filter(level.contains)
+            if footprint.isEmpty { return (mask, false) }
+            for cell in footprint where !state.cells.contains(cell) {
+                if poles.contains(cell) { return (mask, true) }
+                if isBar, mirrors[cell] != nil { return (mask, true) }
+                if let j = owner[cell], j != me { mask |= UInt64(1) << UInt64(j) }
+            }
+            if !isBar, let mirror = mirrors[anchor] { direction = mirror.deflect(direction) }
+        }
+        return (mask, true)
     }
 
     // MARK: Public API
 
     public func solve() -> Outcome {
         let search = Search(solver: self, budget: configuration.nodeBudget)
-        let root = Key(present: rootPresent, cracked: 0)
+        let root = rootKey
         guard let rootSolvable = search.solvable(root) else { return .unknown }
         guard rootSolvable else { return .unsolvable }
 
@@ -138,7 +176,7 @@ public struct Solver: Sendable {
         var state = root
         var solution: [Int] = []
         var pitfalls = 0
-        var peakBag = bagSize(present: rootPresent)
+        var peakBag = bagFill(root.bag)
         while state.present != 0 {
             var next: Key?
             for move in moves(from: state) {
@@ -158,7 +196,7 @@ public struct Solver: Sendable {
             }
             guard let chosen = next else { return .unknown }
             state = chosen
-            peakBag = max(peakBag, bagSize(present: state.present))
+            peakBag = max(peakBag, bagFill(state.bag))
         }
 
         var solutions = 1
@@ -182,7 +220,7 @@ public struct Solver: Sendable {
     /// A safe next tap, or nil if the position cannot be won (or is too big to search).
     public func nextMove() -> Int? {
         let search = Search(solver: self, budget: configuration.nodeBudget)
-        let root = Key(present: rootPresent, cracked: 0)
+        let root = rootKey
         guard search.solvable(root) == true else { return nil }
         for move in moves(from: root) {
             if let child = move.child, search.solvable(child) == true { return ids[move.index] }
@@ -190,9 +228,13 @@ public struct Solver: Sendable {
         return nil
     }
 
+    private var rootKey: Key {
+        Key(present: rootPresent, cracked: 0, bag: rootBag, moves: UInt16(rootMoves))
+    }
+
     // MARK: Rules on masks
 
-    private struct Move {
+    struct Move {
         var index: Int
         /// nil when the move fills the bag.
         var child: Key?
@@ -200,28 +242,26 @@ public struct Solver: Sendable {
         var joinsBag: Bool
     }
 
-    private func bagSize(present: UInt64) -> Int {
-        var total = 0
-        for c in 0..<colorMasks.count {
-            let removed = (colorMasks[c] & rootPresent & ~present).nonzeroBitCount
-            total += (rootBag[c] + removed) % Bag.matchCount
-        }
-        return total
+    private func bagCount(_ bag: UInt32, color c: Int) -> Int {
+        Int((bag >> UInt32(c * 3)) & 0b111)
     }
 
-    private func bagCount(color c: Int, present: UInt64) -> Int {
-        let removed = (colorMasks[c] & rootPresent & ~present).nonzeroBitCount
-        return (rootBag[c] + removed) % Bag.matchCount
-    }
-
-    private func movesMade(_ state: Key) -> Int {
-        (rootPresent & ~state.present).nonzeroBitCount + state.cracked.nonzeroBitCount
+    private func bagFill(_ bag: UInt32) -> Int {
+        (0..<CandyColor.allCases.count).reduce(0) { $0 + bagCount(bag, color: $1) }
     }
 
     private func direction(of i: Int, in state: Key) -> Int {
         let bit = UInt64(1) << UInt64(i)
         if rotating & bit == 0 { return baseDirection[i] }
-        return (baseDirection[i] + movesMade(state)) % 4
+        return (baseDirection[i] + Int(state.moves)) % 4
+    }
+
+    private func color(of i: Int, in state: Key) -> Int {
+        let bit = UInt64(1) << UInt64(i)
+        guard changer & bit != 0, palette.count > 1, let start = palette.firstIndex(of: baseColor[i]) else {
+            return baseColor[i]
+        }
+        return palette[(start + Int(state.moves)) % palette.count]
     }
 
     private func isFrozen(_ i: Int, present: UInt64) -> Bool {
@@ -230,29 +270,39 @@ public struct Solver: Sendable {
         return neighbours[i] & rootPresent & ~present == 0
     }
 
+    private func isLocked(_ i: Int, present: UInt64) -> Bool {
+        let bit = UInt64(1) << UInt64(i)
+        return lockedAtRoot & bit != 0 && keys & present != 0
+    }
+
     /// Legal taps (no bounce), best-looking first.
-    private func moves(from state: Key) -> [Move] {
+    func moves(from state: Key) -> [Move] {
         var result: [Move] = []
         var remaining = state.present
+        let nextMoves = state.moves &+ 1
         while remaining != 0 {
             let i = remaining.trailingZeroBitCount
             remaining &= remaining - 1
             let bit = UInt64(1) << UInt64(i)
-            if isFrozen(i, present: state.present) { continue }
+            if isFrozen(i, present: state.present) || isLocked(i, present: state.present) { continue }
             let d = direction(of: i, in: state)
-            if poleBlocked[i][d] || rays[i][d] & state.present != 0 { continue }
+            if rayBlocked[i][d] || rays[i][d] & state.present != 0 { continue }
 
             if caramel & bit != 0, state.cracked & bit == 0 {
-                result.append(Move(
-                    index: i, child: Key(present: state.present, cracked: state.cracked | bit),
-                    popsTriple: false, joinsBag: false
-                ))
+                let child = Key(present: state.present, cracked: state.cracked | bit, bag: state.bag, moves: nextMoves)
+                result.append(Move(index: i, child: child, popsTriple: false, joinsBag: false))
                 continue
             }
-            let inBag = bagCount(color: colors[i], present: state.present)
-            let next = Key(present: state.present & ~bit, cracked: state.cracked)
+            let c = color(of: i, in: state)
+            let inBag = bagCount(state.bag, color: c)
             let pops = inBag == Bag.matchCount - 1
-            let fills = next.present != 0 && bagSize(present: next.present) >= capacity
+            let newCount = pops ? 0 : inBag + 1
+            let shift = UInt32(c * 3)
+            let bag = (state.bag & ~(UInt32(0b111) << shift)) | (UInt32(newCount) << shift)
+            var present = state.present & ~bit
+            if bombs & bit != 0 { present &= ~neighbours[i] }
+            let next = Key(present: present, cracked: state.cracked, bag: bag, moves: nextMoves)
+            let fills = present != 0 && bagFill(bag) >= capacity
             result.append(Move(index: i, child: fills ? nil : next, popsTriple: pops, joinsBag: inBag > 0))
         }
         result.sort { lhs, rhs in
@@ -264,8 +314,9 @@ public struct Solver: Sendable {
     }
 
     /// Cheap necessary condition: ignoring the bag, can every candy still get out?
-    /// Peels off candies with a clear path until nothing changes.
-    private func canPeel(_ state: Key) -> Bool {
+    /// Peels off candies with a clear path until nothing changes. Optimistic on purpose
+    /// (bombs clear their neighbours, spinners may point anywhere), so a "no" is always right.
+    func canPeel(_ state: Key) -> Bool {
         var left = state.present
         var progress = true
         while left != 0 && progress {
@@ -275,16 +326,19 @@ public struct Solver: Sendable {
                 let i = scan.trailingZeroBitCount
                 scan &= scan - 1
                 let bit = UInt64(1) << UInt64(i)
+                guard left & bit != 0 else { continue }
                 if frozenAtRoot & bit != 0, neighbours[i] & rootPresent & ~left == 0 { continue }
+                if lockedAtRoot & bit != 0, keys & left != 0 { continue }
                 let free: Bool
                 if rotating & bit != 0 {
-                    free = (0..<4).contains { d in !poleBlocked[i][d] && rays[i][d] & left == 0 }
+                    free = (0..<4).contains { d in !rayBlocked[i][d] && rays[i][d] & left == 0 }
                 } else {
                     let d = baseDirection[i]
-                    free = !poleBlocked[i][d] && rays[i][d] & left == 0
+                    free = !rayBlocked[i][d] && rays[i][d] & left == 0
                 }
                 if free {
                     left &= ~bit
+                    if bombs & bit != 0 { left &= ~neighbours[i] }
                     progress = true
                 }
             }

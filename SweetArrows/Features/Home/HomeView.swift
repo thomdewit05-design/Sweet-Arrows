@@ -33,14 +33,17 @@ struct HomeView: View {
                 }
                 Spacer()
 
+                // The main game is endless; the hand-made and generated levels live under "Puzzles".
                 Button {
-                    model.path.append(.level(next))
+                    model.path.append(.endless)
                 } label: {
                     VStack(spacing: 2) {
                         Text("Play")
-                        Text("Level \(next)")
-                            .font(Theme.body(15))
-                            .opacity(0.9)
+                        if progress.endlessBest > 0 {
+                            Text("Best \(progress.endlessBest)")
+                                .font(Theme.body(15))
+                                .opacity(0.9)
+                        }
                     }
                     .frame(maxWidth: 240)
                 }
@@ -48,8 +51,11 @@ struct HomeView: View {
                 .accessibilityIdentifier("playButton")
 
                 HStack(spacing: 16) {
-                    Button("Map") { model.path.append(.map) }
+                    Button("Puzzles") { model.path.append(.level(next)) }
                         .buttonStyle(CandyButtonStyle(color: Color(hex: 0x5B6CFF)))
+                        .accessibilityIdentifier("puzzlesButton")
+                    Button("Map") { model.path.append(.map) }
+                        .buttonStyle(CandyButtonStyle(color: Color(hex: 0xA259FF)))
                     if progress.showsMetaFeatures {
                         Button("Shop") { model.path.append(.shop) }
                             .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))

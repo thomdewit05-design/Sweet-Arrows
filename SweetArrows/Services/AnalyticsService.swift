@@ -23,6 +23,8 @@ enum AnalyticsEvent: Equatable, Sendable {
     case adImpression(format: String, network: String, value: Double, currency: String)
     case purchase(product: String, price: Double)
     case subscriptionStart(product: String)
+    case endlessStart
+    case endlessOver(score: Int, seconds: Int, stage: Int)
 
     var name: String {
         switch self {
@@ -41,6 +43,8 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .adImpression: "ad_impression"
         case .purchase: "purchase"
         case .subscriptionStart: "subscription_start"
+        case .endlessStart: "endless_start"
+        case .endlessOver: "endless_over"
         }
     }
 
@@ -62,6 +66,8 @@ enum AnalyticsEvent: Equatable, Sendable {
             ["format": format, "network": network, "value": String(value), "currency": currency]
         case let .purchase(product, price): ["product": product, "price": String(price)]
         case .subscriptionStart(let product): ["product": product]
+        case .endlessStart: [:]
+        case let .endlessOver(score, seconds, stage): ["score": "\(score)", "seconds": "\(seconds)", "stage": "\(stage)"]
         }
     }
 }
