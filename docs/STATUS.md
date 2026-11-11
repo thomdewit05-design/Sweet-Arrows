@@ -77,8 +77,8 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 - **Tik** op een snoepje: het glijdt in de richting van zijn pijl tot de rand of een ander snoepje.
   Kan het niet bewegen, dan draait de pijl een kwartslag (met de klok mee). Elke tik doet dus iets; geen hartjes.
 - **3 of meer** van dezelfde kleur op een rij (horizontaal of verticaal) ploppen. Er valt niets; het bord is een tafel.
-- Bord van **5×5** (keuze van de eigenaar; eerst 7×8, toen 6×6), start met 5 snoepjes. Elke 3,0 s komt er een snoepje bij (eerst 1 s een schaduw);
-  elke "snelheid" (10 snoepjes geplopt) 8% sneller, tot één per 1,0 s. Een nieuw snoepje maakt nooit zelf een rij.
+- Bord van **5×5** (keuze van de eigenaar; eerst 7×8, toen 6×6), start met 5 snoepjes. Elke 3,6 s komt er een snoepje bij (eerst 1 s een schaduw);
+  elke "snelheid" (10 snoepjes geplopt) 6% sneller, tot één per 1,3 s (iets makkelijker gemaakt op verzoek van de eigenaar). Een nieuw snoepje maakt nooit zelf een rij.
 - Eerst 3 kleuren, daarna 4 (op het kleine bord nooit meer dan 4, anders zijn rijtjes bijna onmogelijk). Speciaal: **bom** (vanaf snelheid 2, popt 3×3),
   **steen** (vanaf 3, kan niet bewegen, breekt als ernaast iets popt), **regenboog** (vanaf 4, telt als elke kleur).
 - **Af:** geen vrij vakje voor een nieuw snoepje. Eén keer per potje doorgaan met een beloningsvideo:
@@ -86,7 +86,7 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 - **Punten:** 10 per gepopt snoepje, +20 per snoepje boven de 3 in een rij, 5 per gebroken steen, alles × combo
   (ploppen binnen 3 s na elkaar, max. ×5), +100 voor een leeg bord. Munten: score ÷ 25. Record en Game Center-ranglijst
   `sweetarrows.endless_score` zoals voorheen.
-- Simulatie op 5×5 (20 potjes, speler die één zet vooruit kijkt, een tik per 0,8–1,2 s): potjes duren gemiddeld ongeveer 3 minuten; met 4 kleuren gaan ze langer en scoren ze beter dan met 5 of 6.
+- Simulatie op 5×5 (20 potjes, speler die één zet vooruit kijkt, een tik per 0,8–1,2 s): potjes duren gemiddeld ongeveer 4 minuten; met 4 kleuren gaan ze langer en scoren ze beter dan met 5 of 6.
 - Eerste twee potjes: uitleg bovenin en een handje dat een snoepje aanwijst dat meteen een rij maakt.
 - **Boosters** (onder het bord; uit voorraad, voor munten of met een beloningsvideo):
   *Tip* (60) laat een snoepje knipperen dat meteen een rij maakt (je betaalt alleen als er zo'n zet is),
@@ -144,6 +144,12 @@ Op verzoek van de eigenaar ("alles mag") zodat spelers blijven terugkomen:
   mee als je erop drukt. Het sterretje knippert met zijn ogen en wiebelt als je erop tikt.
   Met "Beweging verminderen" aan staat dit allemaal stil.
 
+- **Muziek die meegroeit** (`Tools/Sounds/make_music.py`, numpy): vijf zelf gesynthetiseerde loops van 30–42 s,
+  elk met een A- en B-deel. Menu: ukulele-lounge (92 BPM). In het spel per twee snelheden een levendiger stuk:
+  *Rustig* (marimba, 96 BPM), *Groove* (funky bas en klappen, 108 BPM), *Vrolijk* (8-bit, 120 BPM) en
+  *Sprint* (snelle arpeggio's en beat, 132 BPM). Wisselen gaat met een overgang van 1,2 s; terug naar het menu
+  speelt weer de lounge. Alle stukken even hard (RMS genormaliseerd), samen ongeveer 7,5 MB.
+
 ### Echte illustraties later toevoegen
 
 Alles is nu met code getekend. Komen er later echte tekeningen (bijv. van een illustrator), zet ze dan als
@@ -157,6 +163,22 @@ afbeelding in `SweetArrows/Resources/Assets.xcassets` met precies deze namen; de
 | Achtergrond | `backdrop-candyMeadow`, `backdrop-iceCreamBay`, `backdrop-chocolateRiver`, `backdrop-cottonSky`, `backdrop-starryNight` | staand, 1290×2796 |
 
 De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die dus niet in de afbeelding.
+
+## Website (voorwaarden en privacybeleid)
+
+`docs/site` wordt via GitHub Pages gepubliceerd op **https://thomdewit05-design.github.io/Sweet-Arrows/**
+(keuze van de eigenaar: gratis GitHub-adres, geen eigen domein). Pagina's in het Engels en Nederlands:
+`index`, `privacy`, `terms` (+ `-nl`). De app opent de Nederlandse pagina's als de telefoon in het Nederlands staat.
+
+Zelf nog doen:
+1. GitHub → repository → Settings → Pages → Build and deployment → Source: **GitHub Actions**. Daarna
+   Actions → Website → Run workflow (of wacht op de volgende merge met een wijziging in `docs/site`).
+2. Een apart supportadres aanmaken (bijv. een nieuw Gmail-adres) en doorgeven; nu staat er nog
+   `support@sweetarrowsgame.com` op de site en in de app (`Links.supportAddress`), dat bestaat niet.
+3. In App Store Connect: Privacybeleid-URL = `…/Sweet-Arrows/privacy.html`, Support-URL = `…/Sweet-Arrows/`.
+4. `app-ads.txt`: AdMob zoekt dit bestand in de hoofdmap van je website-domein. Op een projectadres
+   (`/Sweet-Arrows/`) vindt AdMob het niet; daarvoor is later een repository `thomdewit05-design.github.io` of een
+   eigen domein nodig. Advertenties werken zonder, maar AdMob raadt het sterk aan.
 
 ## Besluiten van de eigenaar
 
@@ -179,7 +201,7 @@ De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die
 | Crashlytics actief | 🟡 `GoogleService-Info.plist` nodig |
 | Kleurenblind-modus, geluid/muziek/trillen los | ✅ |
 | Alle teksten vertaald (min. EN en NL) | ✅ 8 talen |
-| Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site`; domein + GitHub Pages aanzetten, publisher-id invullen |
+| Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site` (EN + NL); GitHub Pages aanzetten, supportadres en publisher-id invullen |
 | Privacylabels, leeftijdsclassificatie, handelaarsstatus | ❌ jij, in App Store Connect |
 | Echte advertentie-ID's alleen in Release | ✅ via `Config/Secrets.xcconfig` |
 | Store-pagina: icoon, screenshots, video, teksten per taal | 🟡 icoon klaar; screenshots uit de UI-test als basis |

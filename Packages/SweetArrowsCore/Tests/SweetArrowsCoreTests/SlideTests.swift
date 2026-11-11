@@ -205,11 +205,11 @@ struct SlideTests {
     @Test func slowDownHalvesTheArrivalSpeed() {
         var normal = SlideGame(pieces: [], settings: small())
         var slowed = normal
-        slowed.slowDown(for: 10)
+        slowed.slowDown(for: 20)
         #expect(slowed.isSlowedDown)
         var normalSpawns = 0
         var slowSpawns = 0
-        for _ in 0..<40 {
+        for _ in 0..<80 {  // 20 seconds
             normalSpawns += normal.advance(by: 0.25).filter { if case .spawned = $0 { true } else { false } }.count
             slowSpawns += slowed.advance(by: 0.25).filter { if case .spawned = $0 { true } else { false } }.count
         }

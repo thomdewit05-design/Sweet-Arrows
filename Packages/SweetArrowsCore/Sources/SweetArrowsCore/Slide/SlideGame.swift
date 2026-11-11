@@ -10,12 +10,14 @@ public struct SlideGame: Sendable {
         public var height = 5
         public var startCandies = 5
         /// Seconds between candies at the start and at full speed.
-        public var startInterval = 3.0
-        public var fastestInterval = 1.0
+        public var startInterval = 3.6
+        public var fastestInterval = 1.3
         /// How long the warning shadow shows before a candy appears.
         public var warning = 1.0
         /// Candies popped per stage; every stage is a bit faster and may bring a color or a special candy.
         public var popsPerStage = 10
+        /// Each stage the time between candies is multiplied by this (smaller = speeds up faster).
+        public var speedUp = 0.94
         /// Most colors in play at once (a small board gets too crowded with all six).
         public var maxColors = 4
         /// Pops within this many seconds of each other build a combo.
@@ -211,7 +213,7 @@ public struct SlideGame: Sendable {
 
     public var interval: Double {
         var value = settings.startInterval
-        for _ in 0..<stage { value *= 0.92 }
+        for _ in 0..<stage { value *= settings.speedUp }
         return max(settings.fastestInterval, value)
     }
 
