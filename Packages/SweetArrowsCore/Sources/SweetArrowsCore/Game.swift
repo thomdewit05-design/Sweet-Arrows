@@ -203,7 +203,7 @@ public struct Game: Sendable {
         var anchor = state.cells[0]
         let limit = (level.width + level.height) * 4
         for _ in 0..<limit {
-            anchor = anchor + direction
+            anchor += direction
             // Every cell of the candy at its new position.
             let footprint = [anchor] + (isBar ? offsets.map { GridPoint(anchor.x + $0.x, anchor.y + $0.y) } : [])
             let inside = footprint.filter(level.contains)

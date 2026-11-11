@@ -133,6 +133,7 @@ public struct Generator: Sendable {
     // MARK: Construction
 
     /// One attempt at building a level. Returns nil if the random choices painted it into a corner.
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func build(_ p: Parameters, id: Int, rng: inout SplitMix64) -> Level? {
         let n = p.candies
         guard n % 3 == 0, n >= 3, p.colors >= 1, p.colors * 3 <= n else { return nil }

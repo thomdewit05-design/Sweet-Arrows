@@ -151,7 +151,7 @@ public struct Solver: Sendable {
         var direction = start
         var mask: UInt64 = 0
         for _ in 0..<((level.width + level.height) * 4) {
-            anchor = anchor + direction
+            anchor += direction
             let footprint = offsets.map { GridPoint(anchor.x + $0.x, anchor.y + $0.y) }.filter(level.contains)
             if footprint.isEmpty { return (mask, false) }
             for cell in footprint where !state.cells.contains(cell) {

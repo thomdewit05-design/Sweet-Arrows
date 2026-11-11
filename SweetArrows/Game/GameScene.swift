@@ -317,7 +317,7 @@ final class GameScene: SKScene {
     private func routeAction(for node: CandyNode, launch: Launch) -> SKAction {
         guard let first = launch.route.first else { return .wait(forDuration: 0) }
         // The node is centred on its cells; the route follows the anchor cell.
-        let anchorPoint = point(for: launch.route.count > 0 ? previousCell(first, launch: launch) : first)
+        let anchorPoint = point(for: previousCell(first, launch: launch))
         let offset = CGVector(dx: node.position.x - anchorPoint.x, dy: node.position.y - anchorPoint.y)
         var corners: [CGPoint] = []
         for (index, cellPoint) in launch.route.enumerated() {
