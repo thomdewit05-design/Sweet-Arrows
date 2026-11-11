@@ -111,8 +111,9 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
   dezelfde regels en solver.
 - **SwiftLint draait in CI** (en lokaal via een build-fase als het geïnstalleerd is), niet in de CI-build van Xcode zelf.
 - **Lettertype**: Fredoka (OFL) staat in `SweetArrows/Resources/Fonts`, licentie in `docs/licenses/`.
-- **App-icoon** is een placeholder in code getekend (roze hartgummy met pijl op crème), zoals het plan
-  voorschrijft voor fase 1–3.
+- **App-icoon**: Jelly (roze hartgummy met grote ogen en een lach) op een witte pijl, voor een felle
+  snoephemel met glitters en snoepjes; gemaakt door `Tools/Icon/make_icon.py`. Vrolijk en speels, maar
+  bewust niet kinderachtig: de app blijft voor algemeen publiek (geen Kids-categorie, zie Privacy in PLAN.md).
 
 ## Klok en nieuwe elementen (na de eerste TestFlight)
 
