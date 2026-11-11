@@ -72,6 +72,7 @@ struct SettingsView: View {
 }
 
 /// Public pages on the game's website (docs/site, served by GitHub Pages).
+@MainActor
 enum Links {
     static let website = URL(string: "https://sweetarrowsgame.com")!
     static let privacy = URL(string: "https://sweetarrowsgame.com/privacy.html")!

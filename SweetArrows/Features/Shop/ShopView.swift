@@ -68,32 +68,12 @@ struct ShopView: View {
         }
         .disabled(busy)
         .sheet(isPresented: $showVIP) {
-            SubscriptionStoreView(productIDs: StoreProduct.vipGroup.map(\.rawValue)) {
-                VStack(spacing: 10) {
-                    JellyView(size: 70)
-                    Text("Sweet Arrows VIP")
-                        .font(Theme.title(28))
-                        .foregroundStyle(Theme.ink)
-                    Text("No ads · 3 free hints every day · golden candy style · rewards without watching")
-                        .font(Theme.body())
-                        .foregroundStyle(Theme.inkSoft)
-                        .multilineTextAlignment(.center)
-                }
-                .padding()
-            }
-            .subscriptionStoreButtonLabel(.multiline)
-            .storeButton(.visible, for: .restorePurchases)
-            .onInAppPurchaseCompletion { _, _ in
-                await MainActor.run {
-                    Task { @MainActor in
-                        await model.purchases.refreshEntitlements()
-                        model.grantVIPBonusIfNeeded()
-                        showVIP = false
-                    }
-                }
+            VIPStoreSheet {
+                await model.purchases.refreshEntitlements()
+                model.grantVIPBonusIfNeeded()
+                showVIP = false
             }
         }
-        .background(Theme.cream.ignoresSafeArea())
         .safeAreaInset(edge: .bottom) {
             if model.ads.canShowBanner {
                 BannerAdView(adUnitID: model.ads.bannerAdUnitID)
@@ -269,6 +249,38 @@ private struct CosmeticCard: View {
                 }
             }
         }
+    }
+}
+
+/// The VIP subscription sheet (StoreKit's SubscriptionStoreView with our own header).
+private struct VIPStoreSheet: View {
+    let purchased: @MainActor () async -> Void
+
+    var body: some View {
+        SubscriptionStoreView(productIDs: StoreProduct.vipGroup.map(\.rawValue), marketingContent: {
+            VIPHeader()
+        })
+        .subscriptionStoreButtonLabel(.multiline)
+        .storeButton(.visible, for: .restorePurchases)
+        .onInAppPurchaseCompletion { _, _ in
+            await purchased()
+        }
+    }
+}
+
+private struct VIPHeader: View {
+    var body: some View {
+        VStack(spacing: 10) {
+            JellyView(size: 70)
+            Text("Sweet Arrows VIP")
+                .font(Theme.title(28))
+                .foregroundStyle(Theme.ink)
+            Text("No ads · 3 free hints every day · golden candy style · rewards without watching")
+                .font(Theme.body())
+                .foregroundStyle(Theme.inkSoft)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
     }
 }
 
