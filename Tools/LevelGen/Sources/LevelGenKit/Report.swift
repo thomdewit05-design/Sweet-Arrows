@@ -29,8 +29,9 @@ public enum Report {
             let avg = difficulties.isEmpty ? 0 : difficulties.reduce(0, +) / Double(difficulties.count)
             let w = World(id: world)
             let name = w.theme.displayName
-            lines.append("| \(world). \(name) | \(group.first!.id)–\(group.last!.id) | "
-                + "\(w.newElements.isEmpty ? "–" : w.newElements.map(\.displayName).joined(separator: ", ")) | \(format(avg)) | \(format(difficulties.max() ?? 0)) |")
+            let introduced = w.newElements.isEmpty ? "–" : w.newElements.map(\.displayName).joined(separator: ", ")
+            lines.append("| \(world). \(name) | \(group.first!.id)–\(group.last!.id) | \(introduced) | "
+                + "\(format(avg)) | \(format(difficulties.max() ?? 0)) |")
         }
         lines.append("")
 
@@ -46,9 +47,11 @@ public enum Report {
             let difficulty = stats.map { format($0.difficulty) } ?? "?"
             let bar = String(repeating: "█", count: Int((stats?.difficulty ?? 0) / 10))
             let colors = Set(level.candies.map(\.color)).count
+            let time = level.timeLimit.map { "\($0) s" } ?? "–"
             lines.append("| \(level.id) | \(slot)\(level.hard ? " 🔥" : "") | \(level.width)×\(level.height) | "
                 + "\(level.candies.count) | \(colors) | \(level.bagCapacity) | \(elements.isEmpty ? "–" : elements) | "
-                + "\(stats?.solutionLength ?? 0) | \(level.timeLimit.map { "\($0) s" } ?? "–") | \(stats?.pitfalls ?? 0) | \(solutions) | \(difficulty) | \(bar) |")
+                + "\(stats?.solutionLength ?? 0) | \(time) | \(stats?.pitfalls ?? 0) | "
+                + "\(solutions) | \(difficulty) | \(bar) |")
         }
         lines.append("")
         return lines.joined(separator: "\n")
