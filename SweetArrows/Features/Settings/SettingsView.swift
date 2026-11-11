@@ -1,4 +1,5 @@
 import SwiftUI
+import SweetArrowsCore
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
