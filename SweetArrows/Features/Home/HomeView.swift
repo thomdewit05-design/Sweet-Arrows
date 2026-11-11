@@ -108,44 +108,95 @@ struct CoinBadge: View {
     }
 }
 
-/// Placeholder for the mascot Jelly until real artwork arrives: a pink gummy with big eyes.
+/// The mascot from the app icon: a smiling lemon star candy that gently squishes.
 struct JellyView: View {
     var size: CGFloat = 100
     @State private var squish = false
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: size * 0.42)
-                .fill(Theme.heart.gradient)
-                .frame(width: size, height: size * 0.9)
-                .overlay(alignment: .topLeading) {
-                    Ellipse()
-                        .fill(.white.opacity(0.5))
-                        .frame(width: size * 0.28, height: size * 0.14)
-                        .rotationEffect(.degrees(-20))
-                        .offset(x: size * 0.16, y: size * 0.12)
-                }
-            HStack(spacing: size * 0.16) {
+            StarShape()
+                .fill(.white)
+                .frame(width: size * 1.12, height: size * 1.12)
+            StarShape()
+                .fill(LinearGradient(
+                    colors: [Color(hex: 0xFFE27A), Color(hex: 0xF2C230)], startPoint: .top, endPoint: .bottom
+                ))
+                .frame(width: size, height: size)
+            Ellipse()
+                .fill(.white.opacity(0.55))
+                .frame(width: size * 0.2, height: size * 0.09)
+                .offset(x: -size * 0.04, y: -size * 0.2)
+            HStack(spacing: size * 0.09) {
                 eye
                 eye
             }
-            .offset(y: -size * 0.04)
+            .offset(y: size * 0.02)
+            HStack(spacing: size * 0.32) {
+                cheek
+                cheek
+            }
+            .offset(y: size * 0.11)
             Capsule()
-                .fill(Theme.ink)
-                .frame(width: size * 0.18, height: size * 0.07)
-                .offset(y: size * 0.17)
+                .fill(Color(hex: 0x6E1E32))
+                .frame(width: size * 0.13, height: size * 0.05)
+                .offset(y: size * 0.15)
         }
-        .scaleEffect(x: squish ? 1.06 : 1, y: squish ? 0.94 : 1, anchor: .bottom)
+        .scaleEffect(x: squish ? 1.05 : 1, y: squish ? 0.95 : 1, anchor: .bottom)
         .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: squish)
         .onAppear { squish = true }
         .accessibilityHidden(true)
     }
 
     private var eye: some View {
-        Circle()
+        Ellipse()
             .fill(.white)
-            .frame(width: size * 0.24, height: size * 0.24)
-            .overlay(Circle().fill(Theme.ink).frame(width: size * 0.12).offset(x: size * 0.02, y: size * 0.02))
+            .frame(width: size * 0.12, height: size * 0.15)
+            .overlay(
+                Ellipse()
+                    .fill(Theme.ink)
+                    .frame(width: size * 0.08, height: size * 0.1)
+                    .offset(x: size * 0.006, y: size * 0.012)
+            )
+    }
+
+    private var cheek: some View {
+        Ellipse()
+            .fill(Color(hex: 0xFF96AF))
+            .frame(width: size * 0.09, height: size * 0.045)
+    }
+}
+
+/// Five-point star with softly rounded tips.
+struct StarShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY + rect.height * 0.04)
+        let outer = min(rect.width, rect.height) / 2
+        let inner = outer * 0.5
+        var points: [CGPoint] = []
+        for i in 0..<10 {
+            let radius = i.isMultiple(of: 2) ? outer : inner
+            let angle = Double(i) * .pi / 5 - .pi / 2
+            points.append(CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius))
+        }
+        var path = Path()
+        let corner = outer * 0.12
+        for i in points.indices {
+            let previous = points[(i + points.count - 1) % points.count]
+            let current = points[i]
+            let next = points[(i + 1) % points.count]
+            let start = Self.point(from: current, toward: previous, distance: corner)
+            let end = Self.point(from: current, toward: next, distance: corner)
+            if i == 0 { path.move(to: start) } else { path.addLine(to: start) }
+            path.addQuadCurve(to: end, control: current)
+        }
+        path.closeSubpath()
+        return path
+    }
+
+    private static func point(from a: CGPoint, toward b: CGPoint, distance: CGFloat) -> CGPoint {
+        let length = max(hypot(b.x - a.x, b.y - a.y), 0.001)
+        return CGPoint(x: a.x + (b.x - a.x) / length * distance, y: a.y + (b.y - a.y) / length * distance)
     }
 }
 

@@ -65,9 +65,10 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
 - **CI via GitHub Actions** in plaats van Xcode Cloud (Xcode Cloud kan later nog naast of in plaats van).
 - **SwiftLint draait in CI** (en lokaal via een build-fase als het geïnstalleerd is), niet in de CI-build van Xcode zelf.
 - **Lettertype**: Fredoka (OFL) staat in `SweetArrows/Resources/Fonts`, licentie in `docs/licenses/`.
-- **App-icoon**: Jelly (roze hartgummy met grote ogen en een lach) op een witte pijl, voor een felle
-  snoephemel met glitters en snoepjes; gemaakt door `Tools/Icon/make_icon.py`. Vrolijk en speels, maar
-  bewust niet kinderachtig: de app blijft voor algemeen publiek (geen Kids-categorie, zie Privacy in PLAN.md).
+- **App-icoon** (keuze van de eigenaar, ontwerp D): een lachend geel sterretje-snoepje op een grote witte pijl,
+  voor een groen-paarse snoephemel met stralen, glitters en een paar snoepjes in de vormen uit het spel;
+  gemaakt door `Tools/Icon/make_icon.py`. De mascotte in de app (`JellyView`) is hetzelfde sterretje.
+  Vrolijk en speels, maar bewust niet kinderachtig: de app blijft voor algemeen publiek (geen Kids-categorie).
 
 ## Hoofdspel: Glijden & matchen
 
@@ -121,7 +122,7 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 | Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site`; domein + GitHub Pages aanzetten, publisher-id invullen |
 | Privacylabels, leeftijdsclassificatie, handelaarsstatus | ❌ jij, in App Store Connect |
 | Echte advertentie-ID's alleen in Release | ✅ via `Config/Secrets.xcconfig` |
-| Store-pagina: icoon, screenshots, video, teksten per taal | ❌ icoon is een placeholder; screenshots uit de UI-test als basis |
+| Store-pagina: icoon, screenshots, video, teksten per taal | 🟡 icoon klaar; screenshots uit de UI-test als basis |
 | KvK en belastinggegevens | ❌ jij |
 | Naam vrij, domein, geen merkconflict | ❌ jij (App Store, sweetarrowsgame.com, EUIPO/BOIP) |
 | Snoepthema doorgevoerd | 🟡 in code-tekeningen; echte artwork nog niet |
