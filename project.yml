@@ -110,7 +110,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: $(SWEETARROWS_BUNDLE_ID).tests
 
   SweetArrowsUITests:
-    type: bundle.ui-test
+    type: bundle.ui-testing
     platform: iOS
     sources: [SweetArrowsUITests]
     dependencies:

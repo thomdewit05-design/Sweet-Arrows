@@ -12,6 +12,10 @@ public struct GridPoint: Hashable, Codable, Sendable, CustomStringConvertible {
         GridPoint(lhs.x + rhs.dx, lhs.y + rhs.dy)
     }
 
+    public static func += (lhs: inout GridPoint, rhs: Direction) {
+        lhs = lhs + rhs
+    }
+
     public var neighbors: [GridPoint] {
         Direction.allCases.map { self + $0 }
     }

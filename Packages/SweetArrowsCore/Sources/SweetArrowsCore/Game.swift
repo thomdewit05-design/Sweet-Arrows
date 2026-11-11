@@ -167,7 +167,7 @@ public struct Game: Sendable {
                     break
                 }
                 steps += 1
-                p = p + direction
+                p += direction
             }
             exit = max(exit, steps + 1)
         }

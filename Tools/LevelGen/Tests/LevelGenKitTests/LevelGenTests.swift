@@ -103,10 +103,10 @@ struct GeneratorTests {
         }
     }
 
-    @Test func colorsNeverOverflowTheJar() {
+    @Test func colorsNeverOverflowTheJar() throws {
         var rng = SplitMix64(seed: 3)
         for limit in 2...4 {
-            let colors = try! #require(fast.dealColors(count: 30, colors: 5, bagLimit: limit, rng: &rng))
+            let colors = try #require(fast.dealColors(count: 30, colors: 5, bagLimit: limit, rng: &rng))
             var bag = Bag(capacity: 8)
             for color in colors {
                 bag.insert(color)

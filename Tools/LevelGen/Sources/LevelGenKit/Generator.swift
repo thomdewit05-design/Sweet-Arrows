@@ -161,7 +161,7 @@ public struct Generator: Sendable {
                 var c = cell + d
                 while inside(c) {
                     if !cells.contains(c), occupied[c.y][c.x] { return false }
-                    c = c + d
+                    c += d
                 }
             }
             return true

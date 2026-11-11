@@ -111,7 +111,7 @@ public struct Solver: Sendable {
                         if let j = owner[p], j != i {
                             rays[i][direction.index] |= UInt64(1) << UInt64(j)
                         }
-                        p = p + direction
+                        p += direction
                     }
                 }
             }
