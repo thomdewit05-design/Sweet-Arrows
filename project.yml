@@ -61,6 +61,8 @@ targets:
         product: FirebaseCrashlytics
       - package: Firebase
         product: FirebaseRemoteConfig
+      # Needed by Google Mobile Ads when linked with -ObjC.
+      - sdk: JavaScriptCore.framework
     info:
       path: SweetArrows/App/Info.plist
       properties:
