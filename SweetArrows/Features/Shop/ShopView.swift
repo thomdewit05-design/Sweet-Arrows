@@ -212,6 +212,7 @@ private struct CosmeticCard: View {
             Image(uiImage: BackdropArt.image(for: item, size: CGSize(width: 120, height: 70)))
                 .resizable()
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
     }
 }
 
