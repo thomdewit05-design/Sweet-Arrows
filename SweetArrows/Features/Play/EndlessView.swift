@@ -73,6 +73,7 @@ struct EndlessView: View {
                         use: useBooster
                     )
                     .frame(height: Self.boosterBarHeight)
+                    .background(RoundedRectangle(cornerRadius: 20).fill(.white.opacity(0.7)).padding(.horizontal, -8))
                     .accessibilityIdentifier("boosterBar")
                     if showsBanner {
                         // Owner's choice: a banner under the board, kept clear of the booster buttons.
@@ -113,7 +114,8 @@ struct EndlessView: View {
         let newSession = SlideSession()
         let newScene = SlideScene(
             session: newSession, haptics: model.haptics, audio: model.audio,
-            colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle
+            colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle,
+            backdrop: progress.backdrop
         )
         newScene.topInset = 132
         newScene.bottomInset = bottomInset
@@ -304,6 +306,9 @@ private struct EndlessHUD: View {
                     .font(Theme.body(14))
                     .foregroundStyle(Theme.inkSoft)
             }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(.white.opacity(0.85)).shadow(color: Theme.ink.opacity(0.1), radius: 4, y: 2))
             Spacer()
             VStack(spacing: 2) {
                 Image(systemName: "hare.fill")
@@ -312,7 +317,8 @@ private struct EndlessHUD: View {
                     .font(Theme.heading(16))
             }
             .foregroundStyle(Theme.heart)
-            .frame(width: 48)
+            .frame(width: 48, height: 48)
+            .background(Circle().fill(.white.opacity(0.85)))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("Speed \(session.stage + 1)!"))
         }

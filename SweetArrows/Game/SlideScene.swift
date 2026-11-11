@@ -11,6 +11,10 @@ final class SlideScene: SKScene {
     private let audio: AudioService
     private let colorBlind: Bool
     private let boardStyle: Cosmetic
+    private let backdrop: Cosmetic
+    private let backdropNode = SKSpriteNode()
+    /// Pink haze over the backdrop during combo fever.
+    private let feverTint = SKSpriteNode(color: UIColor(hex: 0xFF5C8A), size: .zero)
     private let candyStyle: Cosmetic
 
     /// Space SwiftUI uses above the board (HUD) and below it (booster bar).
@@ -45,8 +49,10 @@ final class SlideScene: SKScene {
         audio: AudioService,
         colorBlind: Bool,
         boardStyle: Cosmetic = .woodCounter,
-        candyStyle: Cosmetic = .classicCandy
+        candyStyle: Cosmetic = .classicCandy,
+        backdrop: Cosmetic = .candyMeadow
     ) {
+        self.backdrop = backdrop
         self.session = session
         self.haptics = haptics
         self.audio = audio
@@ -56,6 +62,13 @@ final class SlideScene: SKScene {
         super.init(size: CGSize(width: 390, height: 844))
         scaleMode = .resizeFill
         backgroundColor = UIColor(hex: 0xFFF4E6)
+        backdropNode.anchorPoint = .zero
+        backdropNode.zPosition = -50
+        addChild(backdropNode)
+        feverTint.anchorPoint = .zero
+        feverTint.zPosition = -49
+        feverTint.alpha = 0
+        addChild(feverTint)
         anchorPoint = .zero
         addChild(boardRoot)
         boardRoot.addChild(counter)
@@ -88,14 +101,19 @@ final class SlideScene: SKScene {
         if fever != feverOn {
             feverOn = fever
             effects.setFever(fever, around: boardFrame, cornerRadius: cell * 0.4)
-            let target = fever ? UIColor(hex: 0xFFE3EC) : UIColor(hex: 0xFFF4E6)
-            backgroundColor = target
+            feverTint.removeAllActions()
+            feverTint.run(fever
+                ? .repeatForever(.sequence([.fadeAlpha(to: 0.22, duration: 0.4), .fadeAlpha(to: 0.12, duration: 0.4)]))
+                : .fadeAlpha(to: 0, duration: 0.3))
         }
     }
 
     // MARK: Layout
 
     private func layoutBoard() {
+        backdropNode.texture = SKTexture(image: BackdropArt.image(for: backdrop, size: size))
+        backdropNode.size = size
+        feverTint.size = size
         let safeTop = view?.safeAreaInsets.top ?? 0
         let safeBottom = view?.safeAreaInsets.bottom ?? 0
         let margin: CGFloat = 16

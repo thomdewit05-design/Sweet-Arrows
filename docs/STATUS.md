@@ -107,6 +107,42 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
   na 3 potjes, ATT-vraag na 2, advertenties na 2 potjes,
   interstitial pas vanaf potje 4, hooguit om de 2 potjes, alleen bij "Opnieuw spelen".
 
+## Doorspelen en uitstraling (november 2026)
+
+Op verzoek van de eigenaar ("alles mag") zodat spelers blijven terugkomen:
+
+- **Spelersniveau met XP** (`PlayerLevel`): elk potje geeft 20 XP + score/25 + 15 per leeg bord. Een niveau kost
+  100 XP, daarna 40 meer per niveau. Elk niveau geeft 40 + 10×niveau munten; elk 5e niveau 1 van elke booster;
+  niveau 3, 6, 10 en 15 geven een nieuwe **achtergrond** (Snoepweide, IJsjesbaai, Chocoladerivier,
+  Suikerspinlucht, Sterrennacht). Achtergronden kies je in de winkel.
+- **3 dagopdrachten** (`DailyMissions`): elke dag andere, voor iedereen met hetzelfde niveau gelijk, doelen
+  groeien met je niveau (bijv. "Haal 1500 punten in één potje", "Laat 50 snoepjes ploppen", "Haal combo ×4").
+  Munten per opdracht en een bonuscadeau (munten + tip) als alle drie klaar zijn.
+- **Speelreeks** (`PlayStreak`): dagen op rij met minstens één potje, met vlammetje op het startscherm.
+- **Na een potje:** eerst het doorspeel-aanbod (filmpje), pas daarna wordt het potje geteld (dus nooit dubbel).
+  De uitslagkaart toont de XP-balk die vol loopt, level-ups met beloning, gehaalde opdrachten, alle munten
+  en "nog X punten tot je record".
+- **Startscherm:** snoephemel met zwevende snoepjes, niveau + XP-balk, munten, record en speelreeks,
+  een grote kloppende Speel-knop, de dagopdrachten en knoppen voor winkel en cadeau (met stip als het klaarstaat).
+- **Eén stijl:** glanzende 3D-knoppen, witte kaarten op de snoephemel (startscherm en winkel), score en
+  boosters op een lichte ondergrond zodat ze op elke achtergrond leesbaar zijn.
+- **Snoepjes:** donkerdere onderkant en extra glimlichtje voor meer diepte, en een zachte "ademhaling" als ze
+  stilliggen (uit met Beweging verminderen). Combo-koorts kleurt nu de achtergrond roze in plaats van de kleur te wisselen.
+
+### Echte illustraties later toevoegen
+
+Alles is nu met code getekend. Komen er later echte tekeningen (bijv. van een illustrator), zet ze dan als
+afbeelding in `SweetArrows/Resources/Assets.xcassets` met precies deze namen; de app gebruikt ze dan vanzelf:
+
+| Wat | Naam in de asset catalog | Formaat |
+|---|---|---|
+| Snoepje per kleur | `candy-strawberry`, `candy-lemon`, `candy-mint`, `candy-blueberry`, `candy-orange`, `candy-grape` | vierkant, transparant, 256×256 |
+| Snoepje per kleur en stijl (optioneel) | bijv. `candy-lemon-pastelCandy`, `candy-mint-goldenCandy` | idem |
+| Mascotte (sterretje) | `mascot` | vierkant, transparant, 512×512 |
+| Achtergrond | `backdrop-candyMeadow`, `backdrop-iceCreamBay`, `backdrop-chocolateRiver`, `backdrop-cottonSky`, `backdrop-starryNight` | staand, 1290×2796 |
+
+De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die dus niet in de afbeelding.
+
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;

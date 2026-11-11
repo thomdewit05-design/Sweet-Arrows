@@ -8,7 +8,7 @@ struct ShopView: View {
     var body: some View {
         let progress = model.save.progress
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     JellyView(size: 54)
                     Spacer()
@@ -28,9 +28,16 @@ struct ShopView: View {
                 section("Candy styles") {
                     cosmeticsGrid(.candyStyle, progress: progress)
                 }
+                section("Backdrops") {
+                    Text("A new backdrop comes free at levels 3, 6, 10 and 15.")
+                        .font(Theme.body(13))
+                        .foregroundStyle(Theme.inkSoft)
+                    cosmeticsGrid(.backdrop, progress: progress)
+                }
             }
             .padding()
         }
+        .background(CandySkyBackground(colors: [Color(hex: 0xBDEBFF), Color(hex: 0xE4D9FF), Color(hex: 0xFFD6E6)]))
         .safeAreaInset(edge: .bottom) {
             if model.showsBanner {
                 BannerAdView(adUnitID: model.ads.bannerAdUnitID)
@@ -48,6 +55,8 @@ struct ShopView: View {
                 .foregroundStyle(Theme.ink)
             content()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .candyCard()
     }
 
     private func cosmeticsGrid(_ kind: Cosmetic.Kind, progress: PlayerProgress) -> some View {
@@ -56,8 +65,9 @@ struct ShopView: View {
                 CosmeticCard(
                     item: item,
                     owned: progress.ownedCosmetics.contains(item),
-                    equipped: progress.board == item || progress.candyStyle == item,
-                    affordable: progress.coins >= item.price
+                    equipped: progress.board == item || progress.candyStyle == item || progress.backdrop == item,
+                    affordable: progress.coins >= item.price,
+                    lockedUntil: item.unlockLevel.flatMap { $0 > progress.level ? $0 : nil }
                 ) { tapped(item) }
             }
         }
@@ -134,7 +144,11 @@ private struct CosmeticCard: View {
     let owned: Bool
     let equipped: Bool
     let affordable: Bool
+    /// Backdrops not reached yet: the level that unlocks them.
+    var lockedUntil: Int?
     let action: () -> Void
+
+    private var usable: Bool { lockedUntil == nil && (owned || affordable) }
 
     var body: some View {
         Button(action: action) {
@@ -145,7 +159,9 @@ private struct CosmeticCard: View {
                     .font(Theme.heading(15))
                     .foregroundStyle(Theme.ink)
                 Group {
-                    if equipped {
+                    if let level = lockedUntil {
+                        Label("Level \(level)", systemImage: "lock.fill")
+                    } else if equipped {
                         Label("In use", systemImage: "checkmark.circle.fill")
                     } else if owned {
                         Text("Use")
@@ -164,8 +180,8 @@ private struct CosmeticCard: View {
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(equipped ? Theme.heart : .clear, lineWidth: 3))
             )
         }
-        .disabled(!owned && !affordable)
-        .opacity(!owned && !affordable ? 0.55 : 1)
+        .disabled(!usable)
+        .opacity(usable ? 1 : 0.55)
     }
 
     @ViewBuilder private var preview: some View {
@@ -192,7 +208,10 @@ private struct CosmeticCard: View {
                         .frame(width: 30, height: 30)
                 }
             }
-        }
+        case .backdrop:
+            Image(uiImage: BackdropArt.image(for: item, size: CGSize(width: 120, height: 70)))
+                .resizable()
+                .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
 
@@ -207,6 +226,11 @@ extension Cosmetic {
         case .pastelCandy: "Pastel"
         case .sparkleCandy: "Sparkle"
         case .goldenCandy: "Golden"
+        case .candyMeadow: "Candy meadow"
+        case .iceCreamBay: "Ice cream bay"
+        case .chocolateRiver: "Chocolate river"
+        case .cottonSky: "Cotton candy sky"
+        case .starryNight: "Starry night"
         }
     }
 }

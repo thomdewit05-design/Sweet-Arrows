@@ -59,6 +59,21 @@ final class CandyNode: SKNode {
         if colorBlind, piece.kind != .rainbow { addColorBlindMark(color: piece.color, size: size) }
         if piece.kind == .rainbow { addRainbowRing(size: size) }
         if piece.kind == .bomb { addBombBadge(size: size) }
+        breathe()
+    }
+
+    /// A slow, gummy "breathing" so the board never looks frozen (off with Reduce Motion).
+    private func breathe() {
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        let duration = Double.random(in: 1.1...1.6)
+        let squeeze = SKAction.scaleX(to: 1.025, y: 0.975, duration: duration)
+        squeeze.timingMode = .easeInEaseOut
+        let relax = SKAction.scale(to: 1, duration: duration)
+        relax.timingMode = .easeInEaseOut
+        body.run(.sequence([
+            .wait(forDuration: Double.random(in: 0...1.2)),
+            .repeatForever(.sequence([squeeze, relax])),
+        ]), withKey: "idle")
     }
 
     @available(*, unavailable)
@@ -68,6 +83,11 @@ final class CandyNode: SKNode {
 
     /// Body (shadow + candy + shine), as a cached texture when possible.
     private static func bodySprite(color: CandyColor, cellSize: CGFloat, style: Cosmetic, art: CandyArt?) -> SKNode {
+        // Real artwork wins when it is in the asset catalog ("candy-lemon", "candy-lemon-pastelCandy", ...).
+        if let image = UIImage(named: "candy-\(color.rawValue)-\(style.rawValue)") ?? UIImage(named: "candy-\(color.rawValue)") {
+            let side = cellSize * 0.92
+            return SKSpriteNode(texture: SKTexture(image: image), size: CGSize(width: side, height: side))
+        }
         let extent = CGSize(width: cellSize * 1.2, height: cellSize * 1.2)
         let key = "body-\(color.rawValue)-\(style.rawValue)-\(Int(cellSize * 10))"
         let build = { CandyNode.makeBody(color: color, cellSize: cellSize, style: style) }
@@ -148,6 +168,19 @@ final class CandyNode: SKNode {
         candy.lineJoin = .round
         root.addChild(candy)
 
+        // Depth: a darker belly, clipped to the candy's own shape.
+        let crop = SKCropNode()
+        let mask = SKShapeNode(path: path)
+        mask.fillColor = .white
+        mask.strokeColor = .clear
+        crop.maskNode = mask
+        let belly = SKShapeNode(ellipseOf: CGSize(width: size * 1.3, height: size * 0.9))
+        belly.fillColor = UIColor(hex: 0x4A2C2A, alpha: 0.16)
+        belly.strokeColor = .clear
+        belly.position = CGPoint(x: size * 0.08, y: -size * 0.42)
+        crop.addChild(belly)
+        root.addChild(crop)
+
         let shineSize = size * 0.32
         let shine = SKShapeNode(ellipseOf: CGSize(width: shineSize, height: shineSize * 0.6))
         shine.fillColor = UIColor.white.withAlphaComponent(0.45)
@@ -155,6 +188,11 @@ final class CandyNode: SKNode {
         shine.position = CGPoint(x: -size * 0.16, y: size * 0.2)
         shine.zRotation = 0.5
         root.addChild(shine)
+        let glint = SKShapeNode(circleOfRadius: size * 0.05)
+        glint.fillColor = UIColor.white.withAlphaComponent(0.9)
+        glint.strokeColor = .clear
+        glint.position = CGPoint(x: -size * 0.24, y: size * 0.26)
+        root.addChild(glint)
 
         if style == .sparkleCandy {
             // Three tiny glitter stars.

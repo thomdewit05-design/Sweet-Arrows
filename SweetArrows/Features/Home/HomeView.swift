@@ -6,56 +6,78 @@ struct HomeView: View {
     @State private var showDailyReward = false
     @State private var showTrackingPrimer = false
 
+    @State private var pulse = false
+
     var body: some View {
         let progress = model.save.progress
         ZStack {
-            Theme.cream.ignoresSafeArea()
-            VStack(spacing: 24) {
-                HStack {
-                    CoinBadge(coins: progress.coins)
-                    Spacer()
-                    RoundIconButton(systemName: "gearshape.fill", label: "Settings") {
-                        model.path.append(.settings)
+            CandySkyBackground()
+            ScrollView {
+                VStack(spacing: 18) {
+                    topBar(progress)
+                    VStack(spacing: 2) {
+                        JellyView(size: 104)
+                            .padding(.bottom, 6)
+                        Text(verbatim: "Sweet Arrows")
+                            .font(Theme.title(44))
+                            .foregroundStyle(.white)
+                            .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 3)
+                        Text("Tap, slide, pop the sweets")
+                            .font(Theme.body())
+                            .foregroundStyle(.white.opacity(0.95))
+                            .shadow(color: Theme.ink.opacity(0.25), radius: 2, y: 1)
+                    }
+                    .padding(.top, 8)
+
+                    statsRow(progress)
+
+                    Button {
+                        model.path.append(.endless)
+                    } label: {
+                        Label("Play", systemImage: "play.fill")
+                            .font(Theme.title(30))
+                            .frame(maxWidth: 260)
+                            .padding(.vertical, 6)
+                    }
+                    .buttonStyle(CandyButtonStyle())
+                    .scaleEffect(pulse ? 1.04 : 1)
+                    .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
+                    .accessibilityIdentifier("playButton")
+
+                    if !progress.missions.missions.isEmpty {
+                        missionsCard(progress.missions)
+                    }
+
+                    if progress.showsMetaFeatures {
+                        HStack(spacing: 12) {
+                            Button {
+                                model.path.append(.shop)
+                            } label: {
+                                Label("Shop", systemImage: "bag.fill")
+                            }
+                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                            .accessibilityIdentifier("shopButton")
+                            Button {
+                                showDailyReward = true
+                            } label: {
+                                Label("Gift", systemImage: "gift.fill")
+                            }
+                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
+                            .overlay(alignment: .topTrailing) {
+                                if progress.dailyReward.claimableStep(today: model.today) != nil {
+                                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                                        .offset(x: 2, y: -2)
+                                }
+                            }
+                            .accessibilityIdentifier("giftButton")
+                        }
                     }
                 }
                 .padding(.horizontal)
-
-                Spacer()
-                JellyView(size: 120)
-                VStack(spacing: 4) {
-                    Text(verbatim: "Sweet Arrows")
-                        .font(Theme.title(44))
-                        .foregroundStyle(Theme.ink)
-                    Text("Tap, slide, pop the sweets")
-                        .font(Theme.body())
-                        .foregroundStyle(Theme.inkSoft)
-                }
-                Spacer()
-
-                Button {
-                    model.path.append(.endless)
-                } label: {
-                    VStack(spacing: 2) {
-                        Text("Play")
-                        if progress.endlessBest > 0 {
-                            Text("Best \(progress.endlessBest)")
-                                .font(Theme.body(15))
-                                .opacity(0.9)
-                        }
-                    }
-                    .frame(maxWidth: 240)
-                }
-                .buttonStyle(CandyButtonStyle())
-                .accessibilityIdentifier("playButton")
-
-                if progress.showsMetaFeatures {
-                    Button("Shop") { model.path.append(.shop) }
-                        .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
-                        .accessibilityIdentifier("shopButton")
-                }
-                Spacer().frame(height: 24)
+                .padding(.bottom, 24)
             }
-            .padding(.vertical)
+            .scrollBounceBehavior(.basedOnSize)
         }
         .safeAreaInset(edge: .bottom) {
             if model.showsBanner {
@@ -79,6 +101,11 @@ struct HomeView: View {
             .interactiveDismissDisabled()
         }
         .onAppear {
+            pulse = true
+            let today = model.today
+            if model.save.progress.missions.day != today {
+                model.save.update { $0.refreshMissions(today: today) }
+            }
             let progress = model.save.progress
             // App Tracking Transparency: only after a few runs, with our own explanation first.
             if progress.endlessRuns >= 2, model.consent.needsTrackingPrompt {
@@ -88,6 +115,90 @@ struct HomeView: View {
                 showDailyReward = true
             }
         }
+    }
+
+    private func topBar(_ progress: PlayerProgress) -> some View {
+        HStack(spacing: 10) {
+            LevelBadge(level: progress.level, size: 46)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Level \(progress.level)")
+                    .font(Theme.heading(16))
+                    .foregroundStyle(Theme.ink)
+                XPBar(fraction: Double(progress.xpIntoLevel) / Double(max(progress.xpForLevel, 1)), height: 10)
+                    .frame(width: 110)
+            }
+            Spacer()
+            CoinBadge(coins: progress.coins)
+            RoundIconButton(systemName: "gearshape.fill", label: "Settings") {
+                model.path.append(.settings)
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    private func statsRow(_ progress: PlayerProgress) -> some View {
+        HStack(spacing: 10) {
+            StatChip(icon: "trophy.fill", tint: Theme.gold, value: "\(progress.endlessBest)", label: "Best")
+            StatChip(icon: "flame.fill", tint: Color(hex: 0xFF9F1C),
+                     value: "\(progress.streak.current(today: model.today))", label: "Days in a row")
+        }
+    }
+
+    private func missionsCard(_ missions: DailyMissions) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("Daily missions", systemImage: "checklist")
+                    .font(Theme.heading(18))
+                    .foregroundStyle(Theme.ink)
+                Spacer()
+                Text("\(missions.missions.filter(\.isDone).count)/\(missions.missions.count)")
+                    .font(Theme.heading(15))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            ForEach(missions.missions, id: \.kind) { mission in
+                MissionRow(mission: mission)
+            }
+            if missions.allDone {
+                Label("All done! Come back tomorrow for new missions.", systemImage: "party.popper.fill")
+                    .font(Theme.body(14))
+                    .foregroundStyle(Theme.heart)
+            } else {
+                Text("Finish all three for a bonus gift")
+                    .font(Theme.body(13))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+        }
+        .candyCard()
+        .accessibilityIdentifier("missionsCard")
+    }
+}
+
+/// Small white pill with an icon, a number and a label.
+struct StatChip: View {
+    let icon: String
+    let tint: Color
+    let value: String
+    let label: LocalizedStringKey
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(tint)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(value)
+                    .font(Theme.heading(18))
+                    .foregroundStyle(Theme.ink)
+                    .monospacedDigit()
+                Text(label)
+                    .font(Theme.body(11))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+        .candyCard(padding: 10)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -119,6 +230,22 @@ struct JellyView: View {
     @State private var squish = false
 
     var body: some View {
+        if let artwork = UIImage(named: "mascot") {
+            // Real artwork, when it has been added to the asset catalog.
+            Image(uiImage: artwork)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 1.15, height: size * 1.15)
+                .scaleEffect(x: squish ? 1.05 : 1, y: squish ? 0.95 : 1, anchor: .bottom)
+                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: squish)
+                .onAppear { squish = true }
+                .accessibilityHidden(true)
+        } else {
+            drawnStar
+        }
+    }
+
+    private var drawnStar: some View {
         ZStack {
             StarShape()
                 .fill(.white)
