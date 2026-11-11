@@ -28,6 +28,17 @@ final class SlideSession {
         return run.tap(id)
     }
 
+    // MARK: Boosters
+
+    var isSlowedDown: Bool { run.isSlowedDown }
+
+    func hint() -> Int? { run.hint() }
+
+    @discardableResult
+    func smash(_ id: Int) -> Bool { run.smash(id) }
+
+    func slowDown() { run.slowDown(for: 15) }
+
     // MARK: Clock
 
     func start() { startIfNeeded() }

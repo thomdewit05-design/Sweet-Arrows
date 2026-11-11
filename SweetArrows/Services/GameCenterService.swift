@@ -3,28 +3,16 @@ import UIKit
 
 /// Game Center achievements. The ids must also be created in App Store Connect (see docs/STATUS.md).
 enum Achievement: String, CaseIterable, Sendable {
-    case firstWin = "sweetarrows.first_win"
-    case tutorialDone = "sweetarrows.tutorial_done"
-    case world1 = "sweetarrows.world_1"
-    case world2 = "sweetarrows.world_2"
-    case world3 = "sweetarrows.world_3"
-    case world4 = "sweetarrows.world_4"
-    case world5 = "sweetarrows.world_5"
-    case world6 = "sweetarrows.world_6"
-    case world7 = "sweetarrows.world_7"
-    case world8 = "sweetarrows.world_8"
-    case stars100 = "sweetarrows.stars_100"
-    case dailyStreak7 = "sweetarrows.daily_streak_7"
-
-    static func world(_ number: Int) -> Achievement? {
-        allCases.first { $0.rawValue == "sweetarrows.world_\(number)" }
-    }
+    case firstPop = "sweetarrows.first_pop"
+    case score1000 = "sweetarrows.score_1000"
+    case score5000 = "sweetarrows.score_5000"
+    case combo5 = "sweetarrows.combo_5"
+    case speed10 = "sweetarrows.speed_10"
+    case runs50 = "sweetarrows.runs_50"
 }
 
 enum Leaderboard {
-    /// Daily puzzle: fastest time in seconds (create as "low to high", recurring daily, in App Store Connect).
-    static let dailyPuzzle = "sweetarrows.daily_time"
-    /// Endless mode: highest score (create as "high to low", all-time, in App Store Connect).
+    /// Highest score (create as "high to low", all-time, in App Store Connect).
     static let endless = "sweetarrows.endless_score"
 }
 
@@ -33,7 +21,6 @@ protocol GameCenterService: AnyObject {
     var isAuthenticated: Bool { get }
     func authenticate()
     func report(_ achievement: Achievement)
-    func submitDailyTime(seconds: Int)
     func submitEndlessScore(_ score: Int)
 }
 
@@ -60,13 +47,6 @@ final class GameKitService: GameCenterService {
         GKAchievement.report([entry]) { _ in }
     }
 
-    func submitDailyTime(seconds: Int) {
-        guard isAuthenticated else { return }
-        GKLeaderboard.submitScore(
-            seconds, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [Leaderboard.dailyPuzzle]
-        ) { _ in }
-    }
-
     func submitEndlessScore(_ score: Int) {
         guard isAuthenticated, score > 0 else { return }
         GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [Leaderboard.endless]) { _ in }
@@ -88,6 +68,5 @@ final class OfflineGameCenterService: GameCenterService {
     let isAuthenticated = false
     func authenticate() {}
     func report(_ achievement: Achievement) {}
-    func submitDailyTime(seconds: Int) {}
     func submitEndlessScore(_ score: Int) {}
 }

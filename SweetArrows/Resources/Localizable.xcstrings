@@ -50,98 +50,6 @@
         }
       }
     },
-    "%lld hearts left": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog %lld hartjes"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch %lld Herzen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encore %lld cœurs"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quedan %lld corazones"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restam %lld corações"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld kalp kaldı"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sisa %lld hati"
-          }
-        }
-      }
-    },
-    "%lld seconds left": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog %lld seconden"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch %lld Sekunden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encore %lld secondes"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quedan %lld segundos"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restam %lld segundos"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld saniye kaldı"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sisa %lld detik"
-          }
-        }
-      }
-    },
     "%lld stars": {
       "localizations": {
         "nl": {
@@ -234,52 +142,6 @@
         }
       }
     },
-    "+15 seconds": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 seconden"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 Sekunden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 secondes"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 segundos"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 segundos"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 saniye"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "+15 detik"
-          }
-        }
-      }
-    },
     "1,000 coins and 3 of every booster. Only once.": {
       "localizations": {
         "nl": {
@@ -322,144 +184,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "1.000 koin dan 3 dari setiap booster. Hanya sekali."
-          }
-        }
-      }
-    },
-    "3 hearts": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 hartjes"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 Herzen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 cœurs"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 corazones"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 corações"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 kalp"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "3 hati"
-          }
-        }
-      }
-    },
-    "A bomb takes its neighbours with it. They don't go into the jar.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Een bom neemt de snoepjes ernaast mee. Die gaan niet in de pot."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eine Bombe nimmt ihre Nachbarn mit. Sie landen nicht im Glas."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une bombe emporte ses voisins. Ils ne vont pas dans le bocal."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una bomba se lleva a sus vecinos. No van al frasco."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uma bomba leva os vizinhos junto. Eles não vão para o pote."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bomba komşularını da götürür. Onlar kavanoza girmez."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bom membawa tetangganya pergi. Mereka tidak masuk toples."
-          }
-        }
-      }
-    },
-    "A new puzzle every day": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elke dag een nieuwe puzzel"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jeden Tag ein neues Rätsel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un nouveau puzzle chaque jour"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un puzle nuevo cada día"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Um quebra-cabeça novo todo dia"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Her gün yeni bir bulmaca"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Teka-teki baru setiap hari"
           }
         }
       }
@@ -648,52 +372,6 @@
         }
       }
     },
-    "Bombs": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bommen"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bomben"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bombes"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bombas"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bombas"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bombalar"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bom"
-          }
-        }
-      }
-    },
     "Boosters": {
       "localizations": {
         "nl": {
@@ -740,144 +418,6 @@
         }
       }
     },
-    "Bounced too often. Want three more hearts?": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Te vaak gebotst. Wil je drie extra hartjes?"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zu oft abgeprallt. Drei Herzen extra?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trop de rebonds. Trois cœurs de plus ?"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rebotaste demasiado. ¿Quieres tres corazones más?"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quicou demais. Quer mais três corações?"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Çok fazla sektin. Üç kalp daha ister misin?"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terlalu sering memantul. Mau tiga hati lagi?"
-          }
-        }
-      }
-    },
-    "Bumpers": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bumpers"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bumper"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rebonds"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rebotadores"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rebatedores"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tamponlar"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pemantul"
-          }
-        }
-      }
-    },
-    "Bumpers bend a flying candy a quarter turn. Chocolate bars can't take the bend.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bumpers buigen een vliegend snoepje een kwartslag af. Chocoladerepen kunnen die bocht niet maken."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bumper lenken ein fliegendes Bonbon um eine Vierteldrehung ab. Schokoriegel schaffen die Kurve nicht."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les rebonds dévient un bonbon d'un quart de tour. Les barres de chocolat ne passent pas le virage."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los rebotadores desvían un caramelo un cuarto de vuelta. Las barras de chocolate no pueden girar."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os rebatedores desviam um doce um quarto de volta. Barras de chocolate não fazem a curva."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tamponlar uçan şekeri çeyrek tur saptırır. Çikolata barları dönemez."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pemantul membelokkan permen seperempat putaran. Batang cokelat tidak bisa berbelok."
-          }
-        }
-      }
-    },
     "Candy styles": {
       "localizations": {
         "nl": {
@@ -920,282 +460,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gaya permen"
-          }
-        }
-      }
-    },
-    "Caramel": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamel"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamell"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramelo"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramelo"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamel"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamel"
-          }
-        }
-      }
-    },
-    "Caramel Canyon": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramel Canyon"
-          }
-        }
-      }
-    },
-    "Caramel needs two taps: the first cracks it, the second sends it flying.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamel heeft twee tikken nodig: de eerste kraakt hem, de tweede laat hem vliegen."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamell braucht zwei Tipper: Der erste knackt ihn, der zweite lässt ihn fliegen."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le caramel demande deux touches : la première le casse, la seconde le fait voler."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El caramelo necesita dos toques: el primero lo rompe y el segundo lo hace volar."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O caramelo precisa de dois toques: o primeiro quebra, o segundo faz voar."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamel iki dokunuş ister: ilki kırar, ikincisi uçurur."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karamel butuh dua ketukan: yang pertama memecahkannya, yang kedua menerbangkannya."
-          }
-        }
-      }
-    },
-    "Chocolate bars": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocoladerepen"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schokoriegel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Barres de chocolat"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Barras de chocolate"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Barras de chocolate"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Çikolata barları"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Batang cokelat"
-          }
-        }
-      }
-    },
-    "Chocolate bars are two cells long and fly as one.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocoladerepen zijn twee vakjes lang en vliegen als één geheel."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schokoriegel sind zwei Felder lang und fliegen als Ganzes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les barres de chocolat font deux cases et volent d'un seul bloc."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las barras de chocolate ocupan dos casillas y vuelan juntas."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "As barras de chocolate ocupam duas casas e voam juntas."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Çikolata barları iki kare uzunluğundadır ve tek parça uçar."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Batang cokelat panjangnya dua kotak dan terbang sebagai satu."
-          }
-        }
-      }
-    },
-    "Chocolate Falls": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chocolate Falls"
           }
         }
       }
@@ -1380,98 +644,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Koin"
-          }
-        }
-      }
-    },
-    "Color changers": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kleurwisselaars"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farbwechsler"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caméléons"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cambiacolores"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Muda-cores"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renk değiştiriciler"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pengubah warna"
-          }
-        }
-      }
-    },
-    "Color changers switch to the next color after every move. Time your tap!": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kleurwisselaars krijgen na elke zet de volgende kleur. Kies je moment!"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Farbwechsler nehmen nach jedem Zug die nächste Farbe an. Wähle den richtigen Moment!"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les caméléons changent de couleur à chaque coup. Choisis le bon moment !"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los cambiacolores cambian de color tras cada jugada. ¡Elige el momento!"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os muda-cores mudam de cor a cada jogada. Escolha o momento certo!"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renk değiştiriciler her hamleden sonra sıradaki renge geçer. Zamanlamana dikkat!"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pengubah warna berganti warna setiap langkah. Pilih waktu yang tepat!"
           }
         }
       }
@@ -1706,52 +878,6 @@
         }
       }
     },
-    "Cotton Candy Clouds": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cotton Candy Clouds"
-          }
-        }
-      }
-    },
     "Counters": {
       "localizations": {
         "nl": {
@@ -1794,52 +920,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meja"
-          }
-        }
-      }
-    },
-    "Daily puzzle": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dagpuzzel"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tagesrätsel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puzzle du jour"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puzle diario"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Desafio diário"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Günlük bulmaca"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Teka-teki harian"
           }
         }
       }
@@ -1936,52 +1016,6 @@
         }
       }
     },
-    "Done in %lld s · play again for a better time": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klaar in %lld s · speel opnieuw voor een betere tijd"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geschafft in %lld s · nochmal für eine bessere Zeit"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fini en %lld s · rejoue pour un meilleur temps"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hecho en %lld s · juega otra vez para mejorar"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feito em %lld s · jogue de novo para melhorar"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld sn'de bitti · daha iyi süre için tekrar oyna"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Selesai dalam %lld dtk · main lagi untuk waktu lebih baik"
-          }
-        }
-      }
-    },
     "Double it": {
       "localizations": {
         "nl": {
@@ -2074,190 +1108,6 @@
         }
       }
     },
-    "Extra slot": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Extra vakje"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Extra-Platz"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Case en plus"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hueco extra"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Espaço extra"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ekstra yuva"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slot ekstra"
-          }
-        }
-      }
-    },
-    "Extra slot (%lld)": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Extra vakje (%lld)"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Extra-Platz (%lld)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Case en plus (%lld)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hueco extra (%lld)"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Espaço extra (%lld)"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ekstra yuva (%lld)"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slot ekstra (%lld)"
-          }
-        }
-      }
-    },
-    "Extra slot · %lld": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Extra vakje · %lld"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Extra-Platz · %lld"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Case en plus · %lld"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hueco extra · %lld"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Espaço extra · %lld"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ekstra yuva · %lld"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Slot ekstra · %lld"
-          }
-        }
-      }
-    },
-    "Get one more slot and keep going.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Krijg een extra vakje en speel verder."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hol dir einen Platz mehr und spiel weiter."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Obtiens une case de plus et continue."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consigue un hueco más y sigue jugando."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ganhe mais um espaço e continue."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bir yuva daha al ve devam et."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dapatkan satu slot lagi dan lanjutkan."
-          }
-        }
-      }
-    },
     "Golden (VIP)": {
       "localizations": {
         "nl": {
@@ -2304,140 +1154,48 @@
         }
       }
     },
-    "Got it": {
+    "Hammer": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Begrepen"
+            "value": "Hamer"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Verstanden"
+            "value": "Hammer"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compris"
+            "value": "Marteau"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entendido"
+            "value": "Martillo"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entendi"
+            "value": "Martelo"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anladım"
+            "value": "Çekiç"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mengerti"
-          }
-        }
-      }
-    },
-    "Gummy Garden": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gummy Garden"
-          }
-        }
-      }
-    },
-    "Hard level": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Moeilijk level"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schweres Level"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niveau difficile"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nivel difícil"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nível difícil"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zor seviye"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Level sulit"
+            "value": "Palu"
           }
         }
       }
@@ -2530,144 +1288,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Beranda"
-          }
-        }
-      }
-    },
-    "Ice Cream Island": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ice Cream Island"
-          }
-        }
-      }
-    },
-    "Ice cubes": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IJsblokjes"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eiswürfel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glaçons"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cubitos de hielo"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cubos de gelo"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buz küpleri"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Es batu"
-          }
-        }
-      }
-    },
-    "Iced candies stay frozen until a neighbour leaves the board.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bevroren snoepjes blijven vastzitten tot een buurman het bord verlaat."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gefrorene Bonbons bleiben stecken, bis ein Nachbar das Brett verlässt."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les bonbons gelés restent bloqués jusqu'à ce qu'un voisin quitte le plateau."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los caramelos congelados no se mueven hasta que un vecino sale del tablero."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doces congelados ficam presos até um vizinho sair do tabuleiro."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Donmuş şekerler bir komşu tahtadan ayrılana kadar donuk kalır."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permen beku tetap diam sampai tetangganya keluar dari papan."
           }
         }
       }
@@ -2902,328 +1522,6 @@
         }
       }
     },
-    "Level not found": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Level niet gevonden"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Level nicht gefunden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niveau introuvable"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nivel no encontrado"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nível não encontrado"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seviye bulunamadı"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Level tidak ditemukan"
-          }
-        }
-      }
-    },
-    "Licorice Lab": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Licorice Lab"
-          }
-        }
-      }
-    },
-    "Locked candies open once the candy with the key has left the board.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Snoepjes op slot gaan open zodra het snoepje met de sleutel van het bord is."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verschlossene Bonbons öffnen sich, sobald das Bonbon mit dem Schlüssel das Brett verlassen hat."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les bonbons verrouillés s'ouvrent quand le bonbon à la clé a quitté le plateau."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los caramelos con candado se abren cuando el caramelo con la llave sale del tablero."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doces trancados abrem quando o doce com a chave sai do tabuleiro."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kilitli şekerler, anahtarlı şeker tahtadan ayrılınca açılır."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permen tergembok terbuka setelah permen berkunci keluar dari papan."
-          }
-        }
-      }
-    },
-    "Locks & keys": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sloten & sleutels"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schlösser & Schlüssel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cadenas & clés"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Candados y llaves"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cadeados e chaves"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kilitler ve anahtarlar"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gembok & kunci"
-          }
-        }
-      }
-    },
-    "Lollipop Lane": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollipop Lane"
-          }
-        }
-      }
-    },
-    "Lollipop poles": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollypalen"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lutscherstangen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bâtons de sucette"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Palos de piruleta"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Palitos de pirulito"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lolipop çubukları"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tiang lolipop"
-          }
-        }
-      }
-    },
-    "Lollipop poles never move. Candies have to go around them.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lollypalen staan vast. Snoepjes moeten eromheen."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lutscherstangen bewegen sich nie. Bonbons müssen um sie herum."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les bâtons de sucette ne bougent jamais. Les bonbons doivent les contourner."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los palos de piruleta nunca se mueven. Los caramelos deben rodearlos."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os palitos de pirulito nunca se movem. Os doces precisam contorná-los."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lolipop çubukları hiç hareket etmez. Şekerler etraflarından dolaşmalı."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tiang lolipop tidak pernah bergerak. Permen harus memutarinya."
-          }
-        }
-      }
-    },
     "Map": {
       "localizations": {
         "nl": {
@@ -3266,52 +1564,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Peta"
-          }
-        }
-      }
-    },
-    "Marshmallow Mountains": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marshmallow Mountains"
           }
         }
       }
@@ -3500,98 +1752,6 @@
         }
       }
     },
-    "New!": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nieuw!"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neu!"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouveau !"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¡Nuevo!"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Novo!"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yeni!"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Baru!"
-          }
-        }
-      }
-    },
-    "Next level": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Volgend level"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nächstes Level"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niveau suivant"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Siguiente nivel"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Próximo nível"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonraki seviye"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Level berikutnya"
-          }
-        }
-      }
-    },
     "No ads · 3 free hints every day · golden candy style · rewards without watching": {
       "localizations": {
         "nl": {
@@ -3726,52 +1886,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tidak ada lagi iklan interstisial, banner, atau iklan pembuka. Video berhadiah tetap opsional."
-          }
-        }
-      }
-    },
-    "Out of hearts": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hartjes op"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Herzen mehr"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus de cœurs"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin corazones"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sem corações"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalp kalmadı"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hati habis"
           }
         }
       }
@@ -4006,52 +2120,6 @@
         }
       }
     },
-    "Puzzles": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puzzels"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rätsel"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puzzles"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puzles"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quebra-cabeças"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bulmacalar"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Teka-teki"
-          }
-        }
-      }
-    },
     "Remove": {
       "localizations": {
         "nl": {
@@ -4236,52 +2304,6 @@
         }
       }
     },
-    "Share result": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deel je resultaat"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ergebnis teilen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Partager le résultat"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compartir resultado"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compartilhar resultado"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sonucu paylaş"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bagikan hasil"
-          }
-        }
-      }
-    },
     "Shop": {
       "localizations": {
         "nl": {
@@ -4328,94 +2350,48 @@
         }
       }
     },
-    "So close. Want 15 more seconds?": {
+    "Slow down": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bijna! Wil je 15 seconden extra?"
+            "value": "Slowmo"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "So knapp! 15 Sekunden mehr?"
+            "value": "Zeitlupe"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Presque ! 15 secondes de plus ?"
+            "value": "Ralenti"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "¡Casi! ¿Quieres 15 segundos más?"
+            "value": "Cámara lenta"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quase! Quer mais 15 segundos?"
+            "value": "Câmera lenta"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Çok yaklaştın! 15 saniye daha ister misin?"
+            "value": "Yavaşlat"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hampir! Mau tambahan 15 detik?"
-          }
-        }
-      }
-    },
-    "Something in the way? Start with the candy in front.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zit er iets in de weg? Begin met het snoepje vooraan."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwas im Weg? Fang mit dem vordersten Bonbon an."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quelque chose bloque ? Commence par le bonbon de devant."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Algo en medio? Empieza por el caramelo de delante."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Algo no caminho? Comece pelo doce da frente."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Önünde bir şey mi var? Öndeki şekerle başla."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ada yang menghalangi? Mulai dari permen paling depan."
+            "value": "Pelan"
           }
         }
       }
@@ -4558,144 +2534,6 @@
         }
       }
     },
-    "Spend your coins on hints, undos and new candy styles.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Besteed je munten aan hints, zetten terugnemen en nieuwe snoepstijlen."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gib deine Münzen für Tipps und neue Bonbon-Stile aus."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dépense tes pièces en indices et nouveaux styles de bonbons."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gasta tus monedas en pistas y nuevos estilos de caramelo."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gaste suas moedas em dicas e novos estilos de doce."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jetonlarını ipuçlarına ve yeni şeker stillerine harca."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Belanjakan koinmu untuk petunjuk dan gaya permen baru."
-          }
-        }
-      }
-    },
-    "Spinners": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Draaisnoepjes"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drehbonbons"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toupies"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giratorios"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Giratórios"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dönen şekerler"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permen putar"
-          }
-        }
-      }
-    },
-    "Spinners turn their arrow a quarter turn after every move.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Draaisnoepjes draaien hun pijl een kwartslag na elke zet."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drehbonbons drehen ihren Pfeil nach jedem Zug um eine Vierteldrehung."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les toupies tournent leur flèche d'un quart de tour après chaque coup."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los giratorios giran su flecha un cuarto de vuelta tras cada jugada."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os giratórios giram a seta um quarto de volta após cada jogada."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dönen şekerler her hamleden sonra oklarını çeyrek tur çevirir."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permen putar memutar panahnya seperempat putaran setelah setiap langkah."
-          }
-        }
-      }
-    },
     "Starter pack": {
       "localizations": {
         "nl": {
@@ -4834,52 +2672,6 @@
         }
       }
     },
-    "Sweet!": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heerlijk!"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lecker!"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Délicieux !"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¡Qué dulce!"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Que doce!"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tatlı!"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Manis!"
-          }
-        }
-      }
-    },
     "Tap a candy to slide it. Line up 3 of a color!": {
       "localizations": {
         "nl": {
@@ -4926,94 +2718,48 @@
         }
       }
     },
-    "Tap a candy: it flies off where its arrow points!": {
+    "Tap a candy to smash it": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tik op een snoepje: het schiet weg waar de pijl heen wijst!"
+            "value": "Tik op een snoepje om het weg te slaan"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tippe auf ein Bonbon: Es fliegt dorthin, wohin sein Pfeil zeigt!"
+            "value": "Tippe auf ein Bonbon, um es zu zerschlagen"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Touche un bonbon : il file là où pointe sa flèche !"
+            "value": "Touche un bonbon pour l'écraser"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toca un caramelo: ¡sale volando hacia donde apunta su flecha!"
+            "value": "Toca un caramelo para aplastarlo"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toque num doce: ele voa para onde a seta aponta!"
+            "value": "Toque num doce para esmagá-lo"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bir şekere dokun: oku nereyi gösteriyorsa oraya uçar!"
+            "value": "Ezmek için bir şekere dokun"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ketuk permen: ia terbang ke arah panahnya!"
-          }
-        }
-      }
-    },
-    "Tap the candy you want to remove.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tik op het snoepje dat weg moet."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tippe auf das Bonbon, das weg soll."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Touche le bonbon à retirer."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toca el caramelo que quieres quitar."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toque no doce que deseja remover."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaldırmak istediğin şekere dokun."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ketuk permen yang ingin kamu hapus."
+            "value": "Ketuk permen untuk menghancurkannya"
           }
         }
       }
@@ -5152,328 +2898,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Papannya penuh!"
-          }
-        }
-      }
-    },
-    "The candy shop opens soon": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De snoepwinkel gaat binnenkort open"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Bonbonladen öffnet bald"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La confiserie ouvre bientôt"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La tienda de dulces abre pronto"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A loja de doces abre em breve"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Şekerci dükkânı yakında açılıyor"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toko permen segera buka"
-          }
-        }
-      }
-    },
-    "The jar is full!": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De snoeppot is vol!"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das Glas ist voll!"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le bocal est plein !"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¡El frasco está lleno!"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O pote está cheio!"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kavanoz doldu!"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toplesnya penuh!"
-          }
-        }
-      }
-    },
-    "Three of the same in the jar go pop!": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drie dezelfde in de pot? Plop!"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drei gleiche im Glas machen Plopp!"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trois pareils dans le bocal font pop !"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¡Tres iguales en el frasco hacen pop!"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Três iguais no pote fazem pop!"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kavanozda üç aynı şeker patlar!"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tiga yang sama di toples langsung pop!"
-          }
-        }
-      }
-    },
-    "Time's up!": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tijd is op!"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeit ist um!"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps écoulé !"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¡Se acabó el tiempo!"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O tempo acabou!"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Süre doldu!"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waktu habis!"
-          }
-        }
-      }
-    },
-    "Try again": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opnieuw proberen"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nochmal versuchen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Réessayer"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Intentar de nuevo"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tentar de novo"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tekrar dene"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Coba lagi"
-          }
-        }
-      }
-    },
-    "Undo": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ongedaan maken"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rückgängig"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annuler"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deshacer"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Desfazer"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geri al"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Urungkan"
-          }
-        }
-      }
-    },
-    "Undo last move": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laatste zet terug"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Letzten Zug zurück"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annuler le dernier coup"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deshacer la última jugada"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Desfazer última jogada"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Son hamleyi geri al"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Urungkan langkah terakhir"
           }
         }
       }
@@ -5704,98 +3128,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meja kayu"
-          }
-        }
-      }
-    },
-    "Wrapped sweets": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verpakte snoepjes"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verpackte Bonbons"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bonbons emballés"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caramelos envueltos"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doces embrulhados"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paketli şekerler"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permen terbungkus"
-          }
-        }
-      }
-    },
-    "Wrapped sweets hide their color until their path is clear.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verpakte snoepjes laten hun kleur pas zien als de weg vrij is."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verpackte Bonbons zeigen ihre Farbe erst, wenn ihr Weg frei ist."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les bonbons emballés cachent leur couleur tant que leur chemin n'est pas libre."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los caramelos envueltos ocultan su color hasta que su camino esté libre."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doces embrulhados escondem a cor até o caminho ficar livre."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paketli şekerler yolları açılana kadar renklerini gizler."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Permen terbungkus menyembunyikan warnanya sampai jalannya bebas."
           }
         }
       }

@@ -9,10 +9,6 @@ import FirebaseAnalytics
 /// The events from docs/PLAN.md ("Data & LiveOps").
 enum AnalyticsEvent: Equatable, Sendable {
     case sessionStart
-    case levelStart(level: Int)
-    case levelComplete(level: Int, moves: Int, seconds: Int, stars: Int)
-    case levelFail(level: Int, reason: String, moves: Int)
-    case levelQuit(level: Int, moves: Int)
     case boosterUsed(type: String, source: String)
     case tutorialStep(step: Int)
     case dailyRewardClaimed(day: Int, doubled: Bool)
@@ -29,10 +25,6 @@ enum AnalyticsEvent: Equatable, Sendable {
     var name: String {
         switch self {
         case .sessionStart: "session_start"
-        case .levelStart: "level_start"
-        case .levelComplete: "level_complete"
-        case .levelFail: "level_fail"
-        case .levelQuit: "level_quit"
         case .boosterUsed: "booster_used"
         case .tutorialStep: "tutorial_step"
         case .dailyRewardClaimed: "daily_reward_claimed"
@@ -51,11 +43,6 @@ enum AnalyticsEvent: Equatable, Sendable {
     var parameters: [String: String] {
         switch self {
         case .sessionStart: [:]
-        case .levelStart(let level): ["level": "\(level)"]
-        case let .levelComplete(level, moves, seconds, stars):
-            ["level": "\(level)", "moves": "\(moves)", "seconds": "\(seconds)", "stars": "\(stars)"]
-        case let .levelFail(level, reason, moves): ["level": "\(level)", "reason": reason, "moves": "\(moves)"]
-        case let .levelQuit(level, moves): ["level": "\(level)", "moves": "\(moves)"]
         case let .boosterUsed(type, source): ["type": type, "source": source]
         case .tutorialStep(let step): ["step": "\(step)"]
         case let .dailyRewardClaimed(day, doubled): ["day": "\(day)", "doubled": doubled ? "1" : "0"]

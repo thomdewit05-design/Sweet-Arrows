@@ -21,9 +21,9 @@ public struct DailyRewardState: Hashable, Codable, Sendable {
         Reward(coins: 30),
         Reward(boosters: [.hint: 1]),
         Reward(coins: 50),
-        Reward(boosters: [.removeCandy: 1]),
+        Reward(boosters: [.hammer: 1]),
         Reward(coins: 80),
-        Reward(coins: 100, boosters: [.extraSlot: 1]),
+        Reward(coins: 100, boosters: [.slowDown: 1]),
     ]
 
     /// Day number of the last claim.

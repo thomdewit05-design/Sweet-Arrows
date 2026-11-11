@@ -7,13 +7,11 @@ import GoogleMobileAds
 
 /// Why the player watches a rewarded ad. Logged with every ad.
 enum RewardReason: String, Sendable {
-    case extraSlot = "extra_slot"
-    case undo
-    case removeCandy = "remove_candy"
     case hint
+    case hammer
+    case slowDown = "slow_down"
+    case revive
     case doubleCoins = "double_coins"
-    case extraHearts = "extra_hearts"
-    case extraTime = "extra_time"
     case dailyRewardDouble = "daily_reward_double"
 }
 
@@ -109,7 +107,8 @@ final class GoogleAdService: NSObject, AdService {
     }
 
     private var adsRemoved: Bool { purchases.hasRemovedAds || purchases.isVIP }
-    private var completedLevel: Int { save.progress.completedLevel }
+    /// Ads are gated on finished runs (the policy calls them levels).
+    private var completedLevel: Int { save.progress.endlessRuns }
 
     var canShowBanner: Bool {
         started && policy.canShowBanner(completedLevel: completedLevel, adsRemoved: adsRemoved)

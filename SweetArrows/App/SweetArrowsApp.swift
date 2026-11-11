@@ -30,7 +30,7 @@ struct SweetArrowsApp: App {
     }
 }
 
-/// Navigation root: Home, with Map, Level, Shop and Settings pushed on top.
+/// Navigation root: Home, with the game, Shop and Settings pushed on top.
 struct RootView: View {
     @Environment(AppModel.self) private var model
 
@@ -40,10 +40,7 @@ struct RootView: View {
             HomeView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .map: MapView()
-                    case .level(let id): LevelView(mode: .campaign(id))
                     case .endless: EndlessView()
-                    case .daily(let day): LevelView(mode: .daily(day: day))
                     case .shop: ShopView()
                     case .settings: SettingsView()
                     case .dailyReward: DailyRewardView()

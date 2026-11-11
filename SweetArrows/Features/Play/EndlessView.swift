@@ -1,0 +1,323 @@
+import SpriteKit
+import SwiftUI
+import SweetArrowsCore
+
+/// The main game, slide & match: tap a candy to slide it along its arrow, line up three of a color
+/// to pop them. Candies keep arriving, faster and faster, until the board is full.
+struct EndlessView: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var session: SlideSession?
+    @State private var scene: SlideScene?
+    @State private var showResult = false
+    @State private var newRecord = false
+    @State private var coinsEarned = 0
+    @State private var stageBanner: Int?
+    /// The hammer waits for the player to pick a candy.
+    @State private var choosingCandy = false
+
+    private static let boosterBarHeight: CGFloat = 66
+
+    var body: some View {
+        ZStack {
+            Theme.cream.ignoresSafeArea()
+            if let session, let scene {
+                SpriteView(scene: scene, preferredFramesPerSecond: 60)
+                    .id(ObjectIdentifier(scene))
+                    .ignoresSafeArea()
+                    .accessibilityIdentifier("board")
+                VStack(spacing: 8) {
+                    EndlessHUD(session: session, best: model.save.progress.endlessBest, back: leave)
+                    if model.save.progress.endlessRuns < 2, session.run.popped == 0 {
+                        Text("Tap a candy to slide it. Line up 3 of a color!")
+                            .font(Theme.body(16))
+                            .foregroundStyle(Theme.ink)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(.white.opacity(0.85)))
+                            .accessibilityIdentifier("slideHelp")
+                    }
+                    if let stage = stageBanner {
+                        Text("Speed \(stage + 1)!")
+                            .font(Theme.heading())
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(Theme.heart))
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                    if choosingCandy {
+                        Text("Tap a candy to smash it")
+                            .font(Theme.body(16))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(Theme.ink.opacity(0.85)))
+                    }
+                    Spacer()
+                    BoosterBar(
+                        progress: model.save.progress,
+                        adReady: model.ads.isRewardedReady,
+                        enabled: !session.isOver && !showResult,
+                        active: choosingCandy ? .hammer : nil,
+                        use: useBooster
+                    )
+                    .frame(height: Self.boosterBarHeight)
+                    .accessibilityIdentifier("boosterBar")
+                }
+                .padding(.horizontal)
+                if showResult {
+                    EndlessResultCard(
+                        score: session.score,
+                        best: model.save.progress.endlessBest,
+                        newRecord: newRecord,
+                        coins: coinsEarned,
+                        canRevive: session.canRevive && model.ads.isRewardedReady,
+                        onRevive: revive,
+                        onAgain: playAgain,
+                        onHome: leave
+                    )
+                    .transition(.scale(scale: 0.85).combined(with: .opacity))
+                }
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: showResult)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: stageBanner)
+        .toolbar(.hidden, for: .navigationBar)
+        .task { if session == nil { load() } }
+        .onChange(of: session?.boardVersion) { _, _ in scene?.rebuild() }
+        .onChange(of: session?.isOver) { _, over in
+            if over == true { runEnded() }
+        }
+        .onChange(of: session?.isSlowedDown) { _, slowed in scene?.showSlowDown(slowed == true) }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { session?.release("background") } else { session?.hold("background") }
+        }
+    }
+
+    private func load() {
+        let progress = model.save.progress
+        let newSession = SlideSession()
+        let newScene = SlideScene(
+            session: newSession, haptics: model.haptics, audio: model.audio,
+            colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle
+        )
+        newScene.topInset = 132
+        newScene.bottomInset = Self.boosterBarHeight + 16
+        newScene.showsTutorialHand = progress.endlessRuns < 2
+        newSession.onEvent = { [weak newScene] event in
+            switch event {
+            case .warn(let pending): newScene?.showWarning(pending)
+            case .spawned(let piece): newScene?.spawn(piece)
+            case .boardFull: newScene?.boardFull()
+            case .stageUp(let stage): showStage(stage)
+            }
+        }
+        session = newSession
+        scene = newScene
+        model.analytics.log(.endlessStart)
+        newSession.start()
+    }
+
+    private func showStage(_ stage: Int) {
+        stageBanner = stage
+        model.audio.playCombo(min(stage + 1, 8))
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.4))
+            if stageBanner == stage { stageBanner = nil }
+        }
+    }
+
+    private func runEnded() {
+        guard let session, !showResult else { return }
+        let run = session.run
+        coinsEarned = run.coinsEarned
+        var record = false
+        model.save.update { record = $0.recordEndless(score: run.score, coins: run.coinsEarned) }
+        newRecord = record
+        model.gameCenter.submitEndlessScore(run.score)
+        model.reportAchievements(after: run)
+        model.analytics.log(.endlessOver(score: run.score, seconds: Int(run.elapsed), stage: run.stage))
+        model.ads.levelFinished(won: true)
+        if record {
+            scene?.celebrate()
+            model.haptics.success()
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(800))
+            showResult = true
+        }
+    }
+
+    private func revive() {
+        Task { @MainActor in
+            guard let session, await model.ads.showRewarded(reason: .revive) else { return }
+            model.analytics.log(.boosterUsed(type: "endless_revive", source: "ad"))
+            showResult = false
+            session.revive()
+        }
+    }
+
+    private func playAgain() {
+        showResult = false
+        newRecord = false
+        model.ads.maybeShowInterstitial(afterLevel: model.save.progress.endlessRuns)
+        session?.restart()
+        model.analytics.log(.endlessStart)
+    }
+
+    // MARK: Boosters
+
+    private func useBooster(_ booster: Booster) {
+        guard let session else { return }
+        let viaAd = !model.save.progress.canAfford(booster)
+        if booster == .hammer {
+            guard !choosingCandy else {
+                cancelHammer()
+                return
+            }
+            // Pay only once a candy has actually been picked.
+            choosingCandy = true
+            scene?.onCandySelected = { id in
+                Task { @MainActor in
+                    choosingCandy = false
+                    guard !session.isOver, await pay(for: .hammer, viaAd: viaAd) else { return }
+                    scene?.smashed(id)
+                    session.smash(id)
+                }
+            }
+            return
+        }
+        cancelHammer()
+        Task { @MainActor in
+            if booster == .hint {
+                // Only pay when there is something to show.
+                guard let id = session.hint() else {
+                    model.haptics.bonk()
+                    return
+                }
+                guard await pay(for: .hint, viaAd: viaAd) else { return }
+                scene?.highlight(id)
+            } else {
+                guard await pay(for: booster, viaAd: viaAd) else { return }
+                session.slowDown()
+            }
+        }
+    }
+
+    private func pay(for booster: Booster, viaAd: Bool) async -> Bool {
+        guard viaAd else {
+            guard model.save.spend(booster) else { return false }
+            model.analytics.log(.boosterUsed(type: booster.rawValue, source: "coins"))
+            return true
+        }
+        let reason: RewardReason = switch booster {
+        case .hint: .hint
+        case .hammer: .hammer
+        case .slowDown: .slowDown
+        }
+        session?.hold("ad")
+        defer { session?.release("ad") }
+        guard await model.ads.showRewarded(reason: reason) else { return false }
+        model.analytics.log(.boosterUsed(type: booster.rawValue, source: "ad"))
+        return true
+    }
+
+    private func cancelHammer() {
+        choosingCandy = false
+        scene?.onCandySelected = nil
+    }
+
+    private func leave() {
+        session?.hold("leaving")
+        if !model.path.isEmpty { model.path.removeLast() }
+    }
+}
+
+private struct EndlessHUD: View {
+    let session: SlideSession
+    let best: Int
+    let back: () -> Void
+
+    var body: some View {
+        HStack(alignment: .center) {
+            RoundIconButton(systemName: "chevron.left", label: "Back", action: back)
+                .accessibilityIdentifier("backButton")
+            Spacer()
+            VStack(spacing: 0) {
+                Text("\(session.score)")
+                    .font(Theme.title(40))
+                    .foregroundStyle(Theme.ink)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .animation(.spring(response: 0.25), value: session.score)
+                    .accessibilityIdentifier("score")
+                Text("Best \(max(best, session.score))")
+                    .font(Theme.body(14))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            Spacer()
+            VStack(spacing: 2) {
+                Image(systemName: "hare.fill")
+                    .font(.system(size: 18, weight: .bold))
+                Text("\(session.stage + 1)")
+                    .font(Theme.heading(16))
+            }
+            .foregroundStyle(Theme.heart)
+            .frame(width: 48)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Speed \(session.stage + 1)!"))
+        }
+        .padding(.top, 4)
+    }
+}
+
+private struct EndlessResultCard: View {
+    let score: Int
+    let best: Int
+    let newRecord: Bool
+    let coins: Int
+    let canRevive: Bool
+    let onRevive: () -> Void
+    let onAgain: () -> Void
+    let onHome: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.35).ignoresSafeArea()
+            VStack(spacing: 16) {
+                JellyView(size: 64)
+                Text(newRecord ? "New record!" : "The board is full!")
+                    .font(Theme.title(28))
+                    .foregroundStyle(Theme.ink)
+                    .multilineTextAlignment(.center)
+                Text("\(score)")
+                    .font(Theme.title(56))
+                    .foregroundStyle(newRecord ? Theme.heart : Theme.ink)
+                    .monospacedDigit()
+                Text("Best \(best)")
+                    .font(Theme.body())
+                    .foregroundStyle(Theme.inkSoft)
+                if coins > 0 { CoinBadge(coins: coins) }
+                if canRevive {
+                    Button(action: onRevive) {
+                        Label("Keep going", systemImage: "play.rectangle.fill")
+                    }
+                    .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                    .accessibilityIdentifier("reviveButton")
+                }
+                Button("Play again", action: onAgain)
+                    .buttonStyle(CandyButtonStyle())
+                    .accessibilityIdentifier("playAgainButton")
+                Button("Home", action: onHome)
+                    .font(Theme.body())
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            .padding(28)
+            .frame(maxWidth: 340)
+            .background(RoundedRectangle(cornerRadius: 32).fill(Theme.cream))
+            .padding()
+        }
+    }
+}

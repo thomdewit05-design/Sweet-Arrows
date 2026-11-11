@@ -123,16 +123,16 @@ extension Booster {
     var icon: String {
         switch self {
         case .hint: "lightbulb.fill"
-        case .removeCandy: "hand.tap.fill"
-        case .extraSlot: "plus.square.fill"
+        case .hammer: "hammer.fill"
+        case .slowDown: "tortoise.fill"
         }
     }
 
     var localizedName: LocalizedStringKey {
         switch self {
         case .hint: "Hint"
-        case .removeCandy: "Remove"
-        case .extraSlot: "Extra slot"
+        case .hammer: "Hammer"
+        case .slowDown: "Slow down"
         }
     }
 }

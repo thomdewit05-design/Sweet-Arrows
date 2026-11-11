@@ -3,12 +3,8 @@ import SwiftUI
 import SweetArrowsCore
 
 enum Route: Hashable {
-    case map
-    case level(Int)
-    /// The endless game.
+    /// The game (slide & match).
     case endless
-    /// The daily puzzle of a given day number.
-    case daily(Int)
     case shop
     case settings
     case dailyReward
@@ -21,7 +17,6 @@ final class AppModel {
     var path: [Route] = []
 
     let save: SaveService
-    let levels: LevelLibrary
     let config: ConfigService
     let analytics: AnalyticsService
     let ads: AdService
@@ -33,7 +28,6 @@ final class AppModel {
 
     init(
         save: SaveService,
-        levels: LevelLibrary,
         config: ConfigService,
         analytics: AnalyticsService,
         ads: AdService,
@@ -44,7 +38,6 @@ final class AppModel {
         haptics: HapticsService
     ) {
         self.save = save
-        self.levels = levels
         self.config = config
         self.analytics = analytics
         self.ads = ads
@@ -78,7 +71,6 @@ final class AppModel {
         config.onChange = { [weak ads] values in ads?.updateLimits(values.adLimits) }
         return AppModel(
             save: save,
-            levels: LevelLibrary(),
             config: config,
             analytics: analytics,
             ads: ads,
@@ -94,7 +86,6 @@ final class AppModel {
     static func preview() -> AppModel {
         AppModel(
             save: SaveService(url: nil),
-            levels: LevelLibrary(),
             config: LocalConfigService(),
             analytics: FirebaseAnalyticsService(),
             ads: PlaceholderAdService(),
@@ -116,7 +107,7 @@ final class AppModel {
         return DayNumber.from(year: parts.year ?? 2026, month: parts.month ?? 1, day: parts.day ?? 1)
     }
 
-    /// First start: GDPR consent (UMP), then the ad SDK. ATT is asked later, after level 3.
+    /// First start: GDPR consent (UMP), then the ad SDK. ATT is asked later, after a few runs.
     func startConsentAndAds() async {
         await config.refresh()
         await consent.gatherConsent()
@@ -134,23 +125,18 @@ final class AppModel {
 
     /// Whether the starter pack offer should be visible.
     var showsStarterPack: Bool {
-        save.progress.showsStarterPack(fromLevel: config.values.starterPackLevel)
+        save.progress.showsStarterPack(afterRuns: config.values.starterPackLevel)
     }
 
-    func dailyPuzzleNumber(day: Int) -> Int {
-        DailyPuzzleState.puzzleNumber(day: day, poolSize: levels.dailyCount)
-    }
-
-    /// Reports the achievements the current progress has earned (cheap; Game Center ignores repeats).
-    func reportAchievements() {
+    /// Reports the achievements a finished run earned (cheap; Game Center ignores repeats).
+    func reportAchievements(after run: SlideGame) {
         let progress = save.progress
-        if progress.completedLevel >= 1 { gameCenter.report(.firstWin) }
-        if progress.completedLevel >= 10 { gameCenter.report(.tutorialDone) }
-        for world in World.all where progress.completedLevel >= world.lastLevel {
-            if let achievement = Achievement.world(world.id) { gameCenter.report(achievement) }
-        }
-        if progress.totalStars >= 100 { gameCenter.report(.stars100) }
-        if progress.dailyPuzzle.bestStreak >= 7 { gameCenter.report(.dailyStreak7) }
+        if run.popped > 0 { gameCenter.report(.firstPop) }
+        if progress.endlessBest >= 1000 { gameCenter.report(.score1000) }
+        if progress.endlessBest >= 5000 { gameCenter.report(.score5000) }
+        if run.bestCombo >= 5 { gameCenter.report(.combo5) }
+        if run.stage + 1 >= 10 { gameCenter.report(.speed10) }
+        if progress.endlessRuns >= 50 { gameCenter.report(.runs50) }
     }
 
     func updateSettings(_ change: (inout GameSettings) -> Void) {
@@ -163,15 +149,5 @@ final class AppModel {
         audio.soundEnabled = settings.sound
         audio.musicEnabled = settings.music
         haptics.enabled = settings.haptics
-    }
-
-    /// Level with any Remote Config override applied.
-    func level(_ id: Int) -> Level? {
-        guard var level = levels.level(id) else { return nil }
-        if let override = config.values.levelOverrides[id] {
-            if let bag = override.bagCapacity { level.bagCapacity = bag }
-            if let hearts = override.hearts { level.hearts = hearts }
-        }
-        return level
     }
 }

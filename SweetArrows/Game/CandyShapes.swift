@@ -54,15 +54,6 @@ enum CandyShapes {
         return p
     }
 
-    /// Chocolate bar spanning two cells.
-    static func barPath(length: CGFloat, thickness: CGFloat, axis: Axis) -> CGPath {
-        let w = axis == .horizontal ? length : thickness
-        let h = axis == .horizontal ? thickness : length
-        return CGPath(
-            roundedRect: CGRect(x: -w / 2, y: -h / 2, width: w, height: h),
-            cornerWidth: thickness * 0.3, cornerHeight: thickness * 0.3, transform: nil
-        )
-    }
 
     /// White arrow pointing up; rotate the node for other directions.
     static func arrowPath(size s: CGFloat) -> CGPath {

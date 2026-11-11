@@ -4,8 +4,6 @@ included:
   - SweetArrowsUITests
   - Packages/SweetArrowsCore/Sources
   - Packages/SweetArrowsCore/Tests
-  - Tools/LevelGen/Sources
-  - Tools/LevelGen/Tests
 excluded:
   - "**/.build"
   - SweetArrows/Resources

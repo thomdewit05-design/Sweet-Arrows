@@ -75,49 +75,4 @@ public enum Direction: String, CaseIterable, Codable, Sendable {
     public func rotated(by quarterTurns: Int) -> Direction {
         Direction(index: index + quarterTurns)
     }
-
-    public var axis: Axis {
-        switch self {
-        case .up, .down: .vertical
-        case .left, .right: .horizontal
-        }
-    }
-}
-
-public enum Axis: String, Codable, Sendable, CaseIterable {
-    case horizontal, vertical
-}
-
-/// A candy-cane bumper that bends a flying candy a quarter turn.
-public struct Mirror: Hashable, Codable, Sendable {
-    public enum Kind: String, Codable, Sendable, CaseIterable {
-        /// "/" : up ↔ right, down ↔ left
-        case slash
-        /// "\" : up ↔ left, down ↔ right
-        case backslash
-    }
-
-    public var position: GridPoint
-    public var kind: Kind
-
-    public init(_ position: GridPoint, _ kind: Kind) {
-        self.position = position
-        self.kind = kind
-    }
-
-    /// Direction a candy moving in `direction` leaves this mirror with.
-    public func deflect(_ direction: Direction) -> Direction {
-        switch (kind, direction) {
-        case (.slash, .up): .right
-        case (.slash, .right): .up
-        case (.slash, .down): .left
-        case (.slash, .left): .down
-        case (.backslash, .up): .left
-        case (.backslash, .left): .up
-        case (.backslash, .down): .right
-        case (.backslash, .right): .down
-        }
-    }
-
-    private enum CodingKeys: String, CodingKey { case position = "at", kind }
 }

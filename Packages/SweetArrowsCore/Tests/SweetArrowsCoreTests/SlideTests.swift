@@ -152,14 +152,44 @@ struct SlideTests {
         #expect(rainbows.matchedIDs().isEmpty)
     }
 
-    @Test func piecesDrawAsCandies() {
-        let bomb = Piece(id: 1, color: .mint, direction: .left, kind: .bomb, position: GridPoint(1, 2))
-        #expect(bomb.candy.has(.bomb))
-        #expect(bomb.candy.position == GridPoint(1, 2))
-        #expect(bomb.candy.direction == .left)
-        let rainbow = Piece(id: 2, color: .mint, direction: .left, kind: .rainbow, position: GridPoint(0, 0))
-        #expect(rainbow.candy.has(.colorChanger))
-        #expect(CandyState(displaying: rainbow.candy).color == .mint)
+    @Test func hintFindsAPoppingSlide() {
+        var game = SlideGame(pieces: [
+            Piece(id: 1, color: .mint, direction: .up, position: GridPoint(0, 4)),
+            Piece(id: 2, color: .mint, direction: .up, position: GridPoint(1, 4)),
+            Piece(id: 4, color: .lemon, direction: .up, position: GridPoint(4, 2)),
+            Piece(id: 3, color: .mint, direction: .down, position: GridPoint(2, 0)),
+        ], settings: small())
+        #expect(game.hint() == 3)
+        _ = game.tap(3)
+        #expect(game.hint() == nil)
+    }
+
+    @Test func hammerRemovesAnything() {
+        var game = SlideGame(pieces: [
+            Piece(id: 1, color: .mint, direction: .up, kind: .stone, position: GridPoint(0, 4)),
+        ], settings: small())
+        let first = game.smash(1)
+        let again = game.smash(1)
+        #expect(first)
+        #expect(!again)
+        #expect(game.pieces.isEmpty)
+        #expect(game.score == 0)
+    }
+
+    @Test func slowDownHalvesTheArrivalSpeed() {
+        var normal = SlideGame(pieces: [], settings: small())
+        var slowed = normal
+        slowed.slowDown(for: 10)
+        #expect(slowed.isSlowedDown)
+        var normalSpawns = 0
+        var slowSpawns = 0
+        for _ in 0..<40 {
+            normalSpawns += normal.advance(by: 0.25).filter { if case .spawned = $0 { true } else { false } }.count
+            slowSpawns += slowed.advance(by: 0.25).filter { if case .spawned = $0 { true } else { false } }.count
+        }
+        #expect(normalSpawns >= 3)
+        #expect(slowSpawns < normalSpawns)
+        #expect(!slowed.isSlowedDown)
     }
 
     @Test func startsWithAFairBoardWithoutLines() {

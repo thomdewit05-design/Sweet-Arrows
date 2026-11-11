@@ -24,7 +24,7 @@ enum StoreProduct: String, CaseIterable, Sendable {
         case .coinsMedium: Reward(coins: 1500)
         case .coinsLarge: Reward(coins: 4000)
         case .coinsHuge: Reward(coins: 10_000)
-        case .starterPack: Reward(coins: 1000, boosters: [.hint: 3, .removeCandy: 3, .extraSlot: 3])
+        case .starterPack: Reward(coins: 1000, boosters: [.hint: 3, .hammer: 3, .slowDown: 3])
         case .removeAds, .vipWeekly, .vipMonthly: nil
         }
     }

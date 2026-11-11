@@ -13,9 +13,12 @@ final class SlideScene: SKScene {
     private let boardStyle: Cosmetic
     private let candyStyle: Cosmetic
 
-    /// Space SwiftUI uses above the board (HUD) and below it.
+    /// Space SwiftUI uses above the board (HUD) and below it (booster bar).
     var topInset: CGFloat = 132 { didSet { needsLayout = true } }
     var bottomInset: CGFloat = 24 { didSet { needsLayout = true } }
+
+    /// When set, the next tap on a candy is handed here instead of playing it (hammer booster).
+    var onCandySelected: ((Int) -> Void)?
 
     private let counter = SKShapeNode()
     private let candyLayer = SKNode()
@@ -153,8 +156,7 @@ final class SlideScene: SKScene {
         if piece.kind == .stone {
             node = makeStone()
         } else {
-            node = CandyNode(state: CandyState(displaying: piece.candy), cellSize: cell, colorBlind: colorBlind,
-                             style: candyStyle, art: art)
+            node = CandyNode(piece: piece, cellSize: cell, colorBlind: colorBlind, style: candyStyle, art: art)
         }
         node.position = point(for: piece.position)
         return node
@@ -186,6 +188,11 @@ final class SlideScene: SKScene {
               let p = gridPoint(at: touch.location(in: self)),
               let piece = run.piece(at: p)
         else { return }
+        if let select = onCandySelected {
+            onCandySelected = nil
+            select(piece.id)
+            return
+        }
         handleTap(on: piece.id)
     }
 
@@ -284,6 +291,31 @@ final class SlideScene: SKScene {
             .fadeOut(withDuration: 0.2),
             .removeFromParent(),
         ]))
+    }
+
+    // MARK: Boosters
+
+    /// Hint: the candy pulses.
+    func highlight(_ id: Int) {
+        (nodes[id] as? CandyNode)?.highlight()
+    }
+
+    /// Hammer: the candy (or stone) is knocked off the board.
+    func smashed(_ id: Int) {
+        guard let node = nodes[id] else { return }
+        audio.play(.crack)
+        haptics.pop()
+        let knock = SKAction.sequence([.scale(to: 0.8, duration: 0.06), .scale(to: 1.1, duration: 0.06)])
+        node.run(knock) { [weak self] in
+            MainActor.assumeIsolated { self?.popNode(id, delay: 0) }
+        }
+        updateTutorialHand()
+    }
+
+    /// Slow-down: the board turns a little blue while it lasts.
+    func showSlowDown(_ active: Bool) {
+        let tint = active ? UIColor(hex: 0xDDF3FF) : BoardPalette(boardStyle).fill
+        counter.fillColor = tint
     }
 
     // MARK: Arrivals
@@ -386,13 +418,7 @@ final class SlideScene: SKScene {
         hand.run(.sequence([.wait(forDuration: 0.6), .repeatForever(press)]))
     }
 
-    /// A candy whose slide pops a line right now, if there is one.
-    private func tutorialTarget() -> Int? {
-        run.sortedPieces.first { piece in
-            var trial = run
-            return trial.tap(piece.id).didPop
-        }?.id
-    }
+    private func tutorialTarget() -> Int? { run.hint() }
 
     private func makeHand() -> SKNode {
         let config = UIImage.SymbolConfiguration(pointSize: 64, weight: .regular)

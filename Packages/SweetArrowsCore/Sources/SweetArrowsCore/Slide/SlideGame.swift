@@ -49,14 +49,6 @@ public struct SlideGame: Sendable {
 
         public var canMove: Bool { kind != .stone }
 
-        /// The piece as a level candy, so it can be drawn with the same art (a rainbow wears the changer ring).
-        public var candy: Candy {
-            var features: Set<CandyFeature> = []
-            if kind == .bomb { features.insert(.bomb) }
-            if kind == .rainbow { features.insert(.colorChanger) }
-            return Candy(id: id, color: color, position: position, direction: direction, features: features)
-        }
-
         func matches(_ other: CandyColor) -> Bool {
             switch kind {
             case .rainbow: true
@@ -123,6 +115,8 @@ public struct SlideGame: Sendable {
     private var untilNext: Double
     private var lastPopAt: Double = -100
     private var announcedStage = 0
+    /// Until this moment (in `elapsed` seconds) candies arrive at half speed.
+    public private(set) var slowUntil: Double = 0
     private var nextID = 1
     private var rng: SeededRandom
 
@@ -317,10 +311,12 @@ public struct SlideGame: Sendable {
 
     public mutating func advance(by seconds: Double) -> [Event] {
         guard status == .playing, seconds > 0 else { return [] }
+        // While slowed down, the spawn countdown runs at half speed.
+        let countdown = elapsed < slowUntil ? seconds / 2 : seconds
         elapsed += seconds
         var events: [Event] = []
         if var next = pending {
-            next.remaining -= seconds
+            next.remaining -= countdown
             if next.remaining > 0 {
                 pending = next
             } else {
@@ -335,7 +331,7 @@ public struct SlideGame: Sendable {
                 events.append(.spawned(piece))
             }
         } else {
-            untilNext -= seconds
+            untilNext -= countdown
             if untilNext <= settings.warning {
                 guard let piece = makePiece() else { return endRun(events) }
                 let warning = PendingSpawn(piece: piece, remaining: max(untilNext, 0.05))
@@ -356,6 +352,32 @@ public struct SlideGame: Sendable {
         status = .boardFull
         pending = nil
         return events + [.boardFull]
+    }
+
+    // MARK: Boosters
+
+    /// A candy whose slide pops a line right now, if there is one.
+    public func hint() -> Int? {
+        sortedPieces.first { piece in
+            guard piece.canMove else { return false }
+            var trial = self
+            return trial.tap(piece.id).didPop
+        }?.id
+    }
+
+    /// Hammer: takes one candy (or stone) off the board. No points.
+    @discardableResult
+    public mutating func smash(_ id: Int) -> Bool {
+        guard status == .playing, pieces[id] != nil else { return false }
+        remove(id)
+        return true
+    }
+
+    public var isSlowedDown: Bool { elapsed < slowUntil }
+
+    /// New candies arrive at half speed for the given number of seconds.
+    public mutating func slowDown(for seconds: Double = 15) {
+        slowUntil = max(slowUntil, elapsed) + seconds
     }
 
     // MARK: After the run
