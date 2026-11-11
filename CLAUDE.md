@@ -25,7 +25,7 @@ SweetArrows/
   Resources/                # Assets.xcassets, Localizable.xcstrings, Fonts/, levels/
 Packages/SweetArrowsCore/   # Swift Package: level-model, regels, snoepbak, solver (GEEN UIKit/SpriteKit)
 Tools/LevelGen/             # CLI: swift run levelgen (generator + solver)
-Tools/Sounds/               # make_sounds.py: synthesiseert alle geluidseffecten
+Tools/Sounds/               # make_sounds.py + make_music.py: synthetiseren geluid en muziek
 SweetArrowsTests/  SweetArrowsUITests/
 docs/                       # PLAN.md, STATUS.md, level-report.md, licenses/
 ```

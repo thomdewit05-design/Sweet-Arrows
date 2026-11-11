@@ -20,7 +20,13 @@ protocol AudioService: AnyObject {
 @MainActor
 final class SoundEffectsService: AudioService {
     var soundEnabled = true
-    var musicEnabled = true
+    var musicEnabled = true {
+        didSet { updateMusic() }
+    }
+
+    /// Background loop, kept low as PLAN.md asks.
+    private static let musicVolume: Float = 0.25
+    private var music: AVAudioPlayer?
 
     private static let comboCount = 8
     private static let voices = 3
@@ -35,6 +41,22 @@ final class SoundEffectsService: AudioService {
             let voices = (0..<Self.voices).compactMap { _ in try? AVAudioPlayer(contentsOf: url) }
             voices.forEach { $0.prepareToPlay() }
             players[name] = voices
+        }
+        if let url = bundle.url(forResource: "candy_shop_loop", withExtension: "wav") {
+            music = try? AVAudioPlayer(contentsOf: url)
+            music?.numberOfLoops = -1
+            music?.volume = Self.musicVolume
+            music?.prepareToPlay()
+        }
+        updateMusic()
+    }
+
+    private func updateMusic() {
+        guard let music else { return }
+        if musicEnabled {
+            if !music.isPlaying { music.play() }
+        } else if music.isPlaying {
+            music.pause()
         }
     }
 

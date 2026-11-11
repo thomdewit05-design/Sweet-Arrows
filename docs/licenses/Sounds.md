@@ -6,4 +6,8 @@ recordings are used, so there is no licence to track. Regenerate with:
 
     python3 Tools/Sounds/make_sounds.py
 
-Background music (lounge/ukulele) is not included yet; when it is added, put its licence here.
+The background loop `SweetArrows/Resources/Music/candy_shop_loop.wav` (41.7 s, ukulele-lounge,
+92 BPM) is generated the same way by `Tools/Sounds/make_music.py`: Karplus-Strong ukulele, soft
+bass, glockenspiel and shaker. No samples, no licence. Regenerate with:
+
+    python3 Tools/Sounds/make_music.py
