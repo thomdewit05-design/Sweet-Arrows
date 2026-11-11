@@ -143,22 +143,28 @@ Op verzoek van de eigenaar, en anders dan het oorspronkelijke plan:
 
 - **Duidelijk moeilijker**: de curve ligt zo'n 25% hoger (gemiddeld makkelijk 47, middel 58, moeilijk 73 van 100).
 
-## Eindeloze modus (hoofdspel)
+## Hoofdspel: Glijden & matchen
 
-Op verzoek van de eigenaar is het hoofdspel nu **eindeloos**; de levels blijven als modus "Puzzels".
+De eigenaar vond het wegschieten met pijlen niet leuk genoeg en koos een nieuw spel dat erop lijkt
+(`SlideGame` in SweetArrowsCore, `SlideSession`/`SlideScene` in de app, scherm `EndlessView`).
+De pijlpuzzels blijven voorlopig bereikbaar onder "Puzzels".
 
-- Bord van 6×6. Er komt steeds een snoepje bij op een vrij vakje, met eerst een schaduw van 1 seconde.
-  Het tempo begint bij één per 2,6 s en wordt elke "snelheid" (6 keer ploppen) 10% sneller, tot één per 0,8 s.
-- Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciale snoepjes komen erbij naarmate je
-  verder komt: karamel, bom, verpakt, kleurwisselaar, draaisnoepje.
-- **Eerlijk:** een nieuw snoepje krijgt alleen een richting waarmee het bord (los van de pot) oplosbaar blijft,
-  en de helft van de keren een kleur die al in de pot ligt.
-- **Af:** bord vol of pot vol. Eén keer per potje doorgaan met een beloningsvideo: de pot wordt leeggemaakt en
+- **Tik** op een snoepje: het glijdt in de richting van zijn pijl tot de rand of een ander snoepje.
+  Kan het niet bewegen, dan draait de pijl een kwartslag (met de klok mee). Elke tik doet dus iets; geen hartjes.
+- **3 of meer** van dezelfde kleur op een rij (horizontaal of verticaal) ploppen. Er valt niets; het bord is een tafel.
+- Bord van 7×8, start met 12 snoepjes. Elke 2,4 s komt er een snoepje bij (eerst 1 s een schaduw);
+  elke "snelheid" (15 snoepjes geplopt) 8% sneller, tot één per 0,7 s. Een nieuw snoepje maakt nooit zelf een rij.
+- Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciaal: **bom** (vanaf snelheid 2, popt 3×3),
+  **steen** (vanaf 3, kan niet bewegen, breekt als ernaast iets popt), **regenboog** (vanaf 4, telt als elke kleur).
+- **Af:** geen vrij vakje voor een nieuw snoepje. Eén keer per potje doorgaan met een beloningsvideo:
   een derde van de snoepjes verdwijnt.
-- **Punten:** 1 per weggeschoten snoepje, 10 per plop × combo (ploppen binnen 3 s na elkaar, max. ×5),
-  50 voor een leeg bord. Munten: score ÷ 10. Record wordt bewaard en gaat naar Game Center
-  (ranglijst `sweetarrows.endless_score`, "hoog naar laag").
-- Bounces kosten in deze modus geen hartjes; geen klok, het tempo is de klok.
+- **Punten:** 10 per gepopt snoepje, +20 per snoepje boven de 3 in een rij, 5 per gebroken steen, alles × combo
+  (ploppen binnen 3 s na elkaar, max. ×5), +100 voor een leeg bord. Munten: score ÷ 25. Record en Game Center-ranglijst
+  `sweetarrows.endless_score` zoals voorheen.
+- Simulatie (20 potjes, speler die één zet vooruit kijkt, één tik per seconde): potjes duren 4–6 minuten, snelheid 4–6.
+- Eerste twee potjes: uitleg bovenin en een handje dat een snoepje aanwijst dat meteen een rij maakt.
+
+(De oude eindeloze pijlmodus, `EndlessGame`, staat nog in de core met tests maar wordt in de app niet meer gebruikt.)
 
 ## Besluiten van de eigenaar
 

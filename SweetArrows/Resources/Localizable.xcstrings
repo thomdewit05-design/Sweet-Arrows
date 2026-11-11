@@ -4880,6 +4880,52 @@
         }
       }
     },
+    "Tap a candy to slide it. Line up 3 of a color!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op een snoepje om het te laten glijden. Zet er 3 van dezelfde kleur op een rij!"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe ein Bonbon an, damit es rutscht. Bilde Reihen aus 3 gleichen Farben!"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touche un bonbon pour le faire glisser. Aligne 3 bonbons de la même couleur !"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca un caramelo para deslizarlo. ¡Junta 3 del mismo color en línea!"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toque num doce para deslizá-lo. Alinhe 3 da mesma cor!"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaydırmak için bir şekere dokun. Aynı renkten 3 tanesini yan yana getir!"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ketuk permen untuk menggesernya. Jajarkan 3 yang warnanya sama!"
+          }
+        }
+      }
+    },
     "Tap a candy: it flies off where its arrow points!": {
       "localizations": {
         "nl": {

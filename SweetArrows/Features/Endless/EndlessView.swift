@@ -2,12 +2,13 @@ import SpriteKit
 import SwiftUI
 import SweetArrowsCore
 
-/// The main game: candies keep arriving, faster and faster, until the board or the jar is full.
+/// The main game, slide & match: tap a candy to slide it along its arrow, line up three of a color
+/// to pop them. Candies keep arriving, faster and faster, until the board is full.
 struct EndlessView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
-    @State private var session: EndlessSession?
-    @State private var scene: GameScene?
+    @State private var session: SlideSession?
+    @State private var scene: SlideScene?
     @State private var showResult = false
     @State private var newRecord = false
     @State private var coinsEarned = 0
@@ -23,6 +24,16 @@ struct EndlessView: View {
                     .accessibilityIdentifier("board")
                 VStack(spacing: 8) {
                     EndlessHUD(session: session, best: model.save.progress.endlessBest, back: leave)
+                    if model.save.progress.endlessRuns < 2, session.run.popped == 0 {
+                        Text("Tap a candy to slide it. Line up 3 of a color!")
+                            .font(Theme.body(16))
+                            .foregroundStyle(Theme.ink)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(.white.opacity(0.85)))
+                            .accessibilityIdentifier("slideHelp")
+                    }
                     if let stage = stageBanner {
                         Text("Speed \(stage + 1)!")
                             .font(Theme.heading())
@@ -41,7 +52,6 @@ struct EndlessView: View {
                         best: model.save.progress.endlessBest,
                         newRecord: newRecord,
                         coins: coinsEarned,
-                        reason: session.status,
                         canRevive: session.canRevive && model.ads.isRewardedReady,
                         onRevive: revive,
                         onAgain: playAgain,
@@ -56,8 +66,8 @@ struct EndlessView: View {
         .toolbar(.hidden, for: .navigationBar)
         .task { if session == nil { load() } }
         .onChange(of: session?.boardVersion) { _, _ in scene?.rebuild() }
-        .onChange(of: session?.status) { _, status in
-            if let status, status.isOver { runEnded() }
+        .onChange(of: session?.isOver) { _, over in
+            if over == true { runEnded() }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { session?.release("background") } else { session?.hold("background") }
@@ -66,16 +76,17 @@ struct EndlessView: View {
 
     private func load() {
         let progress = model.save.progress
-        let newSession = EndlessSession()
-        let newScene = GameScene(
+        let newSession = SlideSession()
+        let newScene = SlideScene(
             session: newSession, haptics: model.haptics, audio: model.audio,
             colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle
         )
         newScene.topInset = 132
+        newScene.showsTutorialHand = progress.endlessRuns < 2
         newSession.onEvent = { [weak newScene] event in
             switch event {
             case .warn(let pending): newScene?.showWarning(pending)
-            case .spawned(let state): newScene?.spawn(state)
+            case .spawned(let piece): newScene?.spawn(piece)
             case .boardFull: newScene?.boardFull()
             case .stageUp(let stage): showStage(stage)
             }
@@ -139,7 +150,7 @@ struct EndlessView: View {
 }
 
 private struct EndlessHUD: View {
-    let session: EndlessSession
+    let session: SlideSession
     let best: Int
     let back: () -> Void
 
@@ -181,7 +192,6 @@ private struct EndlessResultCard: View {
     let best: Int
     let newRecord: Bool
     let coins: Int
-    let reason: GameStatus
     let canRevive: Bool
     let onRevive: () -> Void
     let onAgain: () -> Void
@@ -192,7 +202,7 @@ private struct EndlessResultCard: View {
             Color.black.opacity(0.35).ignoresSafeArea()
             VStack(spacing: 16) {
                 JellyView(size: 64)
-                Text(newRecord ? "New record!" : (reason == .lost(.bagFull) ? "The jar is full!" : "The board is full!"))
+                Text(newRecord ? "New record!" : "The board is full!")
                     .font(Theme.title(28))
                     .foregroundStyle(Theme.ink)
                     .multilineTextAlignment(.center)

@@ -1,8 +1,9 @@
 # Sweet Arrows — snoep-puzzelgame (iOS, Swift + SpriteKit)
 
 ## Doel
-Hybrid-casual puzzelgame voor iPhone. Snoepjes met pijlen schieten bij een tik in hun richting weg;
-vrije snoepjes gaan naar de snoepbak (5 vakjes), 3 dezelfde ploppen. Bord leeg = level klaar.
+Hybrid-casual puzzelgame voor iPhone. Hoofdspel "Glijden & matchen": een getikt snoepje glijdt in de richting
+van zijn pijl tot het ergens tegenaan botst; 3 of meer van dezelfde kleur op een rij ploppen. Er komen steeds
+snoepjes bij; bord vol = af (SlideGame). De oude pijlpuzzels (wegschieten naar de snoepbak) staan onder "Puzzels".
 Verdienmodel: rewarded ads + interstitials + Remove Ads + VIP-abonnement.
 Zie docs/PLAN.md voor het volledige plan, inclusief "Onderscheid van concurrenten".
 Zie docs/STATUS.md voor de stand per fase en gemaakte keuzes.

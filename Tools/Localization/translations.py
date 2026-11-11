@@ -21,6 +21,7 @@ T = {
   "Os anúncios pagam o jogo. O iOS vai perguntar se os apps podem rastrear você. Se permitir, verá anúncios mais relevantes; de qualquer forma você pode jogar tudo.",
   "Oyunu reklamlar finanse ediyor. iOS şimdi uygulamaların seni izleyip izleyemeyeceğini soracak. İzin verirsen daha ilgili reklamlar görürsün; her durumda her şeyi oynayabilirsin.",
   "Iklan membiayai game ini. iOS akan bertanya apakah aplikasi boleh melacakmu. Jika diizinkan, iklan akan lebih relevan; apa pun pilihanmu, kamu tetap bisa memainkan semuanya."],
+"Tap a candy to slide it. Line up 3 of a color!": ["Tippe ein Bonbon an, damit es rutscht. Bilde Reihen aus 3 gleichen Farben!", "Touche un bonbon pour le faire glisser. Aligne 3 bonbons de la même couleur !", "Toca un caramelo para deslizarlo. ¡Junta 3 del mismo color en línea!", "Toque num doce para deslizá-lo. Alinhe 3 da mesma cor!", "Kaydırmak için bir şekere dokun. Aynı renkten 3 tanesini yan yana getir!", "Ketuk permen untuk menggesernya. Jajarkan 3 yang warnanya sama!"],
 "Back": ["Zurück", "Retour", "Atrás", "Voltar", "Geri", "Kembali"],
 "Boosters": ["Booster", "Bonus", "Potenciadores", "Reforços", "Güçlendiriciler", "Booster"],
 "Bounced too often. Want three more hearts?": ["Zu oft abgeprallt. Drei Herzen extra?", "Trop de rebonds. Trois cœurs de plus ?", "Rebotaste demasiado. ¿Quieres tres corazones más?", "Quicou demais. Quer mais três corações?", "Çok fazla sektin. Üç kalp daha ister misin?", "Terlalu sering memantul. Mau tiga hati lagi?"],
@@ -141,7 +142,7 @@ T = {
 "Play again": ["Nochmal spielen", "Rejouer", "Jugar otra vez", "Jogar de novo", "Tekrar oyna", "Main lagi"],
 }
 
-NL_EXTRA = {"About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}
+NL_EXTRA = {"Tap a candy to slide it. Line up 3 of a color!": "Tik op een snoepje om het te laten glijden. Zet er 3 van dezelfde kleur op een rij!", "About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}
 
 TRACKING = [
     "Sweet Arrows nutzt dies, um dir passendere Werbung zu zeigen. Das Spiel bleibt so oder so voll spielbar.",

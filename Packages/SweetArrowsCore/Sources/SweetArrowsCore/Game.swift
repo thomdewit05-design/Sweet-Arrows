@@ -72,6 +72,11 @@ public struct CandyState: Hashable, Sendable, Identifiable {
         revealed = !candy.has(.wrapped)
         locked = candy.has(.locked) && keysOnBoard
     }
+
+    /// A candy shown outside a level (the slide game draws its pieces with the same art).
+    public init(displaying candy: Candy) {
+        self.init(candy, keysOnBoard: false)
+    }
 }
 
 public struct Launch: Hashable, Sendable {
