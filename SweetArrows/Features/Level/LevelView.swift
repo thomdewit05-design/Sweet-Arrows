@@ -1,4 +1,5 @@
 import SpriteKit
+import StoreKit
 import SwiftUI
 import SweetArrowsCore
 
@@ -18,6 +19,8 @@ struct LevelView: View {
     let mode: PlayMode
 
     @Environment(AppModel.self) private var model
+    @Environment(\.requestReview) private var requestReview
+    @AppStorage("lastReviewRequest") private var lastReviewRequest = 0.0
     @State private var session: GameSession?
     @State private var scene: GameScene?
     @State private var showResult = false
@@ -213,6 +216,7 @@ struct LevelView: View {
                 model.gameCenter.submitDailyTime(seconds: result.seconds)
             }
             model.reportAchievements()
+            askForReviewIfDeserved(session)
             model.analytics.log(.levelComplete(
                 level: session.level.id, moves: session.moves, seconds: session.secondsPlayed, stars: session.stars
             ))
@@ -229,6 +233,17 @@ struct LevelView: View {
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(700))
             if session.status.isOver { showResult = true }
+        }
+    }
+
+    /// PLAN.md (ASO): ask for a rating after winning a hard level, never after a loss, at most every 60 days.
+    private func askForReviewIfDeserved(_ session: GameSession) {
+        let now = Date().timeIntervalSince1970
+        guard session.level.hard, now - lastReviewRequest > 60 * 24 * 3600 else { return }
+        lastReviewRequest = now
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            requestReview()
         }
     }
 

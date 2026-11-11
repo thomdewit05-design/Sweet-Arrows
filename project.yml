@@ -80,6 +80,8 @@ targets:
         LSApplicationCategoryType: public.app-category.puzzle-games
         UILaunchScreen:
           UIColorName: LaunchBackground
+          UIImageName: LaunchIcon
+          UIImageRespectsSafeAreaInsets: true
         UIRequiresFullScreen: true
         UIStatusBarStyle: UIStatusBarStyleDarkContent
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]

@@ -13,7 +13,7 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
 | 5. Meta-laag | 🚧 Gebouwd, nog te testen op een iPhone: munten (10 per level + sterrenbonus + win-streak-bonus vanaf 3 op rij), boosters (hint 60, snoepje weg 90, extra vakje 120 munten — of met een advertentie), dagbeloning met 7-dagenreeks (verdubbelen met een advertentie), dagpuzzel (365 door de solver goedgekeurde puzzels, dezelfde voor iedereen, met reeks en deelbare uitslag), winkel met boosters en cosmetica (4 toonbanken, 3 snoepstijlen), introkaart per nieuw wereldelement, voortgang met iCloud-sync, Game Center (prestaties + ranglijst dagpuzzel). Winkel, dagbeloning en dagpuzzel verschijnen pas na level 5. Alles werkt offline. |
 | 6. Toestemming & advertenties | 🚧 Gebouwd: Google UMP bij eerste start (pas daarna laden advertenties), ATT na level 3 met eigen voorscherm, AdMob met rewarded, interstitial, banner (kaart + winkel, nooit tijdens het spelen) en app-open. Alle regels in `AdPolicy` (kern, getest): interstitial vanaf level 8, max 1 per 2 levels, ≥ 90 s ertussen, nooit na verlies of vlak na een rewarded; rewarded max 20/dag; geen advertenties vóór level 3; app-open pas na 4 uur weg vanaf dag 2 en standaard uit. Test-ID's in Debug. |
 | 7. Aankopen, analytics, Remote Config | 🚧 Gebouwd: StoreKit 2 met Remove Ads, VIP (week/maand, 3 dagen gratis, via `SubscriptionStoreView`), 4 muntenpakketten, starterspakket (vanaf level 15, eenmalig), Aankopen herstellen; StoreKit-configuratiebestand voor lokaal testen; alle analytics-events; Crashlytics (dSYM-upload in Release); Remote Config met de sleutels uit het plan (incl. `level_overrides`); debugmenu in Instellingen (alleen Debug). |
-| 8. Afwerking & release | ⏳ Volgende stap. |
+| 8. Afwerking & release | 🚧 Gebouwd: 6 extra talen (de, fr, es, pt-BR, tr, id) voor alle teksten, Dynamic Type in menu's (Fredoka schaalt mee), instellingen (geluid, muziek, trillen, kleurenblind, privacy), privacybeleid/voorwaarden/contact in de app, website + `app-ads.txt` (`docs/site`, GitHub Pages), launch screen met icoon, reviewvraag na een gewonnen moeilijk level, TestFlight-upload via GitHub Actions (`.github/workflows/testflight.yml`), screenshots van de hoofdschermen in de UI-tests. iPhone-only; op iPad draait de app in iPhone-modus. |
 
 ## Zo test je het op je iPhone
 
@@ -120,6 +120,34 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
   vul daar nog je `DEVELOPMENT_TEAM` in.
 - **8 werelden** voor de 300 levels.
 - **Ongedaan maken blijft gratis.**
+
+## Checklist: klaar voor lancering (uit PLAN.md)
+
+| Punt | Stand |
+|---|---|
+| 300 levels, allemaal door de solver goedgekeurd | ✅ (+ 365 dagpuzzels; CI controleert ze) |
+| Levels 1–10 getest door 5 mensen zonder uitleg | ❌ jij — nog niemand heeft het gespeeld |
+| 60 fps oud toestel, koude start < 3 s, download < 80 MB | 🟡 voorbereid (texturen, FPS-teller in Debug); meten op een iPhone 11 met Instruments |
+| Speelbaar zonder internet | ✅ in code; testen op toestel |
+| UMP- en ATT-flow; advertenties pas daarna | ✅ in code; testen op toestel in de EU |
+| Advertentieregels getest | ✅ unit tests (`AdPolicyTests`) |
+| Remote Config met lokale standaardwaarden | ✅ |
+| Remove Ads, VIP, Aankopen herstellen (sandbox + TestFlight) | 🟡 lokaal testbaar met het StoreKit-bestand; producten aanmaken in App Store Connect |
+| Analytics-events in Firebase DebugView | 🟡 `GoogleService-Info.plist` nodig |
+| Crashlytics actief | 🟡 `GoogleService-Info.plist` nodig |
+| Kleurenblind-modus, geluid/muziek/trillen los | ✅ |
+| Alle teksten vertaald (min. EN en NL) | ✅ 8 talen |
+| Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site`; domein + GitHub Pages aanzetten, publisher-id invullen |
+| Privacylabels, leeftijdsclassificatie, handelaarsstatus | ❌ jij, in App Store Connect |
+| Echte advertentie-ID's alleen in Release | ✅ via `Config/Secrets.xcconfig` |
+| Store-pagina: icoon, screenshots, video, teksten per taal | ❌ icoon is een placeholder; screenshots uit de UI-test als basis |
+| KvK en belastinggegevens | ❌ jij |
+| Naam vrij, domein, geen merkconflict | ❌ jij (App Store, sweetarrowsgame.com, EUIPO/BOIP) |
+| Snoepthema doorgevoerd | 🟡 in code-tekeningen; echte artwork nog niet |
+| Licenties in `docs/licenses/` | ✅ Fredoka (OFL); geluid en muziek zelf gemaakt |
+| Cloud-save via iCloud (twee toestellen) | 🟡 gebouwd; testen met twee toestellen |
+| Website met support-mailadres | 🟡 klaar; publiceren |
+| Concurrentiecheck met 5 testspelers | ❌ jij |
 
 ## Open vragen
 
