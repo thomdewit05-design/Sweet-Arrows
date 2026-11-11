@@ -8,84 +8,18 @@ struct HomeView: View {
 
     @State private var pulse = false
 
+    /// How much room the home screen gets: the largest layout that fits is used, so it never needs scrolling.
+    private enum Density { case regular, compact, tiny }
+
     var body: some View {
-        let progress = model.save.progress
         ZStack {
             CandySkyBackground()
-            ScrollView {
-                VStack(spacing: 18) {
-                    topBar(progress)
-                        .popIn(delay: 0)
-                    VStack(spacing: 2) {
-                        JellyView(size: 104)
-                            .padding(.bottom, 6)
-                        Text(verbatim: "Sweet Arrows")
-                            .font(Theme.title(44))
-                            .foregroundStyle(.white)
-                            .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 3)
-                        Text("Tap, slide, pop the sweets")
-                            .font(Theme.body())
-                            .foregroundStyle(.white.opacity(0.95))
-                            .shadow(color: Theme.ink.opacity(0.25), radius: 2, y: 1)
-                    }
-                    .padding(.top, 8)
-                    .popIn(delay: 0.08)
-
-                    statsRow(progress)
-                        .popIn(delay: 0.16)
-
-                    Button {
-                        model.path.append(.endless)
-                    } label: {
-                        Label("Play", systemImage: "play.fill")
-                            .font(Theme.title(30))
-                            .frame(maxWidth: 260)
-                            .padding(.vertical, 6)
-                    }
-                    .buttonStyle(CandyButtonStyle())
-                    .shineSweep()
-                    .scaleEffect(pulse ? 1.04 : 1)
-                    .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
-                    .accessibilityIdentifier("playButton")
-                    .popIn(delay: 0.24)
-
-                    if !progress.missions.missions.isEmpty {
-                        missionsCard(progress.missions)
-                            .popIn(delay: 0.32)
-                    }
-
-                    if progress.showsMetaFeatures {
-                        HStack(spacing: 12) {
-                            Button {
-                                model.path.append(.shop)
-                            } label: {
-                                Label("Shop", systemImage: "bag.fill")
-                            }
-                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
-                            .accessibilityIdentifier("shopButton")
-                            Button {
-                                showDailyReward = true
-                            } label: {
-                                Label("Gift", systemImage: "gift.fill")
-                                    .symbolEffect(.pulse, isActive: progress.dailyReward.claimableStep(today: model.today) != nil)
-                            }
-                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
-                            .overlay(alignment: .topTrailing) {
-                                if progress.dailyReward.claimableStep(today: model.today) != nil {
-                                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
-                                        .overlay(Circle().stroke(.white, lineWidth: 2))
-                                        .offset(x: 2, y: -2)
-                                }
-                            }
-                            .accessibilityIdentifier("giftButton")
-                        }
-                        .popIn(delay: 0.4)
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 24)
+            ViewThatFits(in: .vertical) {
+                content(.regular)
+                content(.compact)
+                content(.tiny)
             }
-            .scrollBounceBehavior(.basedOnSize)
+            .padding(.horizontal)
         }
         .safeAreaInset(edge: .bottom) {
             if model.showsBanner {
@@ -125,6 +59,96 @@ struct HomeView: View {
         }
     }
 
+    private func content(_ density: Density) -> some View {
+        let progress = model.save.progress
+        let spacing: CGFloat = switch density {
+        case .regular: 18
+        case .compact: 12
+        case .tiny: 8
+        }
+        return VStack(spacing: spacing) {
+            topBar(progress)
+                .popIn(delay: 0)
+            Spacer(minLength: 0)
+            VStack(spacing: 2) {
+                if density != .tiny {
+                    JellyView(size: density == .regular ? 104 : 72)
+                        .padding(.bottom, 6)
+                }
+                Text(verbatim: "Sweet Arrows")
+                    .font(Theme.title(density == .regular ? 44 : (density == .compact ? 36 : 30)))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 3)
+                if density != .tiny {
+                    Text("Tap, slide, pop the sweets")
+                        .font(Theme.body(density == .regular ? 17 : 15))
+                        .foregroundStyle(.white.opacity(0.95))
+                        .shadow(color: Theme.ink.opacity(0.25), radius: 2, y: 1)
+                }
+            }
+            .popIn(delay: 0.08)
+
+            statsRow(progress)
+                .popIn(delay: 0.16)
+
+            Button {
+                model.path.append(.endless)
+            } label: {
+                Label("Play", systemImage: "play.fill")
+                    .font(Theme.title(density == .regular ? 30 : 26))
+                    .frame(maxWidth: 260)
+                    .padding(.vertical, density == .regular ? 6 : 2)
+            }
+            .buttonStyle(CandyButtonStyle())
+            .shineSweep()
+            .scaleEffect(pulse ? 1.04 : 1)
+            .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
+            .accessibilityIdentifier("playButton")
+            .popIn(delay: 0.24)
+
+            if !progress.missions.missions.isEmpty {
+                missionsCard(progress.missions, compact: density != .regular)
+                    .popIn(delay: 0.32)
+            }
+
+            if progress.showsMetaFeatures {
+                metaButtons(progress)
+                    .popIn(delay: 0.4)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.top, 4)
+        .padding(.bottom, density == .regular ? 16 : 8)
+    }
+
+    private func metaButtons(_ progress: PlayerProgress) -> some View {
+        let giftReady = progress.dailyReward.claimableStep(today: model.today) != nil
+        return HStack(spacing: 12) {
+            Button {
+                model.path.append(.shop)
+            } label: {
+                Label("Shop", systemImage: "bag.fill")
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+            .accessibilityIdentifier("shopButton")
+            Button {
+                showDailyReward = true
+            } label: {
+                Label("Gift", systemImage: "gift.fill")
+                    .symbolEffect(.pulse, isActive: giftReady)
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
+            .overlay(alignment: .topTrailing) {
+                if giftReady {
+                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .offset(x: 2, y: -2)
+                }
+            }
+            .accessibilityIdentifier("giftButton")
+        }
+    }
+
     private func topBar(_ progress: PlayerProgress) -> some View {
         HStack(spacing: 10) {
             LevelBadge(level: progress.level, size: 46)
@@ -152,8 +176,8 @@ struct HomeView: View {
         }
     }
 
-    private func missionsCard(_ missions: DailyMissions) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+    private func missionsCard(_ missions: DailyMissions, compact: Bool) -> some View {
+        VStack(alignment: .leading, spacing: compact ? 6 : 10) {
             HStack {
                 Label("Daily missions", systemImage: "checklist")
                     .font(Theme.heading(18))
@@ -164,9 +188,11 @@ struct HomeView: View {
                     .foregroundStyle(Theme.inkSoft)
             }
             ForEach(missions.missions, id: \.kind) { mission in
-                MissionRow(mission: mission)
+                MissionRow(mission: mission, compact: compact)
             }
-            if missions.allDone {
+            if compact {
+                EmptyView()
+            } else if missions.allDone {
                 Label("All done! Come back tomorrow for new missions.", systemImage: "party.popper.fill")
                     .font(Theme.body(14))
                     .foregroundStyle(Theme.heart)
@@ -176,7 +202,7 @@ struct HomeView: View {
                     .foregroundStyle(Theme.inkSoft)
             }
         }
-        .candyCard()
+        .candyCard(padding: compact ? 10 : 14)
         .accessibilityIdentifier("missionsCard")
     }
 }
