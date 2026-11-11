@@ -40,6 +40,7 @@ docs/                       # PLAN.md, STATUS.md, licenses/, site/
   (Remote Config) met lokale standaardwaarden.
 - Geen advertenties voordat de toestemmingsflow (UMP, daarna ATT) is afgerond.
 - Nooit een interstitial tijdens een potje of direct na een rewarded ad.
+  Een banner mag onder het spelbord (keuze van de eigenaar), onder de boosterbalk, nooit over het bord.
 - Alle tekst via Localizable.xcstrings, niets hardgecodeerd.
 - Test-ad-unit-ID's in Debug; echte ID's alleen in Release via een xcconfig die niet in git staat.
 - Na elke wijziging:

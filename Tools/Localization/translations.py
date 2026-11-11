@@ -22,6 +22,11 @@ T = {
 "Hammer": ["Hammer", "Marteau", "Martillo", "Martelo", "Çekiç", "Palu"],
 "Slow down": ["Zeitlupe", "Ralenti", "Cámara lenta", "Câmera lenta", "Yavaşlat", "Pelan"],
 "Tap a candy to smash it": ["Tippe auf ein Bonbon, um es zu zerschlagen", "Touche un bonbon pour l'écraser", "Toca un caramelo para aplastarlo", "Toque num doce para esmagá-lo", "Ezmek için bir şekere dokun", "Ketuk permen untuk menghancurkannya"],
+"Sweet!": ["Lecker!", "Délicieux !", "¡Dulce!", "Docinho!", "Tatlı!", "Manis!"],
+"Tasty!": ["Köstlich!", "Savoureux !", "¡Riquísimo!", "Delícia!", "Nefis!", "Lezat!"],
+"Sugar rush!": ["Zuckerrausch!", "Fête sucrée !", "¡Subidón de azúcar!", "Festa do açúcar!", "Şeker şöleni!", "Pesta gula!"],
+"Board clear!": ["Brett leer!", "Plateau vide !", "¡Tablero limpio!", "Tabuleiro limpo!", "Tahta temiz!", "Papan bersih!"],
+"Combo ×%lld": ["Combo ×%lld", "Combo ×%lld", "Combo ×%lld", "Combo ×%lld", "Kombo ×%lld", "Kombo ×%lld"],
 "Back": ["Zurück", "Retour", "Atrás", "Voltar", "Geri", "Kembali"],
 "Boosters": ["Booster", "Bonus", "Potenciadores", "Reforços", "Güçlendiriciler", "Booster"],
 "Candy styles": ["Bonbon-Stile", "Styles de bonbons", "Estilos de caramelo", "Estilos de doce", "Şeker stilleri", "Gaya permen"],
@@ -84,7 +89,7 @@ T = {
 "Play again": ["Nochmal spielen", "Rejouer", "Jugar otra vez", "Jogar de novo", "Tekrar oyna", "Main lagi"],
 }
 
-NL_EXTRA = {"Hammer": "Hamer", "Slow down": "Slowmo", "Tap a candy to smash it": "Tik op een snoepje om het weg te slaan", "Tap a candy to slide it. Line up 3 of a color!": "Tik op een snoepje om het te laten glijden. Zet er 3 van dezelfde kleur op een rij!", "About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}
+NL_EXTRA = {"Sweet!": "Lekker!", "Tasty!": "Heerlijk!", "Sugar rush!": "Suikerfeest!", "Board clear!": "Bord leeg!", "Combo ×%lld": "Combo ×%lld", "Hammer": "Hamer", "Slow down": "Slowmo", "Tap a candy to smash it": "Tik op een snoepje om het weg te slaan", "Tap a candy to slide it. Line up 3 of a color!": "Tik op een snoepje om het te laten glijden. Zet er 3 van dezelfde kleur op een rij!", "About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}
 
 TRACKING = [
     "Sweet Arrows nutzt dies, um dir passendere Werbung zu zeigen. Das Spiel bleibt so oder so voll spielbar.",

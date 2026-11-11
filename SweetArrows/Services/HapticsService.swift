@@ -9,6 +9,10 @@ protocol HapticsService: AnyObject {
     func pop()
     func bonk()
     func success()
+    /// Celebration that grows with the move: 1 (a small pop) to 5 (the board is empty).
+    func burst(_ level: Int)
+    /// Low rumble for a bomb blast.
+    func rumble()
 }
 
 @MainActor
@@ -50,6 +54,38 @@ final class CoreHapticsService: HapticsService {
         play((0..<4).map { event(at: Double($0) * 0.09, intensity: 0.5 + Float($0) * 0.15, sharpness: 0.5) }) {
             fallback.success()
         }
+    }
+
+    func burst(_ level: Int) {
+        let level = min(max(level, 1), 5)
+        // A sharp pop, then one extra beat per level, each a little stronger.
+        var events = [event(at: 0, intensity: 0.8, sharpness: 0.8)]
+        for beat in 1..<level {
+            events.append(event(at: Double(beat) * 0.07, intensity: min(0.55 + Float(beat) * 0.12, 1), sharpness: 0.55))
+        }
+        if level >= 4 {
+            events.append(continuous(at: 0.05, duration: 0.25 + Double(level - 4) * 0.15, intensity: 0.6, sharpness: 0.3))
+        }
+        play(events) { fallback.burst(level) }
+    }
+
+    func rumble() {
+        play([
+            event(at: 0, intensity: 1, sharpness: 0.4),
+            continuous(at: 0.02, duration: 0.35, intensity: 0.8, sharpness: 0.1),
+        ]) { fallback.rumble() }
+    }
+
+    private func continuous(at time: TimeInterval, duration: TimeInterval, intensity: Float, sharpness: Float) -> CHHapticEvent {
+        CHHapticEvent(
+            eventType: .hapticContinuous,
+            parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness),
+            ],
+            relativeTime: time,
+            duration: duration
+        )
     }
 
     private func event(at time: TimeInterval, intensity: Float, sharpness: Float) -> CHHapticEvent {
@@ -106,5 +142,19 @@ final class UIKitHapticsService: HapticsService {
     func success() {
         guard enabled else { return }
         notification.notificationOccurred(.success)
+    }
+
+    func burst(_ level: Int) {
+        guard enabled else { return }
+        if level >= 4 {
+            notification.notificationOccurred(.success)
+        } else {
+            soft.impactOccurred(intensity: min(0.6 + CGFloat(level) * 0.13, 1))
+        }
+    }
+
+    func rumble() {
+        guard enabled else { return }
+        rigid.impactOccurred(intensity: 1)
     }
 }

@@ -152,6 +152,32 @@ struct SlideTests {
         #expect(rainbows.matchedIDs().isEmpty)
     }
 
+    @Test func celebrationGrowsWithTheMove() {
+        typealias Report = SlideGame.Report
+        #expect(Report(move: .ignored).celebration == 0)
+        #expect(Report(move: .ignored, popped: [1, 2, 3], combo: 1).celebration == 1)
+        #expect(Report(move: .ignored, popped: [1, 2, 3, 4], combo: 1).celebration == 2)
+        #expect(Report(move: .ignored, popped: [1, 2, 3], combo: 2).celebration == 2)
+        #expect(Report(move: .ignored, popped: [1, 2, 3], exploded: [4], combo: 1).celebration == 3)
+        #expect(Report(move: .ignored, popped: [1, 2, 3], combo: 3).celebration == 3)
+        #expect(Report(move: .ignored, popped: [1, 2, 3], combo: 5).celebration == 4)
+        #expect(Report(move: .ignored, popped: [1, 2, 3], combo: 1, clearedBoard: true).celebration == 5)
+    }
+
+    @Test func comboStaysLiveForAFewSeconds() {
+        var game = SlideGame(pieces: [
+            Piece(id: 1, color: .mint, direction: .up, position: GridPoint(0, 4)),
+            Piece(id: 2, color: .mint, direction: .up, position: GridPoint(1, 4)),
+            Piece(id: 3, color: .mint, direction: .down, position: GridPoint(2, 0)),
+            Piece(id: 4, color: .grape, direction: .up, position: GridPoint(4, 0)),
+        ], settings: small())
+        #expect(!game.comboIsLive)
+        _ = game.tap(3)
+        #expect(game.comboIsLive)
+        _ = game.advance(by: 3.5)
+        #expect(!game.comboIsLive)
+    }
+
     @Test func hintFindsAPoppingSlide() {
         var game = SlideGame(pieces: [
             Piece(id: 1, color: .mint, direction: .up, position: GridPoint(0, 4)),

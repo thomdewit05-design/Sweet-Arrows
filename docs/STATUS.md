@@ -94,6 +94,15 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
   *Tip* (60) laat een snoepje knipperen dat meteen een rij maakt (je betaalt alleen als er zo'n zet is),
   *Hamer* (90) tik daarna een snoepje of steen weg, *Slowmo* (120) 15 s lang komen nieuwe snoepjes half zo snel.
   In oude saves heten ze nog `removeCandy` en `extraSlot`; die voorraad blijft dus bewaard.
+- **Game feel** (op verzoek van de eigenaar, naar voorbeeld van een opname; eigen stijl): bij elke plop flitst
+  het vakje wit op, schiet er een gloeiende streep langs de rij en spatten snoepstukjes met zwaartekracht weg;
+  lof-woorden groeien mee met de zet (*Lekker!*, *Heerlijk!*, *Suikerfeest!*, *Bord leeg!*, plus "Combo ×N");
+  het bord schudt harder bij grotere zetten en bommen (schokgolf); vanaf combo 3 gloeit er een rand in
+  wisselende snoepkleuren om het bord en kleurt de achtergrond roze; de score pompt op en kleurt mee.
+  Trillingen groeien mee (1–5 tikken, met een doorlopende tril bij grote zetten, een rommel bij bommen).
+  Met "Beweging verminderen" aan: geen schudden en minder stukjes.
+- **Banner onder het spelbord** (keuze van de eigenaar, wijkt af van het plan "nooit tijdens het spelen"):
+  onder de boosterbalk, met ruimte ertussen; pas na 2 potjes, niet met Remove Ads/VIP.
 - **Meta:** winkel en dagbeloning na 3 potjes, starterspakket na 5, ATT-vraag na 2, advertenties na 2 potjes,
   interstitial pas vanaf potje 4, hooguit om de 2 potjes, alleen bij "Opnieuw spelen".
 

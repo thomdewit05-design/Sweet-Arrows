@@ -20,9 +20,16 @@ final class SlideScene: SKScene {
     /// When set, the next tap on a candy is handed here instead of playing it (hammer booster).
     var onCandySelected: ((Int) -> Void)?
 
+    /// Everything that shakes together: counter, candies and effects.
+    private let boardRoot = SKNode()
     private let counter = SKShapeNode()
     private let candyLayer = SKNode()
+    private let effects = SlideEffects()
     private var nodes: [Int: SKNode] = [:]
+    /// Candy color per piece, for shards and streaks.
+    private var colors: [Int: UIColor] = [:]
+    private var boardFrame = CGRect.zero
+    private var feverOn = false
     private var warningNode: SKNode?
     private var cell: CGFloat = 48
     private var boardOrigin = CGPoint.zero  // bottom-left of the board
@@ -50,8 +57,10 @@ final class SlideScene: SKScene {
         scaleMode = .resizeFill
         backgroundColor = UIColor(hex: 0xFFF4E6)
         anchorPoint = .zero
-        addChild(counter)
-        addChild(candyLayer)
+        addChild(boardRoot)
+        boardRoot.addChild(counter)
+        boardRoot.addChild(candyLayer)
+        boardRoot.addChild(effects)
     }
 
     @available(*, unavailable)
@@ -74,6 +83,14 @@ final class SlideScene: SKScene {
             needsLayout = false
             layoutBoard()
         }
+        // Combo fever: a glowing frame and a warmer background while pops keep coming.
+        let fever = run.comboIsLive && run.combo >= 3 && !run.isOver
+        if fever != feverOn {
+            feverOn = fever
+            effects.setFever(fever, around: boardFrame, cornerRadius: cell * 0.4)
+            let target = fever ? UIColor(hex: 0xFFE3EC) : UIColor(hex: 0xFFF4E6)
+            backgroundColor = target
+        }
     }
 
     // MARK: Layout
@@ -93,6 +110,7 @@ final class SlideScene: SKScene {
 
         let padding = cell * 0.25
         let rect = CGRect(origin: boardOrigin, size: boardSize).insetBy(dx: -padding, dy: -padding)
+        boardFrame = rect.insetBy(dx: -4, dy: -4)
         let path = CGPath(roundedRect: rect, cornerWidth: cell * 0.4, cornerHeight: cell * 0.4, transform: nil)
         counter.path = path
         let palette = BoardPalette(boardStyle)
@@ -141,6 +159,7 @@ final class SlideScene: SKScene {
         guard cell > 0 else { return }
         candyLayer.removeAllChildren()
         nodes.removeAll()
+        colors.removeAll()
         warningNode = nil
         for piece in run.sortedPieces {
             let node = makeNode(piece)
@@ -159,6 +178,7 @@ final class SlideScene: SKScene {
             node = CandyNode(piece: piece, cellSize: cell, colorBlind: colorBlind, style: candyStyle, art: art)
         }
         node.position = point(for: piece.position)
+        colors[piece.id] = piece.kind == .stone ? UIColor(hex: 0xB9AFC4) : UIColor.candy(piece.color)
         return node
     }
 
@@ -239,19 +259,69 @@ final class SlideScene: SKScene {
             audio.play(.tap)
             return
         }
+        let level = report.celebration
+        showStreaks(for: report.popped)
         for id in report.popped { popNode(id, delay: 0) }
         for id in report.exploded { popNode(id, delay: 0.08) }
         for id in report.brokenStones { popNode(id, delay: 0.12) }
         audio.play(.pop)
         audio.playCombo(report.combo)
-        haptics.pop()
-        if !report.exploded.isEmpty { audio.play(.crack) }
-        showPoints(report, at: point(for: landing))
+        if report.exploded.isEmpty {
+            haptics.burst(level)
+        } else {
+            audio.play(.crack)
+            haptics.rumble()
+        }
+        let landingPoint = point(for: landing)
+        effects.points(report.points, at: landingPoint, cell: cell, big: report.combo > 1)
+        let shakes: [CGFloat] = [0, 0, 3, 6, 9, 12]
+        let blast: CGFloat = report.exploded.isEmpty ? 1 : 1.4
+        effects.shake(boardRoot, strength: shakes[min(level, 5)] * blast)
+        if let word = Self.praiseWord(for: level) {
+            let combo = report.combo > 1
+                ? String(localized: "Combo ×\(min(report.combo, SlideGame.maxComboMultiplier))") : nil
+            let center = CGPoint(x: boardFrame.midX, y: boardFrame.midY + cell * 0.5)
+            effects.praise(word, subtitle: combo, level: level, at: center, cell: cell)
+        }
         if report.clearedBoard { celebrate() }
+    }
+
+    /// Words that grow with the move (level 1, a plain line of three, gets none).
+    static func praiseWord(for level: Int) -> String? {
+        switch level {
+        case 2: String(localized: "Sweet!")
+        case 3: String(localized: "Tasty!")
+        case 4: String(localized: "Sugar rush!")
+        case 5: String(localized: "Board clear!")
+        default: nil
+        }
+    }
+
+    /// A glowing streak along every row or column of three or more that popped.
+    private func showStreaks(for ids: [Int]) {
+        let cells = ids.compactMap { id in nodes[id].map { (id, $0.position) } }
+        var groups: [CGFloat: [(Int, CGPoint)]] = [:]
+        var columns: [CGFloat: [(Int, CGPoint)]] = [:]
+        for entry in cells {
+            groups[(entry.1.y / 2).rounded(), default: []].append(entry)
+            columns[(entry.1.x / 2).rounded(), default: []].append(entry)
+        }
+        for line in Array(groups.values) + Array(columns.values) where line.count >= 3 {
+            let xs = line.map(\.1.x), ys = line.map(\.1.y)
+            let start = CGPoint(x: xs.min() ?? 0, y: ys.min() ?? 0)
+            let end = CGPoint(x: xs.max() ?? 0, y: ys.max() ?? 0)
+            effects.streak(from: start, to: end, cell: cell, color: colors[line[0].0] ?? .white)
+        }
     }
 
     private func popNode(_ id: Int, delay: Double) {
         guard let node = nodes.removeValue(forKey: id) else { return }
+        let color = colors.removeValue(forKey: id) ?? .white
+        effects.flash(at: node.position, cell: cell, delay: delay)
+        effects.shards(at: node.position, color: color, cell: cell, delay: delay)
+        if (node as? CandyNode)?.isBomb == true {
+            effects.shockwave(at: node.position, cell: cell)
+        }
         if let candy = node as? CandyNode {
             candy.run(.wait(forDuration: delay)) { [weak candy] in
                 MainActor.assumeIsolated { candy?.explode() }
@@ -263,34 +333,6 @@ final class SlideScene: SKScene {
                 .removeFromParent(),
             ]))
         }
-    }
-
-    /// "+30" (and "Combo ×2") floats up from where the candy landed.
-    private func showPoints(_ report: SlideGame.Report, at position: CGPoint) {
-        var text = "+\(report.points)"
-        if report.combo > 1 { text += "  ×\(min(report.combo, SlideGame.maxComboMultiplier))" }
-        let label = SKLabelNode(text: text)
-        label.fontName = Theme.spriteFontName
-        label.fontSize = cell * (report.combo > 1 ? 0.62 : 0.5)
-        label.fontColor = .white
-        label.verticalAlignmentMode = .center
-        label.position = position
-        label.zPosition = 30
-        let outline = SKLabelNode(text: text)
-        outline.fontName = Theme.spriteFontName
-        outline.fontSize = label.fontSize
-        outline.fontColor = UIColor(hex: 0x4A2C2A)
-        outline.verticalAlignmentMode = .center
-        outline.position = CGPoint(x: 1.5, y: -2)
-        outline.zPosition = -1
-        label.addChild(outline)
-        addChild(label)
-        label.setScale(0.6)
-        label.run(.sequence([
-            .group([.scale(to: 1, duration: 0.12), .moveBy(x: 0, y: cell * 0.9, duration: 0.7)]),
-            .fadeOut(withDuration: 0.2),
-            .removeFromParent(),
-        ]))
     }
 
     // MARK: Boosters

@@ -17,6 +17,14 @@ struct EndlessView: View {
     @State private var choosingCandy = false
 
     private static let boosterBarHeight: CGFloat = 66
+    private static let bannerHeight: CGFloat = 68
+
+    private var showsBanner: Bool { model.ads.canShowBanner }
+
+    /// Room the scene keeps free under the board: booster bar, and the banner when it shows.
+    private var bottomInset: CGFloat {
+        Self.boosterBarHeight + 16 + (showsBanner ? Self.bannerHeight : 0)
+    }
 
     var body: some View {
         ZStack {
@@ -65,6 +73,12 @@ struct EndlessView: View {
                     )
                     .frame(height: Self.boosterBarHeight)
                     .accessibilityIdentifier("boosterBar")
+                    if showsBanner {
+                        // Owner's choice: a banner under the board, kept clear of the booster buttons.
+                        BannerAdView(adUnitID: model.ads.bannerAdUnitID)
+                            .padding(.top, 8)
+                            .padding(.horizontal, -16)
+                    }
                 }
                 .padding(.horizontal)
                 if showResult {
@@ -91,6 +105,7 @@ struct EndlessView: View {
             if over == true { runEnded() }
         }
         .onChange(of: session?.isSlowedDown) { _, slowed in scene?.showSlowDown(slowed == true) }
+        .onChange(of: showsBanner) { _, _ in scene?.bottomInset = bottomInset }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { session?.release("background") } else { session?.hold("background") }
         }
@@ -104,7 +119,7 @@ struct EndlessView: View {
             colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle
         )
         newScene.topInset = 132
-        newScene.bottomInset = Self.boosterBarHeight + 16
+        newScene.bottomInset = bottomInset
         newScene.showsTutorialHand = progress.endlessRuns < 2
         newSession.onEvent = { [weak newScene] event in
             switch event {
@@ -240,6 +255,19 @@ private struct EndlessHUD: View {
     let best: Int
     let back: () -> Void
 
+    @State private var bump = false
+
+    /// The score warms up with the combo: brown, then pink, orange and purple.
+    private var scoreColor: Color {
+        guard session.run.comboIsLive else { return Theme.ink }
+        switch session.combo {
+        case ..<2: return Theme.ink
+        case 2: return Theme.heart
+        case 3: return Color(hex: 0xFF9F1C)
+        default: return Color(hex: 0xA259FF)
+        }
+    }
+
     var body: some View {
         HStack(alignment: .center) {
             RoundIconButton(systemName: "chevron.left", label: "Back", action: back)
@@ -248,11 +276,23 @@ private struct EndlessHUD: View {
             VStack(spacing: 0) {
                 Text("\(session.score)")
                     .font(Theme.title(40))
-                    .foregroundStyle(Theme.ink)
+                    .foregroundStyle(scoreColor)
                     .monospacedDigit()
                     .contentTransition(.numericText())
+                    .scaleEffect(bump ? 1.25 : 1)
+                    .shadow(color: scoreColor.opacity(bump ? 0.6 : 0), radius: 8)
                     .animation(.spring(response: 0.25), value: session.score)
+                    .animation(.spring(response: 0.2, dampingFraction: 0.45), value: bump)
+                    .animation(.easeInOut(duration: 0.2), value: scoreColor)
                     .accessibilityIdentifier("score")
+                    .onChange(of: session.score) { old, new in
+                        guard new > old else { return }
+                        bump = true
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(160))
+                            bump = false
+                        }
+                    }
                 Text("Best \(max(best, session.score))")
                     .font(Theme.body(14))
                     .foregroundStyle(Theme.inkSoft)

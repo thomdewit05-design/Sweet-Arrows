@@ -28,11 +28,13 @@ final class CandyArt {
 @MainActor
 final class CandyNode: SKNode {
     let candyID: Int
+    let isBomb: Bool
     private let body: SKNode
     private let arrow: SKNode
 
     init(piece: SlideGame.Piece, cellSize: CGFloat, colorBlind: Bool, style: Cosmetic = .classicCandy, art: CandyArt? = nil) {
         candyID = piece.id
+        isBomb = piece.kind == .bomb
         let size = cellSize * 0.86
 
         let bodyRoot = SKNode()

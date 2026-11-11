@@ -83,6 +83,18 @@ public struct SlideGame: Sendable {
         public var clearedBoard = false
 
         public var didPop: Bool { !popped.isEmpty }
+
+        /// How big a celebration this move deserves: 0 = none, 1 = sweet, 2 = tasty, 3 = delicious,
+        /// 4 = sugar rush, 5 = the board is empty. The app picks words, shake and haptics from it.
+        public var celebration: Int {
+            guard didPop else { return 0 }
+            if clearedBoard { return 5 }
+            let cleared = popped.count + exploded.count
+            if combo >= 5 || cleared >= 9 { return 4 }
+            if combo >= 3 || cleared >= 6 || !exploded.isEmpty { return 3 }
+            if combo == 2 || popped.count >= 4 { return 2 }
+            return 1
+        }
     }
 
     /// A candy about to appear (shown as a shadow first).
@@ -374,6 +386,9 @@ public struct SlideGame: Sendable {
     }
 
     public var isSlowedDown: Bool { elapsed < slowUntil }
+
+    /// True while another pop would still raise the combo.
+    public var comboIsLive: Bool { combo > 0 && elapsed - lastPopAt <= settings.comboWindow }
 
     /// New candies arrive at half speed for the given number of seconds.
     public mutating func slowDown(for seconds: Double = 15) {
