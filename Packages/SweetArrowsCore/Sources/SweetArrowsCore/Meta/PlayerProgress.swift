@@ -26,9 +26,14 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var coins = 0
     public var boosters = BoosterInventory()
     public var dailyReward = DailyRewardState()
-    public var ownedCosmetics: Set<Cosmetic> = [.woodCounter, .classicCandy]
+    public var ownedCosmetics: Set<Cosmetic> = [.woodCounter, .classicCandy, .candyMeadow]
     public var board: Cosmetic = .woodCounter
     public var candyStyle: Cosmetic = .classicCandy
+    public var backdrop: Cosmetic = .candyMeadow
+    /// Total XP; the player level follows from it.
+    public var xp = 0
+    public var missions = DailyMissions()
+    public var streak = PlayStreak()
     /// Best score and number of runs played.
     public var endlessBest = 0
     public var endlessRuns = 0
@@ -41,16 +46,48 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     /// The daily reward and the shop appear after a few runs (PLAN.md, onboarding).
     public var showsMetaFeatures: Bool { endlessRuns >= 3 }
 
+    public var level: Int { PlayerLevel.level(forXP: xp) }
+    public var xpIntoLevel: Int { PlayerLevel.xpIntoLevel(forXP: xp) }
+    public var xpForLevel: Int { PlayerLevel.xpToNext(level) }
+
     // MARK: Changes
 
-    /// Records a finished run. Returns true for a new best score.
+    /// Records a finished run: best score, coins, streak, daily missions and XP with level rewards.
     @discardableResult
-    public mutating func recordEndless(score: Int, coins: Int) -> Bool {
+    public mutating func recordRun(_ run: RunSummary, today: Int) -> RunOutcome {
+        let previousBest = endlessBest
+        let levelBefore = level
         endlessRuns += 1
-        self.coins += coins
-        guard score > endlessBest else { return false }
-        endlessBest = score
-        return true
+        endlessBest = max(endlessBest, run.score)
+        coins += run.coins
+        streak.played(today: today)
+
+        missions.refresh(today: today, level: levelBefore)
+        let (finished, missionReward) = missions.record(run)
+        apply(missionReward)
+
+        let gained = PlayerLevel.xp(for: run)
+        xp += gained
+        var rewards: [LevelReward] = []
+        if level > levelBefore {
+            for reached in (levelBefore + 1)...level {
+                let reward = PlayerLevel.reward(for: reached)
+                apply(reward.reward)
+                if let unlock = reward.unlock { ownedCosmetics.insert(unlock) }
+                rewards.append(reward)
+            }
+        }
+        return RunOutcome(
+            summary: run, newRecord: run.score > previousBest, previousBest: previousBest, coinsFromScore: run.coins,
+            xpGained: gained, levelBefore: levelBefore, levelAfter: level, xpIntoLevel: xpIntoLevel,
+            xpForLevel: xpForLevel, levelRewards: rewards, finishedMissions: finished, missionReward: missionReward,
+            allMissionsDone: missions.allDone, streak: streak.current
+        )
+    }
+
+    /// Today's missions, freshly made on a new day (for showing them before the first run).
+    public mutating func refreshMissions(today: Int) {
+        missions.refresh(today: today, level: level)
     }
 
     public mutating func apply(_ reward: Reward) {
@@ -86,6 +123,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         switch item.kind {
         case .board: board = item
         case .candyStyle: candyStyle = item
+        case .backdrop: backdrop = item
         }
     }
 
@@ -99,6 +137,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         let newer = selfIsNewer ? self : other
         var result = newer
         result.ownedCosmetics = ownedCosmetics.union(other.ownedCosmetics)
+        result.xp = max(xp, other.xp)
+        result.streak.best = max(streak.best, other.streak.best)
         result.endlessBest = max(endlessBest, other.endlessBest)
         result.endlessRuns = max(endlessRuns, other.endlessRuns)
         result.updatedAt = max(updatedAt, other.updatedAt)
@@ -109,7 +149,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case coins, boosters, dailyReward
-        case ownedCosmetics, board, candyStyle, settings, updatedAt
+        case ownedCosmetics, board, candyStyle, backdrop, xp, missions, streak, settings, updatedAt
         case endlessBest, endlessRuns
     }
 
@@ -121,6 +161,11 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         ownedCosmetics = try c.decodeIfPresent(Set<Cosmetic>.self, forKey: .ownedCosmetics) ?? [.woodCounter, .classicCandy]
         board = try c.decodeIfPresent(Cosmetic.self, forKey: .board) ?? .woodCounter
         candyStyle = try c.decodeIfPresent(Cosmetic.self, forKey: .candyStyle) ?? .classicCandy
+        backdrop = try c.decodeIfPresent(Cosmetic.self, forKey: .backdrop) ?? .candyMeadow
+        ownedCosmetics.insert(.candyMeadow)
+        xp = try c.decodeIfPresent(Int.self, forKey: .xp) ?? 0
+        missions = try c.decodeIfPresent(DailyMissions.self, forKey: .missions) ?? DailyMissions()
+        streak = try c.decodeIfPresent(PlayStreak.self, forKey: .streak) ?? PlayStreak()
         endlessBest = try c.decodeIfPresent(Int.self, forKey: .endlessBest) ?? 0
         endlessRuns = try c.decodeIfPresent(Int.self, forKey: .endlessRuns) ?? 0
         settings = try c.decodeIfPresent(GameSettings.self, forKey: .settings) ?? GameSettings()

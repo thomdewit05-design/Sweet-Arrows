@@ -23,14 +23,15 @@ struct EconomyTests {
 
     @Test func runsAndBestScore() {
         var progress = PlayerProgress()
-        let first = progress.recordEndless(score: 300, coins: 12)
-        let second = progress.recordEndless(score: 200, coins: 8)
-        #expect(first)
-        #expect(!second)
+        let first = progress.recordRun(RunSummary(score: 300), today: 1)
+        let second = progress.recordRun(RunSummary(score: 200), today: 1)
+        #expect(first.newRecord)
+        #expect(!second.newRecord)
+        #expect(second.previousBest == 300)
         #expect(progress.endlessBest == 300)
-        #expect(progress.coins == 20)
+        #expect(progress.coins >= 20)  // 12 + 8 from the scores, plus anything the missions paid
         #expect(!progress.showsMetaFeatures)
-        progress.recordEndless(score: 10, coins: 0)
+        progress.recordRun(RunSummary(score: 10), today: 1)
         #expect(progress.showsMetaFeatures)
     }
 

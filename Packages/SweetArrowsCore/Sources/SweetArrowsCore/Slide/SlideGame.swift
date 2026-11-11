@@ -123,6 +123,13 @@ public struct SlideGame: Sendable {
     public private(set) var elapsed: Double = 0
     public private(set) var pending: PendingSpawn?
     public private(set) var revivesUsed = 0
+    // Counters for missions and achievements.
+    public private(set) var bombsPopped = 0
+    public private(set) var rainbowsPopped = 0
+    public private(set) var stonesBroken = 0
+    public private(set) var boardClears = 0
+    /// Most candies popped in one line-up.
+    public private(set) var biggestPop = 0
     private var grid: [Int?]
     private var untilNext: Double
     private var lastPopAt: Double = -100
@@ -272,6 +279,10 @@ public struct SlideGame: Sendable {
         report.popped = lines.sorted()
         report.exploded = exploded.sorted()
         report.brokenStones = stones.sorted()
+        bombsPopped += gone.filter { pieces[$0]?.kind == .bomb }.count
+        rainbowsPopped += lines.filter { pieces[$0]?.kind == .rainbow }.count
+        stonesBroken += stones.count
+        biggestPop = max(biggestPop, lines.count)
         for id in gone { remove(id) }
         for id in stones { remove(id) }
 
@@ -286,6 +297,7 @@ public struct SlideGame: Sendable {
         if pieces.isEmpty {
             points += 100
             report.clearedBoard = true
+            boardClears += 1
             untilNext = min(untilNext, 0.5)
         }
         score += points
@@ -414,6 +426,15 @@ public struct SlideGame: Sendable {
     }
 
     public var coinsEarned: Int { score / 25 }
+
+    /// What this run did, for XP, missions and the result card.
+    public var summary: RunSummary {
+        RunSummary(
+            score: score, popped: popped, bestCombo: bestCombo, stage: stage, bombs: bombsPopped,
+            rainbows: rainbowsPopped, stones: stonesBroken, boardClears: boardClears, biggestPop: biggestPop,
+            seconds: Int(elapsed)
+        )
+    }
 
     // MARK: Spawning
 

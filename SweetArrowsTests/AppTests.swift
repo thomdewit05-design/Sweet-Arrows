@@ -10,26 +10,27 @@ struct AppTests {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
         defer { try? FileManager.default.removeItem(at: url) }
         let save = SaveService(url: url)
-        save.update { _ = $0.recordEndless(score: 450, coins: 18) }
+        save.update { _ = $0.recordRun(RunSummary(score: 450), today: 1) }
         save.update { $0.settings.music = false }
 
         let reloaded = SaveService(url: url)
         #expect(reloaded.progress.endlessBest == 450)
         #expect(reloaded.progress.endlessRuns == 1)
-        #expect(reloaded.progress.coins == 18)
+        #expect(reloaded.progress.coins >= 18)
+        #expect(reloaded.progress.xp > 0)
         #expect(reloaded.progress.settings.music == false)
     }
 
     @Test func iCloudCopiesAreMerged() {
         let cloud = FakeCloud()
         let phone = SaveService(url: nil, cloud: cloud)
-        phone.update { _ = $0.recordEndless(score: 300, coins: 12) }
+        phone.update { _ = $0.recordRun(RunSummary(score: 300), today: 1) }
 
         // A second device starts empty and picks up the iCloud copy.
         let tablet = SaveService(url: nil, cloud: cloud)
         #expect(tablet.progress.endlessBest == 300)
 
-        tablet.update { _ = $0.recordEndless(score: 700, coins: 28) }
+        tablet.update { _ = $0.recordRun(RunSummary(score: 700), today: 1) }
         phone.pullFromCloud()
         #expect(phone.progress.endlessBest == 700)
         #expect(phone.progress.endlessRuns == 2)
@@ -78,13 +79,14 @@ struct AppTests {
     @Test func endlessRecordIsSaved() {
         let save = SaveService(url: nil)
         var record = false
-        save.update { record = $0.recordEndless(score: 120, coins: 12) }
+        save.update { record = $0.recordRun(RunSummary(score: 120), today: 1).newRecord }
         #expect(record)
         #expect(save.progress.endlessBest == 120)
-        save.update { record = $0.recordEndless(score: 80, coins: 8) }
+        save.update { record = $0.recordRun(RunSummary(score: 80), today: 1).newRecord }
         #expect(!record)
         #expect(save.progress.endlessRuns == 2)
-        #expect(save.progress.coins == 20)
+        #expect(save.progress.coins >= 20)
+        #expect(save.progress.streak.current == 1)
     }
 
     @Test func remoteConfigKeysMatchThePlan() {
