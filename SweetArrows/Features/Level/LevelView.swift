@@ -38,6 +38,9 @@ struct LevelView: View {
             Theme.cream.ignoresSafeArea()
             if let session, let scene {
                 SpriteView(scene: scene, preferredFramesPerSecond: 60, debugOptions: Self.spriteDebugOptions)
+                    // SpriteView keeps showing the scene it was created with. "Next level" reuses this
+                    // view with a new scene, so give it a new identity or the old (empty) board stays.
+                    .id(ObjectIdentifier(scene))
                     .ignoresSafeArea()
                     .accessibilityIdentifier("board")
                 overlay(session)
