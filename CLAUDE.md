@@ -34,7 +34,8 @@ docs/                       # PLAN.md, STATUS.md, level-report.md, licenses/
 - Spelregels en solver in SweetArrowsCore als pure Swift, getest met 90%+ dekking.
   Scenes en views bevatten geen spelregels.
 - Afstand houden tot block-jam-games: geen sleepbediening, geen gekleurde deuren/uitgangen,
-  geen tijdslimiet, geen vierkante blokken als hoofdvorm.
+  geen vierkante blokken als hoofdvorm. (Tijdslimiet: op verzoek van de eigenaar heeft elk level
+  wél een klok; die start pas bij de eerste tik. Zie docs/STATUS.md.)
 - Alle advertentie-aanroepen via AdService; frequentiegrenzen komen uit ConfigService
   (Remote Config) met lokale standaardwaarden.
 - Geen advertenties voordat de toestemmingsflow (UMP, daarna ATT) is afgerond.

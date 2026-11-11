@@ -210,11 +210,17 @@ struct WorldTests {
 
     @Test func elementsUnlockPerWorld() {
         #expect(World(id: 1).availableElements.isEmpty)
-        #expect(World(id: 2).availableElements == [.pole])
+        #expect(World(id: 2).availableElements == [.pole, .mirror])
         #expect(World(id: 2).newElement == .pole)
-        #expect(World(id: 7).newElement == .rotating)
-        #expect(World(id: 7).availableElements.count == 6)
+        #expect(World(id: 2).introductions.map(\.level) == [39, 58])
+        #expect(World.availableElements(atLevel: 57) == [.pole])
+        #expect(World.availableElements(atLevel: 58) == [.pole, .mirror])
+        #expect(World.introducedElement(atLevel: 58) == .mirror)
+        #expect(World.introducedElement(atLevel: 59) == nil)
+        #expect(World(id: 6).newElements == [.colorChanger, .rotating])
+        #expect(World(id: 7).availableElements.count == BoardElement.allCases.count)
         #expect(World(id: 8).newElement == nil)
+        #expect(Set(World.all.flatMap(\.newElements)) == Set(BoardElement.allCases))
     }
 
     @Test func everyColorHasItsOwnShape() {

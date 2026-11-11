@@ -53,10 +53,12 @@ public enum LevelPack {
         try await withThrowingTaskGroup(of: Level.self) { group in
             for number in 1...count {
                 group.addTask {
-                    guard var level = generator.level(for: dailyPlan(number: number), seed: seed ^ 0xDA11) else {
+                    let plan = dailyPlan(number: number)
+                    guard var level = generator.level(for: plan, seed: seed ^ 0xDA11) else {
                         throw PackError.generationFailed(dailyIDBase + number)
                     }
                     level.hard = false
+                    level.timeLimit = TimeLimit.seconds(for: level, slot: plan.slot)
                     return level
                 }
             }
@@ -73,7 +75,9 @@ public enum LevelPack {
                 throw PackError.tutorialRejected(level.id, stuck: stuckCandies(level))
             }
             guard stats.pitfalls == 0 else { throw PackError.tutorialCanBeLost(level.id, pitfalls: stats.pitfalls) }
-            return approved
+            var timed = approved
+            timed.timeLimit = TimeLimit.seconds(for: approved, slot: .tutorial)
+            return timed
         }
     }
 
@@ -110,9 +114,10 @@ public enum LevelPack {
                 next += 1
                 group.addTask {
                     let plan = Curve.plan(for: id, total: total)
-                    guard let level = generator.level(for: plan, seed: seed) else {
+                    guard var level = generator.level(for: plan, seed: seed) else {
                         throw PackError.generationFailed(id)
                     }
+                    level.timeLimit = TimeLimit.seconds(for: level, slot: plan.slot)
                     progress?(level)
                     return level
                 }
@@ -184,6 +189,9 @@ public enum LevelPack {
             }
             if level.tutorial, stats.pitfalls > 0 {
                 problems.append("level \(level.id): tutorial level can be lost")
+            }
+            if level.timeLimit == nil {
+                problems.append("level \(level.id): no time limit")
             }
         }
         return problems

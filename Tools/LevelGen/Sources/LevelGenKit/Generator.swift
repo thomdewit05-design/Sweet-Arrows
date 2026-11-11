@@ -22,6 +22,12 @@ public struct Generator: Sendable {
         public var rotating: Double = 0
         public var iced: Double = 0
         public var wrapped: Double = 0
+        public var mirrors: Int = 0
+        public var bomb: Double = 0
+        public var colorChanger: Double = 0
+        /// Chance the level has a key; candies removed after it may then be locked.
+        public var keyChance: Double = 0
+        public var locked: Double = 0
         /// 0 = scattered, higher = candies huddle together (more blocking).
         public var clumping: Double = 2
 
@@ -112,6 +118,15 @@ public struct Generator: Sendable {
         params.caramel = amount(.caramel, base: 0.10)
         params.iced = amount(.iced, base: 0.10)
         params.rotating = amount(.rotating, base: 0.06)
+        if allowed.contains(.mirror) {
+            params.mirrors = plan.featured == .mirror ? 1 + Int(rng.next() % 3) : Int(rng.next() % 3)
+        }
+        params.bomb = amount(.bomb, base: 0.07)
+        params.colorChanger = amount(.colorChanger, base: 0.07)
+        if allowed.contains(.lock) {
+            params.keyChance = plan.featured == .lock ? 1 : 0.4
+            params.locked = 0.22 + rng.unit() * 0.15
+        }
         return params
     }
 
@@ -139,6 +154,20 @@ public struct Generator: Sendable {
             }
         }
 
+        // Candy-cane bumpers on free interior cells.
+        var mirrors: [GridPoint: Mirror] = [:]
+        for _ in 0..<p.mirrors {
+            for _ in 0..<20 {
+                let c = GridPoint(1 + Int(rng.next() % UInt64(max(p.width - 2, 1))),
+                                  1 + Int(rng.next() % UInt64(max(p.height - 2, 1))))
+                if inside(c), !occupied[c.y][c.x] {
+                    occupied[c.y][c.x] = true
+                    mirrors[c] = Mirror(c, rng.chance(0.5) ? .slash : .backslash)
+                    break
+                }
+            }
+        }
+
         // Decide per removal slot: caramel? rotating? bar? (slot 0 = removed first)
         var isCaramel = (0..<n).map { _ in rng.chance(p.caramel) }
         let isRotating = (0..<n).map { i in !isCaramel[i] && rng.chance(p.rotating) }
@@ -156,12 +185,27 @@ public struct Generator: Sendable {
             total += isCaramel[k] ? 2 : 1
         }
 
-        func rayIsFree(from cells: [GridPoint], _ d: Direction) -> Bool {
+        // Same route rules as Game.trace: single candies bend on bumpers, bars stop at them.
+        func rayIsFree(from cells: [GridPoint], _ start: Direction) -> Bool {
+            if cells.count == 1 {
+                var c = cells[0]
+                var d = start
+                for _ in 0..<((p.width + p.height) * 4) {
+                    c += d
+                    guard inside(c) else { return true }
+                    if let mirror = mirrors[c] {
+                        d = mirror.deflect(d)
+                        continue
+                    }
+                    if occupied[c.y][c.x] { return false }
+                }
+                return false
+            }
             for cell in cells {
-                var c = cell + d
+                var c = cell + start
                 while inside(c) {
                     if !cells.contains(c), occupied[c.y][c.x] { return false }
-                    c += d
+                    c += start
                 }
             }
             return true
@@ -205,10 +249,16 @@ public struct Generator: Sendable {
         guard let colors = dealColors(count: n, colors: p.colors, bagLimit: min(p.bagLimit, p.bagCapacity - 1), rng: &rng)
         else { return nil }
 
+        // Color changers start on the color that turns into the dealt one by their launch.
+        let palette = Array(Set(colors)).sorted()
+        // A key early in the built-in order; candies after it may be locked.
+        let keySlot: Int? = rng.chance(p.keyChance) && n >= 6 ? Int(rng.next() % UInt64(max(n / 3, 1))) : nil
+
         // Ice only where a neighbour leaves earlier in the built-in order.
         var owner: [GridPoint: Int] = [:]
         for (k, item) in placed.enumerated() { for cell in item.cells { owner[cell] = k } }
         var candies: [Candy] = []
+        var hasChanger = false
         for (k, item) in placed.enumerated() {
             var features = Set<CandyFeature>()
             if isCaramel[k] { features.insert(.caramel) }
@@ -216,11 +266,22 @@ public struct Generator: Sendable {
             if rng.chance(p.wrapped) { features.insert(.wrapped) }
             let freedEarlier = item.cells.flatMap(\.neighbors).contains { owner[$0].map { $0 < k } ?? false }
             if freedEarlier, !isCaramel[k], rng.chance(p.iced) { features.insert(.iced) }
+            if k == keySlot { features.insert(.key) }
+            if let keySlot, k > keySlot, !features.contains(.iced), rng.chance(p.locked) { features.insert(.locked) }
+            if !isCaramel[k], item.cells.count == 1, rng.chance(p.bomb) { features.insert(.bomb) }
+
+            var color = colors[k]
+            if palette.count > 1, item.cells.count == 1, !features.contains(.bomb), rng.chance(p.colorChanger) {
+                features.insert(.colorChanger)
+                hasChanger = true
+                let index = palette.firstIndex(of: color)!
+                color = palette[((index - movesBefore[k]) % palette.count + palette.count) % palette.count]
+            }
 
             let start = isRotating[k] ? item.flight.rotated(by: -movesBefore[k]) : item.flight
             let anchor = item.cells.min { ($0.y, $0.x) < ($1.y, $1.x) }!
             let bar: Axis? = item.cells.count == 2 ? (item.cells[0].y == item.cells[1].y ? .horizontal : .vertical) : nil
-            candies.append(Candy(id: 0, color: colors[k], position: anchor, direction: start, bar: bar, features: features))
+            candies.append(Candy(id: 0, color: color, position: anchor, direction: start, bar: bar, features: features))
         }
         // Number candies in reading order so ids look tidy in the editor and the report.
         candies.sort { ($0.position.y, $0.position.x) < ($1.position.y, $1.position.x) }
@@ -228,7 +289,9 @@ public struct Generator: Sendable {
 
         return Level(
             id: id, width: p.width, height: p.height, bagCapacity: p.bagCapacity,
-            candies: candies, poles: poles.sorted { ($0.y, $0.x) < ($1.y, $1.x) }
+            candies: candies, poles: poles.sorted { ($0.y, $0.x) < ($1.y, $1.x) },
+            mirrors: mirrors.values.sorted { ($0.position.y, $0.position.x) < ($1.position.y, $1.position.x) },
+            changerColors: hasChanger ? palette : nil
         )
     }
 

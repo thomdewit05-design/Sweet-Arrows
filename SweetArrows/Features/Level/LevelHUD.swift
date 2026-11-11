@@ -18,6 +18,9 @@ struct LevelHUD: View {
                 Text(title)
                     .font(Theme.heading())
                     .foregroundStyle(Theme.ink)
+                if let seconds = session.secondsLeft {
+                    ClockView(seconds: seconds, running: session.clockStarted)
+                }
                 if session.level.hard {
                     Text("Hard level")
                         .font(Theme.body(13))
@@ -122,5 +125,32 @@ private struct HeartsView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("\(hearts) hearts left"))
         .accessibilityIdentifier("hearts")
+    }
+}
+
+/// The level clock. Calm until the last ten seconds, then red and pulsing.
+struct ClockView: View {
+    let seconds: Int
+    let running: Bool
+
+    private var urgent: Bool { running && seconds <= 10 }
+
+    var body: some View {
+        Label {
+            Text(verbatim: String(format: "%d:%02d", seconds / 60, seconds % 60))
+                .monospacedDigit()
+        } icon: {
+            Image(systemName: "timer")
+        }
+        .font(Theme.heading(17))
+        .foregroundStyle(urgent ? .white : Theme.ink)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(urgent ? Theme.heart : Color.white.opacity(running ? 1 : 0.6)))
+        .scaleEffect(urgent && seconds % 2 == 0 ? 1.08 : 1)
+        .animation(.spring(response: 0.25, dampingFraction: 0.5), value: seconds)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("\(seconds) seconds left"))
+        .accessibilityIdentifier("clock")
     }
 }

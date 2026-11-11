@@ -14,6 +14,7 @@ public enum Report {
         lines.append("- **Difficulty** 0–100: board size, colors, traps, jar pressure and special elements.")
         lines.append("- **Traps**: moves along the solution that are allowed but make the level unwinnable.")
         lines.append("- **Solutions**: winning move orders (capped at 10,000).")
+        lines.append("- **Time**: seconds on the clock, which starts at the first tap.")
         lines.append("")
 
         // Per-world summary.
@@ -29,14 +30,14 @@ public enum Report {
             let w = World(id: world)
             let name = w.theme.displayName
             lines.append("| \(world). \(name) | \(group.first!.id)–\(group.last!.id) | "
-                + "\(w.newElement?.displayName ?? "–") | \(format(avg)) | \(format(difficulties.max() ?? 0)) |")
+                + "\(w.newElements.isEmpty ? "–" : w.newElements.map(\.displayName).joined(separator: ", ")) | \(format(avg)) | \(format(difficulties.max() ?? 0)) |")
         }
         lines.append("")
 
         lines.append("## Levels")
         lines.append("")
-        lines.append("| # | Slot | Board | Candies | Colors | Jar | Elements | Taps | Traps | Solutions | Difficulty | |")
-        lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
+        lines.append("| # | Slot | Board | Candies | Colors | Jar | Elements | Taps | Time | Traps | Solutions | Difficulty | |")
+        lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
         for level in levels {
             let stats = level.stats
             let slot = level.tutorial ? "tutorial" : Curve.slot(for: level.id).rawValue
@@ -47,7 +48,7 @@ public enum Report {
             let colors = Set(level.candies.map(\.color)).count
             lines.append("| \(level.id) | \(slot)\(level.hard ? " 🔥" : "") | \(level.width)×\(level.height) | "
                 + "\(level.candies.count) | \(colors) | \(level.bagCapacity) | \(elements.isEmpty ? "–" : elements) | "
-                + "\(stats?.solutionLength ?? 0) | \(stats?.pitfalls ?? 0) | \(solutions) | \(difficulty) | \(bar) |")
+                + "\(stats?.solutionLength ?? 0) | \(level.timeLimit.map { "\($0) s" } ?? "–") | \(stats?.pitfalls ?? 0) | \(solutions) | \(difficulty) | \(bar) |")
         }
         lines.append("")
         return lines.joined(separator: "\n")
@@ -82,6 +83,10 @@ public extension BoardElement {
         case .caramel: "caramel"
         case .iced: "ice"
         case .rotating: "spinner"
+        case .mirror: "bumper"
+        case .lock: "lock & key"
+        case .bomb: "bomb"
+        case .colorChanger: "color changer"
         }
     }
 }

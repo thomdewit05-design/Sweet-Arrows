@@ -20,6 +20,7 @@ struct LevelView: View {
 
     @Environment(AppModel.self) private var model
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("lastReviewRequest") private var lastReviewRequest = 0.0
     @State private var session: GameSession?
     @State private var scene: GameScene?
@@ -49,6 +50,7 @@ struct LevelView: View {
                     ElementIntroCard(element: element) {
                         model.save.update { $0.seenElements.insert(element) }
                         introElement = nil
+                        session.releaseClock("intro")
                     }
                     .transition(.scale(scale: 0.85).combined(with: .opacity))
                 }
@@ -71,6 +73,10 @@ struct LevelView: View {
         .onChange(of: session?.boardVersion) { _, _ in scene?.rebuild() }
         .onChange(of: session?.status) { _, status in
             if let status { statusChanged(status) }
+        }
+        // The clock stops while the app is in the background.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { session?.releaseClock("background") } else { session?.holdClock("background") }
         }
     }
 
@@ -121,6 +127,7 @@ struct LevelView: View {
             onExtraSlot: { useBooster(.extraSlot, viaAd: false) },
             onExtraSlotAd: { useBooster(.extraSlot, viaAd: true) },
             onExtraHearts: { continueWithHearts(session) },
+            onExtraTime: { continueWithTime(session) },
             onHome: leave
         )
     }
@@ -189,11 +196,11 @@ struct LevelView: View {
         session = newSession
         scene = newScene
 
-        // A world's first level introduces its new element once.
-        let world = World.forLevel(id)
-        if mode.campaignLevel != nil, id == world.firstLevel, let element = world.newElement,
+        // The level where an element first appears introduces it once; the clock waits meanwhile.
+        if mode.campaignLevel != nil, let element = World.introducedElement(atLevel: id),
            !progress.seenElements.contains(element) {
             introElement = element
+            newSession.holdClock("intro")
         } else {
             introElement = nil
         }
@@ -228,9 +235,12 @@ struct LevelView: View {
         case .lost(let reason):
             if mode.campaignLevel != nil { model.ads.levelFinished(won: false) }
             if model.ads.isRewardedReady { model.analytics.log(.adOfferShown(reason: "continue")) }
-            model.analytics.log(.levelFail(
-                level: session.level.id, reason: reason == .bagFull ? "bag_full" : "out_of_hearts", moves: session.moves
-            ))
+            let reasonName = switch reason {
+            case .bagFull: "bag_full"
+            case .outOfHearts: "out_of_hearts"
+            case .outOfTime: "out_of_time"
+            }
+            model.analytics.log(.levelFail(level: session.level.id, reason: reasonName, moves: session.moves))
             model.audio.play(.lose)
         }
         Task { @MainActor in
@@ -328,6 +338,15 @@ struct LevelView: View {
     private func cancelRemoval() {
         choosingCandyToRemove = false
         scene?.onCandySelected = nil
+    }
+
+    private func continueWithTime(_ session: GameSession) {
+        Task { @MainActor in
+            guard await model.ads.showRewarded(reason: .extraTime) else { return }
+            model.analytics.log(.boosterUsed(type: "extra_time", source: "ad"))
+            session.addTime(15)
+            showResult = false
+        }
     }
 
     private func continueWithHearts(_ session: GameSession) {

@@ -19,6 +19,12 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
     public var candies: [Candy]
     /// Lollipop poles: fixed obstacles that candies have to go around.
     public var poles: [GridPoint]
+    /// Candy-cane bumpers that bend flying candies.
+    public var mirrors: [Mirror]
+    /// Seconds to clear the board (the clock starts at the first tap). nil = no clock.
+    public var timeLimit: Int?
+    /// Colors a color-changing candy cycles through, in order. nil = the colors on the board.
+    public var changerColors: [CandyColor]?
     /// Filled in by the solver when the level is approved.
     public var stats: LevelStats?
 
@@ -32,6 +38,9 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
         hard: Bool = false,
         candies: [Candy],
         poles: [GridPoint] = [],
+        mirrors: [Mirror] = [],
+        timeLimit: Int? = nil,
+        changerColors: [CandyColor]? = nil,
         stats: LevelStats? = nil
     ) {
         self.id = id
@@ -43,6 +52,9 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
         self.hard = hard
         self.candies = candies
         self.poles = poles
+        self.mirrors = mirrors
+        self.timeLimit = timeLimit
+        self.changerColors = changerColors
         self.stats = stats
     }
 
@@ -52,10 +64,16 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
         p.x >= 0 && p.y >= 0 && p.x < width && p.y < height
     }
 
+    /// Colors a color-changing candy cycles through.
+    public var changerPalette: [CandyColor] {
+        changerColors ?? Array(Set(candies.map(\.color))).sorted()
+    }
+
     /// Every feature or element that appears in this level.
     public var elements: Set<BoardElement> {
         var result = Set<BoardElement>()
         if !poles.isEmpty { result.insert(.pole) }
+        if !mirrors.isEmpty { result.insert(.mirror) }
         for candy in candies {
             if candy.isChocolateBar { result.insert(.chocolateBar) }
             for feature in candy.features { result.insert(BoardElement(feature)) }
@@ -74,6 +92,8 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
         case colorCountNotMultipleOfThree(CandyColor)
         case badBag
         case iceWithoutNeighbours(candyID: Int)
+        case lockWithoutKey
+        case badTimeLimit
 
         public var description: String {
             switch self {
@@ -85,6 +105,8 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
             case .colorCountNotMultipleOfThree(let c): "number of \(c.rawValue) candies is not a multiple of 3"
             case .badBag: "bag capacity must be 3...8 and hearts >= 1"
             case .iceWithoutNeighbours(let id): "iced candy \(id) has no neighbour that could free it"
+            case .lockWithoutKey: "locked candies but no key"
+            case .badTimeLimit: "time limit must be at least 5 seconds"
             }
         }
     }
@@ -99,7 +121,7 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
 
         var occupied = Set<GridPoint>()
         var ids = Set<Int>()
-        for pole in poles {
+        for pole in poles + mirrors.map(\.position) {
             guard contains(pole) else { throw .overlap(pole) }
             guard occupied.insert(pole).inserted else { throw .overlap(pole) }
         }
@@ -110,11 +132,19 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
                 guard occupied.insert(cell).inserted else { throw .overlap(cell) }
             }
         }
-        var counts: [CandyColor: Int] = [:]
-        for candy in candies { counts[candy.color, default: 0] += 1 }
-        for (color, count) in counts where count % 3 != 0 {
-            throw .colorCountNotMultipleOfThree(color)
+        // Color changers and bombs change which colors reach the jar, so only plain levels are counted.
+        let dynamicColors = candies.contains { $0.has(.colorChanger) || $0.has(.bomb) }
+        if !dynamicColors {
+            var counts: [CandyColor: Int] = [:]
+            for candy in candies { counts[candy.color, default: 0] += 1 }
+            for (color, count) in counts.sorted(by: { $0.key < $1.key }) where count % 3 != 0 {
+                throw .colorCountNotMultipleOfThree(color)
+            }
         }
+        if candies.contains(where: { $0.has(.locked) }), !candies.contains(where: { $0.has(.key) }) {
+            throw .lockWithoutKey
+        }
+        if let timeLimit, timeLimit < 5 { throw .badTimeLimit }
         let cellOwner = Dictionary(
             candies.flatMap { candy in candy.cells.map { ($0, candy.id) } },
             uniquingKeysWith: { first, _ in first }
@@ -141,7 +171,7 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, width, height, bagCapacity, hearts, tutorial, hard, candies, poles, stats
+        case id, width, height, bagCapacity, hearts, tutorial, hard, candies, poles, mirrors, timeLimit, changerColors, stats
     }
 
     public init(from decoder: Decoder) throws {
@@ -155,6 +185,9 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
         hard = try c.decodeIfPresent(Bool.self, forKey: .hard) ?? false
         candies = try c.decode([Candy].self, forKey: .candies)
         poles = try c.decodeIfPresent([GridPoint].self, forKey: .poles) ?? []
+        mirrors = try c.decodeIfPresent([Mirror].self, forKey: .mirrors) ?? []
+        timeLimit = try c.decodeIfPresent(Int.self, forKey: .timeLimit)
+        changerColors = try c.decodeIfPresent([CandyColor].self, forKey: .changerColors)
         stats = try c.decodeIfPresent(LevelStats.self, forKey: .stats)
     }
 
@@ -169,13 +202,16 @@ public struct Level: Hashable, Codable, Sendable, Identifiable {
         if hard { try c.encode(true, forKey: .hard) }
         try c.encode(candies, forKey: .candies)
         if !poles.isEmpty { try c.encode(poles, forKey: .poles) }
+        if !mirrors.isEmpty { try c.encode(mirrors, forKey: .mirrors) }
+        try c.encodeIfPresent(timeLimit, forKey: .timeLimit)
+        try c.encodeIfPresent(changerColors, forKey: .changerColors)
         try c.encodeIfPresent(stats, forKey: .stats)
     }
 }
 
 /// Elements that can appear on a board, used for world themes and the level report.
 public enum BoardElement: String, CaseIterable, Codable, Sendable, Comparable {
-    case pole, chocolateBar, wrapped, caramel, iced, rotating
+    case pole, mirror, chocolateBar, wrapped, lock, caramel, bomb, iced, colorChanger, rotating
 
     public init(_ feature: CandyFeature) {
         switch feature {
@@ -183,6 +219,9 @@ public enum BoardElement: String, CaseIterable, Codable, Sendable, Comparable {
         case .rotating: self = .rotating
         case .iced: self = .iced
         case .wrapped: self = .wrapped
+        case .colorChanger: self = .colorChanger
+        case .bomb: self = .bomb
+        case .key, .locked: self = .lock
         }
     }
 

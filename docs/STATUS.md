@@ -114,6 +114,34 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
 - **App-icoon** is een placeholder in code getekend (roze hartgummy met pijl op crème), zoals het plan
   voorschrijft voor fase 1–3.
 
+## Klok en nieuwe elementen (na de eerste TestFlight)
+
+Op verzoek van de eigenaar, en anders dan het oorspronkelijke plan:
+
+- **Elk level heeft een klok.** Hij start pas bij de eerste tik, zodat je het bord rustig kunt bekijken,
+  en staat stil tijdens introkaarten, de uitslagkaart en als de app op de achtergrond staat. Tijd op =
+  verloren, met een aanbod "+15 seconden" (beloningsvideo). De tijd volgt uit de oplossing van de solver:
+  12 s + per tik 3,2 s (makkelijk), 2,8 s (middel) of 2,4 s (moeilijk), afgerond op 5 s, minimaal 30 s;
+  de tutorial krijgt 6 s per tik (minimaal 45 s). Let op: een vaste klok is precies wat Block Out! doet.
+- **Vier nieuwe elementen**, in de regels, de solver en de generator:
+  - *Bumper*: buigt een vliegend snoepje een kwartslag af (chocoladerepen kunnen niet afbuigen).
+  - *Slot & sleutel*: snoepjes op slot gaan open zodra het sleutel-snoepje van het bord is.
+  - *Bom*: neemt de snoepjes ernaast mee; die gaan niet in de pot.
+  - *Kleurwisselaar*: krijgt na elke zet de volgende kleur van het level.
+- **Elke halve wereld een nieuw element** (10 elementen, 8 werelden):
+
+| Wereld | Eerste helft | Tweede helft |
+|---|---|---|
+| 1. Gummy Garden | – | – |
+| 2. Lollipop Lane | lolly-paal | bumper |
+| 3. Chocolate Falls | chocoladereep | verpakt snoepje |
+| 4. Marshmallow Mountains | slot & sleutel | karamel |
+| 5. Caramel Canyon | bom | ijsblokje |
+| 6. Cotton Candy Clouds | kleurwisselaar | draaisnoepje |
+| 7–8 | alles door elkaar | |
+
+- **Duidelijk moeilijker**: de curve ligt zo'n 25% hoger (gemiddeld makkelijk 47, middel 58, moeilijk 73 van 100).
+
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;

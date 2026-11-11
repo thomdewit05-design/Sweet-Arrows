@@ -30,23 +30,40 @@ public struct World: Hashable, Sendable, Identifiable {
     public var lastLevel: Int { firstLevel + World.sizes[id - 1] - 1 }
     public var levels: ClosedRange<Int> { firstLevel...lastLevel }
 
-    /// The element this world introduces (nil for the first and the last world).
-    public var newElement: BoardElement? {
+    /// Elements this world introduces: one at its first level, one halfway.
+    public var newElements: [BoardElement] {
         switch theme {
-        case .gummyGarden, .iceCreamIsland: nil
-        case .lollipopLane: .pole
-        case .chocolateFalls: .chocolateBar
-        case .marshmallowMountains: .wrapped
-        case .caramelCanyon: .caramel
-        case .cottonCandyClouds: .iced
-        case .licoriceLab: .rotating
+        case .gummyGarden, .licoriceLab, .iceCreamIsland: []
+        case .lollipopLane: [.pole, .mirror]
+        case .chocolateFalls: [.chocolateBar, .wrapped]
+        case .marshmallowMountains: [.lock, .caramel]
+        case .caramelCanyon: [.bomb, .iced]
+        case .cottonCandyClouds: [.colorChanger, .rotating]
         }
     }
 
-    /// Every element a level in this world may use.
+    /// First element this world introduces (shown on the map).
+    public var newElement: BoardElement? { newElements.first }
+
+    /// Level at which each new element appears for the first time.
+    public var introductions: [(level: Int, element: BoardElement)] {
+        let halfway = firstLevel + World.sizes[id - 1] / 2
+        return zip([firstLevel, halfway], newElements).map { ($0, $1) }
+    }
+
+    /// Every element unlocked by the end of this world.
     public var availableElements: [BoardElement] {
-        let order: [BoardElement] = [.pole, .chocolateBar, .wrapped, .caramel, .iced, .rotating]
-        return Array(order.prefix(min(id - 1, order.count)))
+        World.all.prefix(id).flatMap(\.newElements)
+    }
+
+    /// Elements a given level may use (everything introduced up to and including it).
+    public static func availableElements(atLevel level: Int) -> [BoardElement] {
+        all.flatMap(\.introductions).filter { $0.level <= level }.map(\.element)
+    }
+
+    /// The element introduced exactly at this level, if any.
+    public static func introducedElement(atLevel level: Int) -> BoardElement? {
+        all.flatMap(\.introductions).first { $0.level == level }?.element
     }
 
     public static func number(forLevel level: Int) -> Int {

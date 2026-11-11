@@ -96,7 +96,7 @@ struct GeneratorTests {
     }
 
     @Test func featuredElementAppears() throws {
-        for id in (2...7).map({ World(id: $0).firstLevel }) {
+        for id in World.all.flatMap(\.introductions).map(\.level) {
             let plan = Curve.plan(for: id)
             let level = try #require(fast.level(for: plan, seed: 1))
             #expect(level.elements.contains(plan.featured!), "level \(id) should show \(plan.featured!)")
@@ -120,9 +120,42 @@ struct GeneratorTests {
         let daily = try await LevelPack.generateDaily(count: 3, seed: 5, generator: fast)
         #expect(daily.map(\.id) == [100_001, 100_002, 100_003])
         #expect(LevelPack.verify(daily, daily: true).isEmpty)
-        #expect(LevelPack.dailyPlan(number: 1).elements.count == 6)
+        #expect(LevelPack.dailyPlan(number: 1).elements.count == BoardElement.allCases.count)
         #expect(LevelPack.dailyPlan(number: 7).target > LevelPack.dailyPlan(number: 1).target)
         #expect(LevelPack.dailyFileName(for: 7) == "daily-007.json")
+    }
+
+    @Test func everyLevelGetsAClock() {
+        let level = Level(id: 1, width: 3, height: 3, candies: [])
+        var stats = level
+        stats.stats = LevelStats(solutionLength: 20, pitfalls: 0, solutions: 1, solutionsCapped: false,
+                                 peakBag: 1, difficulty: 30, solution: [])
+        #expect(TimeLimit.seconds(for: stats, slot: .easy) == 80)
+        #expect(TimeLimit.seconds(for: stats, slot: .hard) == 60)
+        #expect(TimeLimit.seconds(for: stats, slot: .tutorial) > TimeLimit.seconds(for: stats, slot: .easy))
+        #expect(TimeLimit.seconds(for: level, slot: .hard) == 30)  // never below 30 s
+    }
+
+    @Test func newElementsCanBeBuilt() {
+        var rng = SplitMix64(seed: 11)
+        var params = Generator.Parameters(width: 6, height: 7, candies: 21, colors: 4, bagLimit: 3)
+        params.mirrors = 2
+        params.bomb = 0.15
+        params.colorChanger = 0.15
+        params.keyChance = 1
+        params.locked = 0.3
+        var seen = Set<BoardElement>()
+        for _ in 0..<30 {
+            guard let level = fast.build(params, id: 99, rng: &rng) else { continue }
+            #expect((try? level.validate()) != nil)
+            seen.formUnion(level.elements)
+            if case .solved(let analysis) = Solver(level: level, configuration: fast.solverConfiguration).solve() {
+                var game = Game(level: level)
+                for id in analysis.solution { game.tap(id) }
+                #expect(game.status == .won)
+            }
+        }
+        #expect(seen.isSuperset(of: [.mirror, .bomb, .colorChanger, .lock]))
     }
 
     @Test func verifyCatchesTamperedLevels() throws {

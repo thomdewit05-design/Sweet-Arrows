@@ -13,6 +13,7 @@ enum RewardReason: String, Sendable {
     case hint
     case doubleCoins = "double_coins"
     case extraHearts = "extra_hearts"
+    case extraTime = "extra_time"
     case dailyRewardDouble = "daily_reward_double"
 }
 

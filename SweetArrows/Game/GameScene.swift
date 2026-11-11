@@ -169,7 +169,7 @@ final class GameScene: SKScene {
         candyLayer.removeAllChildren()
         nodes.removeAll()
         poleNodes.forEach { $0.removeFromParent() }
-        poleNodes = level.poles.map(makePole)
+        poleNodes = level.poles.map(makePole) + level.mirrors.map(makeMirror)
         poleNodes.forEach(candyLayer.addChild)
 
         for state in session.game.remainingCandies {
@@ -204,6 +204,29 @@ final class GameScene: SKScene {
         candy.addChild(swirlNode)
         node.addChild(stick)
         node.addChild(candy)
+        return node
+    }
+
+    /// A striped candy-cane bumper lying diagonally across its cell.
+    private func makeMirror(_ mirror: Mirror) -> SKNode {
+        let node = SKNode()
+        node.position = point(for: mirror.position)
+        let length = cell * 1.05
+        let bar = SKShapeNode(rectOf: CGSize(width: length, height: cell * 0.16), cornerRadius: cell * 0.08)
+        bar.fillColor = .white
+        bar.strokeColor = UIColor(hex: 0xE0C9B0)
+        bar.lineWidth = 1.5
+        for i in 0..<5 {
+            let stripe = SKShapeNode(rectOf: CGSize(width: cell * 0.07, height: cell * 0.16))
+            stripe.fillColor = UIColor(hex: 0xFF5C8A)
+            stripe.strokeColor = .clear
+            stripe.position = CGPoint(x: -length / 2 + length * (CGFloat(i) + 0.5) / 5, y: 0)
+            stripe.zRotation = 0.5
+            bar.addChild(stripe)
+        }
+        // "/" goes up to the right, "\" up to the left.
+        bar.zRotation = mirror.kind == .slash ? .pi / 4 : -.pi / 4
+        node.addChild(bar)
         return node
     }
 
@@ -247,12 +270,20 @@ final class GameScene: SKScene {
             haptics.tap()
         case .bounced(let bounce):
             animateBounce(bounce)
-        case .frozen(let id):
+        case .frozen(let id), .locked(let id):
             nodes[id]?.shake()
             haptics.bonk()
         case .ignored:
             break
         }
+        if !report.exploded.isEmpty {
+            for id in report.exploded { nodes.removeValue(forKey: id)?.explode() }
+            audio.play(.pop)
+            haptics.pop()
+        }
+        for id in report.unlocked { nodes[id]?.unlock() }
+        if !report.unlocked.isEmpty { audio.play(.crack) }
+        for (id, color) in report.recolored { nodes[id]?.recolor(to: color) }
         for (id, direction) in report.rotated { nodes[id]?.turn(to: direction, animated: true) }
         for id in report.melted { nodes[id]?.melt() }
         if !report.melted.isEmpty { audio.play(.melt) }
@@ -267,16 +298,12 @@ final class GameScene: SKScene {
         let move = LaunchedMove(
             launch: launch, bagAfter: session.game.bag, comboStep: session.comboStep, number: launchCount
         )
-        let vector = CandyShapes.vector(for: launch.direction)
-        let distance = CGFloat(launch.exitDistance) * cell + cell * 0.6
-        // Gummy wiggle, then a quick ease-out slide (150–250 ms) off the counter.
+        // Gummy wiggle, then a quick ease-out slide (150–300 ms) along the route, bending on bumpers.
         let wiggle = SKAction.sequence([
             .scaleX(to: 1.15, y: 0.87, duration: 0.05),
             .scaleX(to: 0.92, y: 1.08, duration: 0.05),
         ])
-        let slide = SKAction.moveBy(x: vector.dx * distance, y: vector.dy * distance,
-                                    duration: min(0.15 + 0.012 * Double(launch.exitDistance), 0.25))
-        slide.timingMode = .easeOut
+        let slide = routeAction(for: node, launch: launch)
         node.zPosition = 20
         node.run(.sequence([wiggle, .group([slide, .scale(to: 1, duration: 0.1)])])) { [weak self, weak node] in
             MainActor.assumeIsolated {
@@ -284,6 +311,57 @@ final class GameScene: SKScene {
                 self.flyToJar(node, move: move)
             }
         }
+    }
+
+    /// Moves through every turn of the route and a little past the edge.
+    private func routeAction(for node: CandyNode, launch: Launch) -> SKAction {
+        guard let first = launch.route.first else { return .wait(forDuration: 0) }
+        // The node is centred on its cells; the route follows the anchor cell.
+        let anchorPoint = point(for: launch.route.count > 0 ? previousCell(first, launch: launch) : first)
+        let offset = CGVector(dx: node.position.x - anchorPoint.x, dy: node.position.y - anchorPoint.y)
+        var corners: [CGPoint] = []
+        for (index, cellPoint) in launch.route.enumerated() {
+            let isLast = index == launch.route.count - 1
+            let next = isLast ? nil : launch.route[index + 1]
+            let prev = index == 0 ? previousCell(first, launch: launch) : launch.route[index - 1]
+            let turns = next.map { ($0.x - cellPoint.x, $0.y - cellPoint.y) != (cellPoint.x - prev.x, cellPoint.y - prev.y) } ?? false
+            if turns || isLast {
+                let p = point(for: cellPoint)
+                corners.append(CGPoint(x: p.x + offset.dx, y: p.y + offset.dy))
+            }
+        }
+        // Overshoot past the edge so the candy clearly leaves the counter.
+        let exit = CandyShapes.vector(for: launch.route.count >= 2
+            ? direction(from: launch.route[launch.route.count - 2], to: launch.route[launch.route.count - 1])
+            : launch.direction)
+        if let last = corners.last {
+            corners[corners.count - 1] = CGPoint(x: last.x + exit.dx * cell * 0.6, y: last.y + exit.dy * cell * 0.6)
+        }
+        let total = min(0.15 + 0.012 * Double(launch.route.count), 0.3)
+        var actions: [SKAction] = []
+        var from = node.position
+        let lengths = corners.map { corner -> CGFloat in
+            defer { from = corner }
+            return hypot(corner.x - from.x, corner.y - from.y)
+        }
+        let sum = max(lengths.reduce(0, +), 1)
+        for (corner, length) in zip(corners, lengths) {
+            let step = SKAction.move(to: corner, duration: total * Double(length / sum))
+            actions.append(step)
+        }
+        actions.last?.timingMode = .easeOut
+        return .sequence(actions)
+    }
+
+    /// The cell the candy starts from (one step back along its first route cell).
+    private func previousCell(_ first: GridPoint, launch: Launch) -> GridPoint {
+        GridPoint(first.x - launch.direction.dx, first.y - launch.direction.dy)
+    }
+
+    private func direction(from a: GridPoint, to b: GridPoint) -> Direction {
+        if b.x > a.x { return .right }
+        if b.x < a.x { return .left }
+        return b.y > a.y ? .down : .up
     }
 
     /// What the jar should show once a launched candy lands.

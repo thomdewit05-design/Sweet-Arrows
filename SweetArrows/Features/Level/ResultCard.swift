@@ -20,6 +20,7 @@ struct ResultCard: View {
     let onExtraSlot: () -> Void
     let onExtraSlotAd: () -> Void
     let onExtraHearts: () -> Void
+    let onExtraTime: () -> Void
     let onHome: () -> Void
 
     var body: some View {
@@ -30,6 +31,7 @@ struct ResultCard: View {
                 case .won: won
                 case .lost(.bagFull): bagFull
                 case .lost(.outOfHearts): outOfHearts
+                case .lost(.outOfTime): outOfTime
                 case .playing: EmptyView()
                 }
             }
@@ -147,6 +149,28 @@ struct ResultCard: View {
         Button("Try again", action: onRetry)
             .font(Theme.body())
             .foregroundStyle(Theme.inkSoft)
+    }
+
+    @ViewBuilder private var outOfTime: some View {
+        Image(systemName: "timer")
+            .font(.system(size: 44, weight: .bold))
+            .foregroundStyle(Theme.heart)
+        Text("Time's up!")
+            .font(Theme.title(28))
+            .foregroundStyle(Theme.ink)
+        Text("So close. Want 15 more seconds?")
+            .font(Theme.body())
+            .foregroundStyle(Theme.inkSoft)
+            .multilineTextAlignment(.center)
+        if adReady {
+            Button(action: onExtraTime) {
+                Label("+15 seconds", systemImage: "play.rectangle.fill")
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+            .accessibilityIdentifier("extraTimeButton")
+        }
+        Button("Try again", action: onRetry)
+            .buttonStyle(CandyButtonStyle())
     }
 
     @ViewBuilder private var outOfHearts: some View {
