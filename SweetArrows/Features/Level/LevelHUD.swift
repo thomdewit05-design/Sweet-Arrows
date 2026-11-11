@@ -66,7 +66,11 @@ struct BoosterBar: View {
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Theme.ink)
                     .frame(width: 52, height: 40)
-                    .background(RoundedRectangle(cornerRadius: 14).fill(.white).shadow(color: Theme.ink.opacity(0.12), radius: 3, y: 2))
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(.white)
+                            .shadow(color: Theme.ink.opacity(0.12), radius: 3, y: 2)
+                    )
                     .overlay(alignment: .topTrailing) {
                         Group {
                             if stock > 0 {

@@ -68,7 +68,8 @@ public struct DailyPuzzleState: Hashable, Codable, Sendable {
 
     /// Wordle-style text to share: no spoilers, just how it went.
     public static func shareText(puzzle: Int, result: DailyResult, streak: Int) -> String {
-        let stars = String(repeating: "⭐", count: result.stars) + String(repeating: "▫️", count: max(3 - result.stars, 0))
+        let stars = String(repeating: "⭐", count: result.stars)
+            + String(repeating: "▫️", count: max(3 - result.stars, 0))
         let minutes = result.seconds / 60, seconds = result.seconds % 60
         let time = minutes > 0 ? "\(minutes)m \(seconds)s" : "\(seconds)s"
         return "Sweet Arrows Daily #\(puzzle) 🍬\n\(stars)  \(result.taps) taps · \(time)" + (streak > 1 ? " · 🔥\(streak)" : "")

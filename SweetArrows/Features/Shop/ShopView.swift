@@ -256,7 +256,10 @@ private struct CosmeticCard: View {
                 ForEach([CandyColor.strawberry, .lemon, .blueberry], id: \.self) { color in
                     Circle()
                         .fill(item == .pastelCandy ? Theme.color(color).opacity(0.6) : Theme.color(color))
-                        .overlay(Circle().stroke(item == .goldenCandy ? Theme.gold : .white, lineWidth: item == .goldenCandy ? 3 : 2))
+                        .overlay(Circle().stroke(
+                            item == .goldenCandy ? Theme.gold : .white,
+                            lineWidth: item == .goldenCandy ? 3 : 2
+                        ))
                         .overlay(alignment: .topTrailing) {
                             if item == .sparkleCandy {
                                 Image(systemName: "sparkle").font(.system(size: 10)).foregroundStyle(.white)

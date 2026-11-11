@@ -11,6 +11,7 @@ struct TrackingPrimerView: View {
                 .font(Theme.title(26))
                 .foregroundStyle(Theme.ink)
                 .multilineTextAlignment(.center)
+            // swiftlint:disable:next line_length
             Text("Ads pay for the game. iOS will now ask if apps may track you. Allowing it shows you more relevant ads; either way you can keep playing everything.")
                 .font(Theme.body())
                 .foregroundStyle(Theme.inkSoft)
