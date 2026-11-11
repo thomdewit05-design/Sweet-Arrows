@@ -1,0 +1,5 @@
+// Settings shared by Debug and Release.
+// Published under your own name. Fill in DEVELOPMENT_TEAM (same Apple Developer account as Skipilot).
+SWEETARROWS_BUNDLE_ID = com.lucthomasdewit.sweetarrows
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic

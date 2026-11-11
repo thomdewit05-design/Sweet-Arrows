@@ -1,0 +1,69 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "CFBundleDisplayName": {
+      "shouldTranslate": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows"
+          }
+        }
+      }
+    },
+    "NSUserTrackingUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows uses this to show you more relevant ads. The game stays fully playable either way."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows gebruikt dit om je relevantere advertenties te tonen. Het spel blijft hoe dan ook volledig speelbaar."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows nutzt dies, um dir passendere Werbung zu zeigen. Das Spiel bleibt so oder so voll spielbar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows l'utilise pour te montrer des pubs plus pertinentes. Le jeu reste entièrement jouable dans tous les cas."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows lo usa para mostrarte anuncios más relevantes. El juego sigue siendo totalmente jugable de cualquier forma."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Sweet Arrows usa isso para mostrar anúncios mais relevantes. O jogo continua totalmente jogável de qualquer forma."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows bunu sana daha ilgili reklamlar göstermek için kullanır. Oyun her durumda tamamen oynanabilir."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows memakai ini untuk menampilkan iklan yang lebih relevan. Game tetap bisa dimainkan sepenuhnya."
+          }
+        }
+      }
+    }
+  }
+}

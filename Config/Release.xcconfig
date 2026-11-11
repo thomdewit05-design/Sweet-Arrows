@@ -1,0 +1,11 @@
+#include "Shared.xcconfig"
+
+// Test id as a fallback so the project always builds.
+GAD_APPLICATION_ID = ca-app-pub-3940256099942544~1458002511
+AD_UNIT_REWARDED = ca-app-pub-3940256099942544/1712485313
+AD_UNIT_INTERSTITIAL = ca-app-pub-3940256099942544/4411468910
+AD_UNIT_BANNER = ca-app-pub-3940256099942544/2435281174
+AD_UNIT_APP_OPEN = ca-app-pub-3940256099942544/5575463023
+
+// Real ad ids live in Secrets.xcconfig, which is NOT in git (see Secrets.example.xcconfig).
+#include? "Secrets.xcconfig"
