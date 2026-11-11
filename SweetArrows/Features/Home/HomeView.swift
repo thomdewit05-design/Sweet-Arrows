@@ -15,6 +15,7 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     topBar(progress)
+                        .popIn(delay: 0)
                     VStack(spacing: 2) {
                         JellyView(size: 104)
                             .padding(.bottom, 6)
@@ -28,8 +29,10 @@ struct HomeView: View {
                             .shadow(color: Theme.ink.opacity(0.25), radius: 2, y: 1)
                     }
                     .padding(.top, 8)
+                    .popIn(delay: 0.08)
 
                     statsRow(progress)
+                        .popIn(delay: 0.16)
 
                     Button {
                         model.path.append(.endless)
@@ -40,12 +43,15 @@ struct HomeView: View {
                             .padding(.vertical, 6)
                     }
                     .buttonStyle(CandyButtonStyle())
+                    .shineSweep()
                     .scaleEffect(pulse ? 1.04 : 1)
                     .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
                     .accessibilityIdentifier("playButton")
+                    .popIn(delay: 0.24)
 
                     if !progress.missions.missions.isEmpty {
                         missionsCard(progress.missions)
+                            .popIn(delay: 0.32)
                     }
 
                     if progress.showsMetaFeatures {
@@ -61,6 +67,7 @@ struct HomeView: View {
                                 showDailyReward = true
                             } label: {
                                 Label("Gift", systemImage: "gift.fill")
+                                    .symbolEffect(.pulse, isActive: progress.dailyReward.claimableStep(today: model.today) != nil)
                             }
                             .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
                             .overlay(alignment: .topTrailing) {
@@ -72,6 +79,7 @@ struct HomeView: View {
                             }
                             .accessibilityIdentifier("giftButton")
                         }
+                        .popIn(delay: 0.4)
                     }
                 }
                 .padding(.horizontal)
@@ -204,6 +212,9 @@ struct StatChip: View {
 
 struct CoinBadge: View {
     let coins: Int
+    /// Count up from zero when it appears (result cards).
+    var countUp = false
+    @State private var bump = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -211,10 +222,19 @@ struct CoinBadge: View {
                 .fill(Theme.gold)
                 .frame(width: 22, height: 22)
                 .overlay(Circle().stroke(.white, lineWidth: 2))
-            Text("\(coins)")
+                .rotation3DEffect(.degrees(bump ? 360 : 0), axis: (x: 0, y: 1, z: 0))
+            RollingNumber(value: coins, countUp: countUp)
                 .font(Theme.heading(18))
                 .foregroundStyle(Theme.ink)
-                .monospacedDigit()
+        }
+        .scaleEffect(bump ? 1.15 : 1)
+        .onChange(of: coins) { old, new in
+            guard new > old else { return }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) { bump = true }
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(450))
+                withAnimation(.spring(response: 0.3)) { bump = false }
+            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -228,6 +248,9 @@ struct CoinBadge: View {
 struct JellyView: View {
     var size: CGFloat = 100
     @State private var squish = false
+    @State private var blink = false
+    @State private var wiggle = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         if let artwork = UIImage(named: "mascot") {
@@ -276,14 +299,39 @@ struct JellyView: View {
         }
         .scaleEffect(x: squish ? 1.05 : 1, y: squish ? 0.95 : 1, anchor: .bottom)
         .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: squish)
+        .rotationEffect(.degrees(wiggle ? 12 : 0))
         .onAppear { squish = true }
+        .onTapGesture { poke() }
+        .task { await blinkLoop() }
         .accessibilityHidden(true)
+    }
+
+    /// Blinks every few seconds.
+    private func blinkLoop() async {
+        guard !reduceMotion else { return }
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(Double.random(in: 2.5...4.5)))
+            withAnimation(.easeInOut(duration: 0.08)) { blink = true }
+            try? await Task.sleep(for: .milliseconds(120))
+            withAnimation(.easeInOut(duration: 0.08)) { blink = false }
+        }
+    }
+
+    /// A happy wiggle when tapped.
+    private func poke() {
+        guard !reduceMotion else { return }
+        withAnimation(.spring(response: 0.18, dampingFraction: 0.3)) { wiggle = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(180))
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.4)) { wiggle = false }
+        }
     }
 
     private var eye: some View {
         Ellipse()
             .fill(.white)
             .frame(width: size * 0.12, height: size * 0.15)
+            .scaleEffect(y: blink ? 0.1 : 1)
             .overlay(
                 Ellipse()
                     .fill(Theme.ink)

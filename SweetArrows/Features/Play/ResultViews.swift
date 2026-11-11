@@ -27,6 +27,7 @@ struct ReviveCard: View {
                     Label("Keep going", systemImage: "play.rectangle.fill")
                 }
                 .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                .shineSweep(every: 2)
                 .accessibilityIdentifier("reviveButton")
                 Button("No thanks", action: onDecline)
                     .font(Theme.body())
@@ -59,20 +60,27 @@ struct RunResultCard: View {
                         .font(Theme.title(28))
                         .foregroundStyle(outcome.newRecord ? Theme.heart : Theme.ink)
                         .multilineTextAlignment(.center)
-                    Text("\(summary.score)")
+                    RollingNumber(value: summary.score, countUp: true, duration: 1.0)
                         .font(Theme.title(56))
                         .foregroundStyle(outcome.newRecord ? Theme.heart : Theme.ink)
-                        .monospacedDigit()
                         .accessibilityIdentifier("resultScore")
+                        .overlay {
+                            if outcome.newRecord { ConfettiBurst() }
+                        }
                     recordLine
+                        .popIn(delay: 0.5)
                     levelBlock
-                    ForEach(outcome.levelRewards, id: \.level) { reward in
+                        .popIn(delay: 0.6)
+                    ForEach(Array(outcome.levelRewards.enumerated()), id: \.element.level) { index, reward in
                         LevelUpRow(reward: reward)
+                            .popIn(delay: 0.9 + Double(index) * 0.15)
+                            .overlay { ConfettiBurst(pieces: 18) }
                     }
                     if !outcome.finishedMissions.isEmpty {
                         VStack(spacing: 8) {
-                            ForEach(outcome.finishedMissions, id: \.kind) { mission in
+                            ForEach(Array(outcome.finishedMissions.enumerated()), id: \.element.kind) { index, mission in
                                 MissionRow(mission: mission, compact: true)
+                                    .popIn(delay: 1.1 + Double(index) * 0.12)
                             }
                             if outcome.allMissionsDone, outcome.missionReward.coins > 0 {
                                 Label("All missions done: bonus!", systemImage: "gift.fill")
@@ -81,10 +89,15 @@ struct RunResultCard: View {
                             }
                         }
                     }
-                    if outcome.totalCoins > 0 { CoinBadge(coins: outcome.totalCoins) }
+                    if outcome.totalCoins > 0 {
+                        CoinBadge(coins: outcome.totalCoins, countUp: true)
+                            .popIn(delay: 1.3)
+                    }
                     Button("Play again", action: onAgain)
                         .buttonStyle(CandyButtonStyle())
+                        .shineSweep()
                         .accessibilityIdentifier("playAgainButton")
+                        .popIn(delay: 0.4)
                     Button("Home", action: onHome)
                         .font(Theme.body())
                         .foregroundStyle(Theme.inkSoft)
@@ -196,6 +209,7 @@ struct XPBar: View {
             }
         }
         .frame(height: height)
+        .animation(.easeOut(duration: 0.6), value: fraction)
         .accessibilityElement()
         .accessibilityValue(Text("\(Int(fraction * 100)) %"))
     }
@@ -218,6 +232,8 @@ struct LevelBadge: View {
                 .offset(y: size * 0.04)
         }
         .frame(width: size, height: size)
+        .rotation3DEffect(.degrees(Double(level) * 360), axis: (x: 0, y: 1, z: 0))
+        .animation(.spring(response: 0.8, dampingFraction: 0.6), value: level)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Level \(level)"))
     }
@@ -231,6 +247,8 @@ struct MissionRow: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: mission.isDone ? "checkmark.circle.fill" : mission.kind.icon)
+                .symbolEffect(.bounce, value: mission.isDone)
+                .contentTransition(.symbolEffect(.replace))
                 .font(.system(size: compact ? 18 : 22, weight: .bold))
                 .foregroundStyle(mission.isDone ? Color(hex: 0x3DDC97) : Theme.heart)
                 .frame(width: 28)

@@ -129,6 +129,15 @@ Op verzoek van de eigenaar ("alles mag") zodat spelers blijven terugkomen:
 - **Snoepjes:** donkerdere onderkant en extra glimlichtje voor meer diepte, en een zachte "ademhaling" als ze
   stilliggen (uit met Beweging verminderen). Combo-koorts kleurt nu de achtergrond roze in plaats van de kleur te wisselen.
 
+- **Animaties in de menu's** (`App/Animations.swift`): onderdelen poppen na elkaar binnen (startscherm,
+  winkel, uitslag, dagbeloning); er strijkt een glimlicht over de grote knoppen; de score en munten tellen op
+  op de uitslagkaart; konfetti bij een record, een level-up en een geclaimde dagbeloning; de munt draait en de
+  teller wipt als je munten krijgt; het niveausterretje draait bij een nieuw niveau; de XP- en opdrachtbalken
+  lopen vloeiend vol; een vinkje springt bij een gehaalde opdracht; het cadeau en de beloning van vandaag
+  bewegen tot je ze ophaalt; boosterpictogrammen springen als je voorraad verandert; kaarten en tegels geven
+  mee als je erop drukt. Het sterretje knippert met zijn ogen en wiebelt als je erop tikt.
+  Met "Beweging verminderen" aan staat dit allemaal stil.
+
 ### Echte illustraties later toevoegen
 
 Alles is nu met code getekend. Komen er later echte tekeningen (bijv. van een illustrator), zet ze dan als

@@ -31,18 +31,23 @@ struct DailyRewardView: View {
                     RewardTile(
                         day: day, reward: DailyRewardState.rewards[day - 1],
                         isToday: day == highlighted,
-                        isDone: day < highlighted || (step == nil && day == highlighted)
+                        isDone: day < highlighted || (step == nil && day == highlighted),
+                        waiting: day == highlighted && step != nil && claimed == nil
                     )
+                    .popIn(delay: Double(day) * 0.05)
                 }
             }
             if let claimed {
                 Text("+\(claimed.coins) coins").font(Theme.heading()).foregroundStyle(Theme.ink)
                     .opacity(claimed.coins > 0 ? 1 : 0)
+                    .popIn()
+                    .overlay { ConfettiBurst(pieces: 30) }
                 Button("Close") { dismiss() }
                     .buttonStyle(CandyButtonStyle())
             } else if step != nil {
                 Button("Claim") { claim(double: false) }
                     .buttonStyle(CandyButtonStyle())
+                    .shineSweep(every: 2.4)
                     .accessibilityIdentifier("claimDailyReward")
                 if model.ads.isRewardedReady {
                     Button {
@@ -75,7 +80,7 @@ struct DailyRewardView: View {
             granted = final
         }
         guard let granted else { return }
-        claimed = granted
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) { claimed = granted }
         model.audio.play(.coin)
         model.haptics.success()
         model.analytics.log(.dailyRewardClaimed(day: model.save.progress.dailyReward.lastClaimedStep, doubled: double))
@@ -87,6 +92,9 @@ private struct RewardTile: View {
     let reward: Reward
     let isToday: Bool
     let isDone: Bool
+    /// Today's reward, not claimed yet: it gently bounces.
+    var waiting = false
+    @State private var bounce = false
 
     var body: some View {
         VStack(spacing: 4) {
@@ -110,11 +118,16 @@ private struct RewardTile: View {
         .overlay(alignment: .topTrailing) {
             if isDone {
                 Image(systemName: "checkmark.circle.fill")
+                    .transition(.scale.combined(with: .opacity))
                     .foregroundStyle(Color(hex: 0x3DDC97))
                     .background(Circle().fill(.white))
                     .offset(x: 4, y: -4)
             }
         }
+        .scaleEffect(bounce ? 1.06 : 1)
+        .animation(waiting ? .easeInOut(duration: 0.6).repeatForever(autoreverses: true) : .default, value: bounce)
+        .onAppear { if waiting { bounce = true } }
+        .onChange(of: waiting) { _, now in if !now { bounce = false } }
         .accessibilityElement(children: .combine)
     }
 }

@@ -30,6 +30,8 @@ struct BoosterBar: View {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(Theme.ink)
+                    .symbolEffect(.bounce, value: stock)
+                    .symbolEffect(.pulse, isActive: active == booster)
                     .frame(width: 52, height: 40)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
@@ -61,6 +63,7 @@ struct BoosterBar: View {
                     .foregroundStyle(Theme.inkSoft)
             }
         }
+        .buttonStyle(SquishButtonStyle())
         .disabled(!usable)
         .opacity(usable ? 1 : 0.45)
         .accessibilityLabel(Text(label))
