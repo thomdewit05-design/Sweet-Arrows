@@ -13,7 +13,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -63,6 +63,9 @@ targets:
       path: SweetArrows/App/Info.plist
       properties:
         CFBundleDisplayName: Sweet Arrows
+        # Without these XcodeGen writes a fixed "1.0" / "1", and every TestFlight upload after the first fails.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, nl, de, fr, es, pt-BR, tr, id]
         ITSAppUsesNonExemptEncryption: false
