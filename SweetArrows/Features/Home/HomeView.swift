@@ -4,6 +4,7 @@ import SweetArrowsCore
 struct HomeView: View {
     @Environment(AppModel.self) private var model
     @State private var showDailyReward = false
+    @State private var showTrackingPrimer = false
 
     var body: some View {
         let progress = model.save.progress
@@ -69,10 +70,24 @@ struct HomeView: View {
             DailyRewardView()
                 .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showTrackingPrimer) {
+            TrackingPrimerView {
+                showTrackingPrimer = false
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(400))
+                    await model.consent.requestTracking()
+                }
+            }
+            .presentationDetents([.medium])
+            .interactiveDismissDisabled()
+        }
         .onAppear {
-            // Daily reward pops up once a day, from level 5 on (never at the very first start).
             let progress = model.save.progress
-            if progress.showsMetaFeatures, progress.dailyReward.claimableStep(today: model.today) != nil {
+            // App Tracking Transparency: only after level 3, with our own explanation first.
+            if progress.completedLevel >= 3, model.consent.needsTrackingPrompt {
+                showTrackingPrimer = true
+            // Daily reward pops up once a day, from level 5 on (never at the very first start).
+            } else if progress.showsMetaFeatures, progress.dailyReward.claimableStep(today: model.today) != nil {
                 showDailyReward = true
             }
         }

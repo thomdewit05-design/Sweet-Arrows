@@ -17,8 +17,10 @@ struct SettingsView: View {
                 Text("Every color already has its own shape. Color-blind mode adds a letter to each candy.")
             }
             Section {
-                Button("Privacy settings") {
-                    Task { await model.consent.presentPrivacyOptions() }
+                if model.consent.privacyOptionsRequired {
+                    Button("Privacy settings") {
+                        Task { await model.consent.presentPrivacyOptions() }
+                    }
                 }
                 Button("Restore purchases") {
                     Task { await model.purchases.restorePurchases() }

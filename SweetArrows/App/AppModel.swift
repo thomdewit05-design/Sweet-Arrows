@@ -57,16 +57,28 @@ final class AppModel {
     /// The real app.
     static func live() -> AppModel {
         let isUITest = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+        let save = isUITest
+            ? SaveService(url: nil)
+            : SaveService(url: SaveService.defaultURL, cloud: NSUbiquitousKeyValueStore.default)
+        let analytics = FirebaseAnalyticsService()
+        let config = LocalConfigService()
+        let consent: ConsentService = isUITest ? PlaceholderConsentService() : GoogleConsentService()
+        let purchases = PlaceholderPurchaseService()
+        let ads: AdService = isUITest
+            ? PlaceholderAdService()
+            : GoogleAdService(
+                consent: consent, analytics: analytics, save: save, purchases: purchases,
+                today: { AppModel.currentDay() }
+            )
+        ads.updateLimits(config.values.adLimits)
         return AppModel(
-            save: isUITest
-                ? SaveService(url: nil)
-                : SaveService(url: SaveService.defaultURL, cloud: NSUbiquitousKeyValueStore.default),
+            save: save,
             levels: LevelLibrary(),
-            config: LocalConfigService(),
-            analytics: FirebaseAnalyticsService(),
-            ads: PlaceholderAdService(),
-            consent: PlaceholderConsentService(),
-            purchases: PlaceholderPurchaseService(),
+            config: config,
+            analytics: analytics,
+            ads: ads,
+            consent: consent,
+            purchases: purchases,
             gameCenter: isUITest ? OfflineGameCenterService() : GameKitService(),
             audio: SoundEffectsService(),
             haptics: CoreHapticsService()
@@ -92,9 +104,17 @@ final class AppModel {
     var settings: GameSettings { save.progress.settings }
 
     /// Today as a local calendar day number (a new day starts at the player's midnight).
-    var today: Int {
+    var today: Int { Self.currentDay() }
+
+    static func currentDay() -> Int {
         let parts = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         return DayNumber.from(year: parts.year ?? 2026, month: parts.month ?? 1, day: parts.day ?? 1)
+    }
+
+    /// First start: GDPR consent (UMP), then the ad SDK. ATT is asked later, after level 3.
+    func startConsentAndAds() async {
+        await consent.gatherConsent()
+        ads.start()
     }
 
     func dailyPuzzleNumber(day: Int) -> Int {

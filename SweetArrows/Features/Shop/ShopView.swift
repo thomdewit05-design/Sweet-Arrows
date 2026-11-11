@@ -32,6 +32,11 @@ struct ShopView: View {
             .padding()
         }
         .background(Theme.cream.ignoresSafeArea())
+        .safeAreaInset(edge: .bottom) {
+            if model.ads.canShowBanner {
+                BannerAdView(adUnitID: model.ads.bannerAdUnitID)
+            }
+        }
         .navigationTitle(Text("Shop"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { model.analytics.log(.storeOpen) }

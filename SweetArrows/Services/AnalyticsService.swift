@@ -18,6 +18,9 @@ enum AnalyticsEvent: Equatable, Sendable {
     case dailyRewardClaimed(day: Int, doubled: Bool)
     case storeOpen
     case cosmeticBought(item: String, price: Int)
+    case adOfferShown(reason: String)
+    case adOfferAccepted(reason: String)
+    case adImpression(format: String, network: String, value: Double, currency: String)
 
     var name: String {
         switch self {
@@ -31,6 +34,9 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .dailyRewardClaimed: "daily_reward_claimed"
         case .storeOpen: "store_open"
         case .cosmeticBought: "cosmetic_bought"
+        case .adOfferShown: "ad_offer_shown"
+        case .adOfferAccepted: "ad_offer_accepted"
+        case .adImpression: "ad_impression"
         }
     }
 
@@ -47,6 +53,9 @@ enum AnalyticsEvent: Equatable, Sendable {
         case let .dailyRewardClaimed(day, doubled): ["day": "\(day)", "doubled": doubled ? "1" : "0"]
         case .storeOpen: [:]
         case let .cosmeticBought(item, price): ["item": item, "price": "\(price)"]
+        case .adOfferShown(let reason), .adOfferAccepted(let reason): ["reason": reason]
+        case let .adImpression(format, network, value, currency):
+            ["format": format, "network": network, "value": String(value), "currency": currency]
         }
     }
 }

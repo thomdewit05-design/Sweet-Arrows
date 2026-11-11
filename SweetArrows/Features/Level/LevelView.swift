@@ -204,6 +204,7 @@ struct LevelView: View {
             switch mode {
             case .campaign(let id):
                 coinsEarned = model.save.recordWin(level: id, stars: session.stars)
+                model.ads.levelFinished(won: true)
                 if id <= 3 { model.analytics.log(.tutorialStep(step: id * 10)) }
             case .daily(let day):
                 let result = DailyResult(taps: session.moves, seconds: session.secondsPlayed, stars: session.stars)
@@ -218,6 +219,8 @@ struct LevelView: View {
             model.haptics.success()
             model.audio.play(.win)
         case .lost(let reason):
+            if mode.campaignLevel != nil { model.ads.levelFinished(won: false) }
+            if model.ads.isRewardedReady { model.analytics.log(.adOfferShown(reason: "continue")) }
             model.analytics.log(.levelFail(
                 level: session.level.id, reason: reason == .bagFull ? "bag_full" : "out_of_hearts", moves: session.moves
             ))

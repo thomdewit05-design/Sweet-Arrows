@@ -1,4 +1,5 @@
 import Foundation
+import SweetArrowsCore
 
 /// Values that can be changed from Firebase Remote Config without an app update.
 /// The defaults below are used offline and until Remote Config is wired up (phase 7).
@@ -16,6 +17,18 @@ struct RemoteValues: Equatable, Sendable {
     struct LevelOverride: Equatable, Sendable, Codable {
         var bagCapacity: Int?
         var hearts: Int?
+    }
+
+    /// The ad rules as `AdPolicy` uses them.
+    var adLimits: AdLimits {
+        var limits = AdLimits()
+        limits.interstitialMinLevel = interstitialMinLevel
+        limits.interstitialLevelGap = interstitialLevelGap
+        limits.interstitialMinSeconds = TimeInterval(interstitialMinSeconds)
+        limits.rewardedDailyCap = rewardedDailyCap
+        limits.bannerEnabled = bannerEnabled
+        limits.appOpenEnabled = appOpenEnabled
+        return limits
     }
 
     /// Remote Config keys, exactly as named in docs/PLAN.md.

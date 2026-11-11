@@ -22,6 +22,11 @@ struct MapView: View {
             .onAppear { proxy.scrollTo(World.number(forLevel: progress.nextLevel), anchor: .center) }
         }
         .background(Theme.cream.ignoresSafeArea())
+        .safeAreaInset(edge: .bottom) {
+            if model.ads.canShowBanner {
+                BannerAdView(adUnitID: model.ads.bannerAdUnitID)
+            }
+        }
         .navigationTitle(Text("Map"))
         .navigationBarTitleDisplayMode(.inline)
     }

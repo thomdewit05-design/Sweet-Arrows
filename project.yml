@@ -84,6 +84,11 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIAppFonts: [Fredoka-Medium.ttf, Fredoka-SemiBold.ttf, Fredoka-Bold.ttf]
         GADApplicationIdentifier: $(GAD_APPLICATION_ID)
+        SAAdUnitRewarded: $(AD_UNIT_REWARDED)
+        SAAdUnitInterstitial: $(AD_UNIT_INTERSTITIAL)
+        SAAdUnitBanner: $(AD_UNIT_BANNER)
+        SAAdUnitAppOpen: $(AD_UNIT_APP_OPEN)
+        NSUserTrackingUsageDescription: "Sweet Arrows uses this to show you more relevant ads. The game stays fully playable either way."
         SKAdNetworkItems:
           - SKAdNetworkIdentifier: cstr6suwn9.skadnetwork
     settings:

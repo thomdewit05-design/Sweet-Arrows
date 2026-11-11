@@ -3,6 +3,8 @@ import SwiftUI
 @main
 struct SweetArrowsApp: App {
     @State private var model = AppModel.live()
+    @State private var backgroundedAt: Date?
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -11,6 +13,18 @@ struct SweetArrowsApp: App {
                 .task {
                     model.analytics.log(.sessionStart)
                     model.gameCenter.authenticate()
+                    await model.startConsentAndAds()
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    switch phase {
+                    case .background:
+                        backgroundedAt = Date()
+                    case .active:
+                        if let away = backgroundedAt { model.ads.maybeShowAppOpen(awaySince: away) }
+                        backgroundedAt = nil
+                    default:
+                        break
+                    }
                 }
         }
     }
