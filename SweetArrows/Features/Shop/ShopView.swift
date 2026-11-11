@@ -1,48 +1,18 @@
-import StoreKit
 import SwiftUI
 import SweetArrowsCore
 
-/// Coins, boosters and looks, plus the real-money offers: VIP, Remove Ads, coin packs and the starter pack.
+/// Spend the coins earned by playing on boosters and new looks. No real-money purchases.
 struct ShopView: View {
     @Environment(AppModel.self) private var model
-    @State private var showVIP = false
-    @State private var busy = false
 
     var body: some View {
         let progress = model.save.progress
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     JellyView(size: 54)
                     Spacer()
                     CoinBadge(coins: progress.coins)
-                }
-                section("Without ads") {
-                    VIPCard(isVIP: model.purchases.isVIP) { showVIP = true }
-                    if !model.purchases.hasRemovedAds && !model.purchases.isVIP {
-                        StoreRow(
-                            icon: "nosign", title: "Remove Ads",
-                            subtitle: "No more interstitials, banners or app-open ads. Rewarded stays optional.",
-                            price: model.purchases.products[.removeAds]?.displayPrice
-                        ) { buy(.removeAds) }
-                    }
-                }
-                if model.showsStarterPack {
-                    section("Starter pack") {
-                        StoreRow(
-                            icon: "gift.fill", title: "Starter pack",
-                            subtitle: "1,000 coins and 3 of every booster. Only once.",
-                            price: model.purchases.products[.starterPack]?.displayPrice
-                        ) { buy(.starterPack) }
-                    }
-                }
-                section("Coins") {
-                    ForEach(StoreProduct.coinPacks, id: \.self) { pack in
-                        StoreRow(
-                            icon: "circle.fill", title: "\(pack.reward?.coins ?? 0) coins", subtitle: nil,
-                            price: model.purchases.products[pack]?.displayPrice
-                        ) { buy(pack) }
-                    }
                 }
                 section("Boosters") {
                     ForEach(Booster.allCases, id: \.self) { booster in
@@ -58,24 +28,18 @@ struct ShopView: View {
                 section("Candy styles") {
                     cosmeticsGrid(.candyStyle, progress: progress)
                 }
-                Button("Restore purchases") {
-                    Task { await model.purchases.restorePurchases() }
+                section("Backdrops") {
+                    Text("A new backdrop comes free at levels 3, 6, 10 and 15.")
+                        .font(Theme.body(13))
+                        .foregroundStyle(Theme.inkSoft)
+                    cosmeticsGrid(.backdrop, progress: progress)
                 }
-                .font(Theme.body(15))
-                .frame(maxWidth: .infinity)
             }
             .padding()
         }
-        .disabled(busy)
-        .sheet(isPresented: $showVIP) {
-            VIPStoreSheet {
-                await model.purchases.refreshEntitlements()
-                model.grantVIPBonusIfNeeded()
-                showVIP = false
-            }
-        }
+        .background(CandySkyBackground(colors: [Color(hex: 0xBDEBFF), Color(hex: 0xE4D9FF), Color(hex: 0xFFD6E6)]))
         .safeAreaInset(edge: .bottom) {
-            if model.ads.canShowBanner {
+            if model.showsBanner {
                 BannerAdView(adUnitID: model.ads.bannerAdUnitID)
             }
         }
@@ -91,30 +55,21 @@ struct ShopView: View {
                 .foregroundStyle(Theme.ink)
             content()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .candyCard()
     }
 
     private func cosmeticsGrid(_ kind: Cosmetic.Kind, progress: PlayerProgress) -> some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            ForEach(Cosmetic.items(of: kind).filter { !$0.vipOnly || model.purchases.isVIP }, id: \.self) { item in
+            ForEach(Cosmetic.items(of: kind), id: \.self) { item in
                 CosmeticCard(
                     item: item,
-                    owned: progress.ownedCosmetics.contains(item) || item.vipOnly,
-                    equipped: progress.board == item || progress.candyStyle == item,
-                    affordable: progress.coins >= item.price
+                    owned: progress.ownedCosmetics.contains(item),
+                    equipped: progress.board == item || progress.candyStyle == item || progress.backdrop == item,
+                    affordable: progress.coins >= item.price,
+                    lockedUntil: item.unlockLevel.flatMap { $0 > progress.level ? $0 : nil }
                 ) { tapped(item) }
             }
-        }
-    }
-
-    private func buy(_ product: StoreProduct) {
-        busy = true
-        Task { @MainActor in
-            if await model.purchases.purchase(product) {
-                model.audio.play(.coin)
-                model.haptics.success()
-                model.grantVIPBonusIfNeeded()
-            }
-            busy = false
         }
     }
 
@@ -133,9 +88,8 @@ struct ShopView: View {
     }
 
     private func tapped(_ item: Cosmetic) {
-        let isVIP = model.purchases.isVIP
-        if model.save.progress.ownedCosmetics.contains(item) || item.vipOnly {
-            model.save.update { $0.equip(item, isVIP: isVIP) }
+        if model.save.progress.ownedCosmetics.contains(item) {
+            model.save.update { $0.equip(item) }
             model.haptics.tap()
             return
         }
@@ -190,7 +144,11 @@ private struct CosmeticCard: View {
     let owned: Bool
     let equipped: Bool
     let affordable: Bool
+    /// Backdrops not reached yet: the level that unlocks them.
+    var lockedUntil: Int?
     let action: () -> Void
+
+    private var usable: Bool { lockedUntil == nil && (owned || affordable) }
 
     var body: some View {
         Button(action: action) {
@@ -201,7 +159,9 @@ private struct CosmeticCard: View {
                     .font(Theme.heading(15))
                     .foregroundStyle(Theme.ink)
                 Group {
-                    if equipped {
+                    if let level = lockedUntil {
+                        Label("Level \(level)", systemImage: "lock.fill")
+                    } else if equipped {
                         Label("In use", systemImage: "checkmark.circle.fill")
                     } else if owned {
                         Text("Use")
@@ -220,8 +180,8 @@ private struct CosmeticCard: View {
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(equipped ? Theme.heart : .clear, lineWidth: 3))
             )
         }
-        .disabled(!owned && !affordable)
-        .opacity(!owned && !affordable ? 0.55 : 1)
+        .disabled(!usable)
+        .opacity(usable ? 1 : 0.55)
     }
 
     @ViewBuilder private var preview: some View {
@@ -248,102 +208,10 @@ private struct CosmeticCard: View {
                         .frame(width: 30, height: 30)
                 }
             }
-        }
-    }
-}
-
-/// The VIP subscription sheet (StoreKit's SubscriptionStoreView with our own header).
-private struct VIPStoreSheet: View {
-    let purchased: @MainActor () async -> Void
-
-    var body: some View {
-        SubscriptionStoreView(productIDs: StoreProduct.vipGroup.map(\.rawValue), marketingContent: {
-            VIPHeader()
-        })
-        .subscriptionStoreButtonLabel(.multiline)
-        .storeButton(.visible, for: .restorePurchases)
-        .onInAppPurchaseCompletion { _, _ in
-            await purchased()
-        }
-    }
-}
-
-private struct VIPHeader: View {
-    var body: some View {
-        VStack(spacing: 10) {
-            JellyView(size: 70)
-            Text("Sweet Arrows VIP")
-                .font(Theme.title(28))
-                .foregroundStyle(Theme.ink)
-            Text("No ads · 3 free hints every day · golden candy style · rewards without watching")
-                .font(Theme.body())
-                .foregroundStyle(Theme.inkSoft)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-    }
-}
-
-private struct VIPCard: View {
-    let isVIP: Bool
-    let open: () -> Void
-
-    var body: some View {
-        Button(action: open) {
-            HStack(spacing: 12) {
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 26))
-                    .foregroundStyle(Theme.gold)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(isVIP ? "You are VIP" : "Sweet Arrows VIP")
-                        .font(Theme.heading(18))
-                        .foregroundStyle(.white)
-                    Text("No ads, daily hints and more. 3 days free.")
-                        .font(Theme.body(13))
-                        .foregroundStyle(.white.opacity(0.9))
-                }
-                Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(.white)
-            }
-            .padding(16)
-            .background(RoundedRectangle(cornerRadius: 20).fill(LinearGradient(
-                colors: [Color(hex: 0xA259FF), Color(hex: 0xFF5C8A)], startPoint: .leading, endPoint: .trailing
-            )))
-        }
-    }
-}
-
-private struct StoreRow: View {
-    let icon: String
-    let title: LocalizedStringKey
-    let subtitle: LocalizedStringKey?
-    let price: String?
-    let buy: () -> Void
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(icon == "circle.fill" ? Theme.gold : Theme.ink)
-                .frame(width: 44, height: 44)
-                .background(RoundedRectangle(cornerRadius: 12).fill(.white))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(Theme.heading(17))
-                    .foregroundStyle(Theme.ink)
-                if let subtitle {
-                    Text(subtitle)
-                        .font(Theme.body(13))
-                        .foregroundStyle(Theme.inkSoft)
-                }
-            }
-            Spacer()
-            Button(action: buy) {
-                Text(price ?? "…")
-                    .font(Theme.heading(15))
-            }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
-            .disabled(price == nil)
+        case .backdrop:
+            Image(uiImage: BackdropArt.image(for: item, size: CGSize(width: 120, height: 70)))
+                .resizable()
+                .clipShape(RoundedRectangle(cornerRadius: 14))
         }
     }
 }
@@ -358,7 +226,12 @@ extension Cosmetic {
         case .classicCandy: "Classic"
         case .pastelCandy: "Pastel"
         case .sparkleCandy: "Sparkle"
-        case .goldenCandy: "Golden (VIP)"
+        case .goldenCandy: "Golden"
+        case .candyMeadow: "Candy meadow"
+        case .iceCreamBay: "Ice cream bay"
+        case .chocolateRiver: "Chocolate river"
+        case .cottonSky: "Cotton candy sky"
+        case .starryNight: "Starry night"
         }
     }
 }

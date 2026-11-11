@@ -44,18 +44,7 @@ targets:
     sources:
       - path: SweetArrows
         excludes:
-          - "Resources/levels"
-          - "Resources/levels/**"
-          - "Resources/daily"
-          - "Resources/daily/**"
           - "App/SweetArrows.entitlements"
-          - "Resources/SweetArrows.storekit"
-      - path: SweetArrows/Resources/levels
-        type: folder
-        buildPhase: resources
-      - path: SweetArrows/Resources/daily
-        type: folder
-        buildPhase: resources
     dependencies:
       - package: SweetArrowsCore
       - package: GoogleMobileAds
@@ -159,7 +148,6 @@ schemes:
         SweetArrows: all
     run:
       config: Debug
-      storeKitConfiguration: SweetArrows/Resources/SweetArrows.storekit
     test:
       config: Debug
       gatherCoverageData: true

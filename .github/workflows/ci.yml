@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   core:
-    name: Rules, solver & levels (Linux)
+    name: Game rules (Linux)
     runs-on: ubuntu-latest
     container: swift:6.0-noble
     steps:
@@ -25,10 +25,6 @@ jobs:
           llvm-cov report "$BIN/SweetArrowsCorePackageTests.xctest" \
             -instr-profile "$BIN/codecov/default.profdata" \
             -ignore-filename-regex='(\.build|Tests)/' | tail -n 15
-      - name: Test LevelGen
-        run: swift test --package-path Tools/LevelGen
-      - name: Every shipped level passes the solver
-        run: swift run --package-path Tools/LevelGen -c release levelgen verify --out SweetArrows/Resources/levels
 
   lint:
     name: SwiftLint

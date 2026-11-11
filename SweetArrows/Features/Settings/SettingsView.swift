@@ -23,9 +23,6 @@ struct SettingsView: View {
                         Task { await model.consent.presentPrivacyOptions() }
                     }
                 }
-                Button("Restore purchases") {
-                    Task { await model.purchases.restorePurchases() }
-                }
             }
             Section("About") {
                 Link("Privacy policy", destination: Links.privacy)

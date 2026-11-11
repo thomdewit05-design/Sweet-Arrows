@@ -7,21 +7,16 @@ import FirebaseRemoteConfig
 
 /// Values that can be changed from Firebase Remote Config without an app update.
 /// The defaults below are used offline and when Firebase is not configured.
+/// "Level" in the key names now means a finished run (the keys keep their names so the console stays the same).
 struct RemoteValues: Equatable, Sendable {
-    var interstitialMinLevel = 8
+    var interstitialMinLevel = 4
     var interstitialLevelGap = 2
     var interstitialMinSeconds = 90
     var rewardedDailyCap = 20
     var bannerEnabled = true
+    /// Finished runs before the banner shows (0 = from the first run).
+    var bannerFromLevel = 0
     var appOpenEnabled = false
-    var starterPackLevel = 15
-    /// Per-level overrides, e.g. a bigger jar for a level with too many quitters.
-    var levelOverrides: [Int: LevelOverride] = [:]
-
-    struct LevelOverride: Equatable, Sendable, Codable {
-        var bagCapacity: Int?
-        var hearts: Int?
-    }
 
     /// The ad rules as `AdPolicy` uses them.
     var adLimits: AdLimits {
@@ -31,7 +26,9 @@ struct RemoteValues: Equatable, Sendable {
         limits.interstitialMinSeconds = TimeInterval(interstitialMinSeconds)
         limits.rewardedDailyCap = rewardedDailyCap
         limits.bannerEnabled = bannerEnabled
+        limits.bannerFromLevel = bannerFromLevel
         limits.appOpenEnabled = appOpenEnabled
+        limits.adsFromLevel = 2
         return limits
     }
 
@@ -42,9 +39,8 @@ struct RemoteValues: Equatable, Sendable {
         case interstitialMinSeconds = "interstitial_min_seconds"
         case rewardedDailyCap = "rewarded_daily_cap"
         case bannerEnabled = "banner_enabled"
+        case bannerFromLevel = "banner_from_level"
         case appOpenEnabled = "app_open_enabled"
-        case starterPackLevel = "starter_pack_level"
-        case levelOverrides = "level_overrides"
     }
 
     /// Defaults as Remote Config wants them.
@@ -55,22 +51,9 @@ struct RemoteValues: Equatable, Sendable {
             Key.interstitialMinSeconds.rawValue: NSNumber(value: interstitialMinSeconds),
             Key.rewardedDailyCap.rawValue: NSNumber(value: rewardedDailyCap),
             Key.bannerEnabled.rawValue: NSNumber(value: bannerEnabled),
+            Key.bannerFromLevel.rawValue: NSNumber(value: bannerFromLevel),
             Key.appOpenEnabled.rawValue: NSNumber(value: appOpenEnabled),
-            Key.starterPackLevel.rawValue: NSNumber(value: starterPackLevel),
-            Key.levelOverrides.rawValue: "{}" as NSString,
         ]
-    }
-
-    /// Parses `level_overrides`, e.g. {"23": {"bagCapacity": 6}, "41": {"hearts": 4}}.
-    static func parseOverrides(_ json: String) -> [Int: LevelOverride] {
-        guard let data = json.data(using: .utf8),
-              let raw = try? JSONDecoder().decode([String: LevelOverride].self, from: data)
-        else { return [:] }
-        var result: [Int: LevelOverride] = [:]
-        for (key, value) in raw {
-            if let level = Int(key) { result[level] = value }
-        }
-        return result
     }
 }
 
@@ -119,10 +102,8 @@ final class FirebaseConfigService: ConfigService {
         next.interstitialMinSeconds = int(.interstitialMinSeconds)
         next.rewardedDailyCap = int(.rewardedDailyCap)
         next.bannerEnabled = bool(.bannerEnabled)
+        next.bannerFromLevel = int(.bannerFromLevel)
         next.appOpenEnabled = bool(.appOpenEnabled)
-        next.starterPackLevel = int(.starterPackLevel)
-        let overrides: String? = config.configValue(forKey: RemoteValues.Key.levelOverrides.rawValue).stringValue
-        next.levelOverrides = RemoteValues.parseOverrides(overrides ?? "{}")
         values = next
         onChange?(next)
     }

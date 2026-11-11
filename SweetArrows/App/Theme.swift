@@ -45,6 +45,13 @@ extension Color {
     }
 }
 
+extension Color {
+    /// Blends towards `other` by `amount` (0...1); works on iOS 17.
+    func mixed(with other: Color, amount: CGFloat) -> Color {
+        Color(uiColor: UIColor(self).mixed(with: UIColor(other), amount: amount))
+    }
+}
+
 extension UIColor {
     convenience init(hex: UInt32, alpha: CGFloat = 1) {
         self.init(
@@ -71,10 +78,23 @@ struct CandyButtonStyle: ButtonStyle {
             .padding(.vertical, 14)
             .frame(minWidth: 44, minHeight: 44)
             .background(
-                Capsule()
-                    .fill(color)
-                    .shadow(color: color.opacity(0.45), radius: 0, x: 0, y: configuration.isPressed ? 1 : 5)
+                ZStack {
+                    // A darker "side" under the button gives it a squishy 3D look.
+                    Capsule()
+                        .fill(color.mixed(with: .black, amount: 0.22))
+                        .offset(y: configuration.isPressed ? 1 : 5)
+                    Capsule()
+                        .fill(LinearGradient(colors: [color.mixed(with: .white, amount: 0.18), color],
+                                             startPoint: .top, endPoint: .bottom))
+                    Capsule()
+                        .fill(.white.opacity(0.35))
+                        .frame(height: 10)
+                        .padding(.horizontal, 14)
+                        .padding(.top, 4)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                }
             )
+            .shadow(color: color.opacity(0.35), radius: 6, y: 4)
             .offset(y: configuration.isPressed ? 4 : 0)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)

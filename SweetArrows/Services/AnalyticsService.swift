@@ -9,10 +9,6 @@ import FirebaseAnalytics
 /// The events from docs/PLAN.md ("Data & LiveOps").
 enum AnalyticsEvent: Equatable, Sendable {
     case sessionStart
-    case levelStart(level: Int)
-    case levelComplete(level: Int, moves: Int, seconds: Int, stars: Int)
-    case levelFail(level: Int, reason: String, moves: Int)
-    case levelQuit(level: Int, moves: Int)
     case boosterUsed(type: String, source: String)
     case tutorialStep(step: Int)
     case dailyRewardClaimed(day: Int, doubled: Bool)
@@ -21,18 +17,12 @@ enum AnalyticsEvent: Equatable, Sendable {
     case adOfferShown(reason: String)
     case adOfferAccepted(reason: String)
     case adImpression(format: String, network: String, value: Double, currency: String)
-    case purchase(product: String, price: Double)
-    case subscriptionStart(product: String)
     case endlessStart
     case endlessOver(score: Int, seconds: Int, stage: Int)
 
     var name: String {
         switch self {
         case .sessionStart: "session_start"
-        case .levelStart: "level_start"
-        case .levelComplete: "level_complete"
-        case .levelFail: "level_fail"
-        case .levelQuit: "level_quit"
         case .boosterUsed: "booster_used"
         case .tutorialStep: "tutorial_step"
         case .dailyRewardClaimed: "daily_reward_claimed"
@@ -41,8 +31,6 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .adOfferShown: "ad_offer_shown"
         case .adOfferAccepted: "ad_offer_accepted"
         case .adImpression: "ad_impression"
-        case .purchase: "purchase"
-        case .subscriptionStart: "subscription_start"
         case .endlessStart: "endless_start"
         case .endlessOver: "endless_over"
         }
@@ -51,11 +39,6 @@ enum AnalyticsEvent: Equatable, Sendable {
     var parameters: [String: String] {
         switch self {
         case .sessionStart: [:]
-        case .levelStart(let level): ["level": "\(level)"]
-        case let .levelComplete(level, moves, seconds, stars):
-            ["level": "\(level)", "moves": "\(moves)", "seconds": "\(seconds)", "stars": "\(stars)"]
-        case let .levelFail(level, reason, moves): ["level": "\(level)", "reason": reason, "moves": "\(moves)"]
-        case let .levelQuit(level, moves): ["level": "\(level)", "moves": "\(moves)"]
         case let .boosterUsed(type, source): ["type": type, "source": source]
         case .tutorialStep(let step): ["step": "\(step)"]
         case let .dailyRewardClaimed(day, doubled): ["day": "\(day)", "doubled": doubled ? "1" : "0"]
@@ -64,8 +47,6 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .adOfferShown(let reason), .adOfferAccepted(let reason): ["reason": reason]
         case let .adImpression(format, network, value, currency):
             ["format": format, "network": network, "value": String(value), "currency": currency]
-        case let .purchase(product, price): ["product": product, "price": String(price)]
-        case .subscriptionStart(let product): ["product": product]
         case .endlessStart: [:]
         case let .endlessOver(score, seconds, stage): ["score": "\(score)", "seconds": "\(seconds)", "stage": "\(stage)"]
         }

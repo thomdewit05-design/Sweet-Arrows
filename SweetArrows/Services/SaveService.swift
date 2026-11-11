@@ -62,36 +62,11 @@ final class SaveService {
         pushToCloud()
     }
 
-    /// Records a won level and returns the coins earned.
-    @discardableResult
-    func recordWin(level: Int, stars: Int) -> Int {
-        var earned = 0
-        update { earned = $0.recordWin(level: level, stars: stars) }
-        return earned
-    }
-
-    func recordLoss() {
-        update { $0.recordLoss() }
-    }
-
     /// Uses a booster from stock or pays coins for it. Returns false if the player can't afford it.
     func spend(_ booster: Booster) -> Bool {
         var paid = false
         update { paid = $0.spend(booster) }
         return paid
-    }
-
-    /// Records a finished daily puzzle; returns the coins earned (only the first completion pays).
-    @discardableResult
-    func recordDaily(_ result: DailyResult, day: Int) -> Int {
-        var earned = 0
-        update { progress in
-            if progress.dailyPuzzle.record(result, day: day) {
-                earned = Economy.dailyPuzzleReward
-                progress.coins += earned
-            }
-        }
-        return earned
     }
 
     // MARK: Disk & iCloud

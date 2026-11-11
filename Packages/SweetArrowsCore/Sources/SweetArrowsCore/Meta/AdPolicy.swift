@@ -9,6 +9,8 @@ public struct AdLimits: Hashable, Codable, Sendable {
     /// No ads and no consent questions before this level is completed (except the GDPR form).
     public var adsFromLevel = 3
     public var bannerEnabled = true
+    /// The banner may show from this many finished runs (0 = from the very first run, after consent).
+    public var bannerFromLevel = 0
     public var appOpenEnabled = false
     public var appOpenMinHoursAway: Double = 4
     /// App-open ads only from this day after install (1 = install day).
@@ -55,8 +57,8 @@ public struct AdPolicy: Sendable {
 
     /// Between levels only: from `interstitialMinLevel`, at most one per `interstitialLevelGap` levels,
     /// at least `interstitialMinSeconds` apart, never after a lost level or right after a rewarded ad.
-    public func canShowInterstitial(afterLevel level: Int, won: Bool, adsRemoved: Bool, now: Date) -> Bool {
-        guard !adsRemoved, won, level >= limits.interstitialMinLevel else { return false }
+    public func canShowInterstitial(afterLevel level: Int, won: Bool, now: Date) -> Bool {
+        guard won, level >= limits.interstitialMinLevel else { return false }
         guard history.levelsSinceInterstitial >= limits.interstitialLevelGap else { return false }
         if let last = history.lastInterstitialAt, now.timeIntervalSince(last) < limits.interstitialMinSeconds {
             return false
@@ -68,16 +70,16 @@ public struct AdPolicy: Sendable {
     }
 
     /// Coming back after more than `appOpenMinHoursAway` hours, from day 2, when switched on remotely.
-    public func canShowAppOpen(awaySince: Date?, now: Date, today: Int, completedLevel: Int, adsRemoved: Bool) -> Bool {
-        guard limits.appOpenEnabled, !adsRemoved, completedLevel >= limits.adsFromLevel, let awaySince else {
+    public func canShowAppOpen(awaySince: Date?, now: Date, today: Int, completedLevel: Int) -> Bool {
+        guard limits.appOpenEnabled, completedLevel >= limits.adsFromLevel, let awaySince else {
             return false
         }
         if let install = history.installDay, today - install + 1 < limits.appOpenFromDay { return false }
         return now.timeIntervalSince(awaySince) >= limits.appOpenMinHoursAway * 3600
     }
 
-    public func canShowBanner(completedLevel: Int, adsRemoved: Bool) -> Bool {
-        limits.bannerEnabled && !adsRemoved && completedLevel >= limits.adsFromLevel
+    public func canShowBanner(completedLevel: Int) -> Bool {
+        limits.bannerEnabled && completedLevel >= limits.bannerFromLevel
     }
 
     // MARK: Recording

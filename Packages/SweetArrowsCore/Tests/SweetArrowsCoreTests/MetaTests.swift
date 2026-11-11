@@ -4,12 +4,6 @@ import Testing
 
 @Suite("Economy & boosters")
 struct EconomyTests {
-    @Test func coinsForAWin() {
-        #expect(Economy.coins(forStars: 1, winStreak: 1) == 10)
-        #expect(Economy.coins(forStars: 3, winStreak: 1) == 14)
-        #expect(Economy.coins(forStars: 3, winStreak: 3) == 19)
-    }
-
     @Test func spendUsesStockFirstThenCoins() {
         var progress = PlayerProgress()
         progress.boosters.add(.hint)
@@ -23,26 +17,28 @@ struct EconomyTests {
         #expect(progress.coins == 40)
         let result3 = progress.spend(.hint)
         #expect(!result3)
-        #expect(!progress.canAfford(.extraSlot))
+        #expect(!progress.canAfford(.slowDown))
         #expect(progress.coins == 40)
     }
 
-    @Test func winsAndStreaks() {
+    @Test func runsAndBestScore() {
         var progress = PlayerProgress()
-        progress.recordWin(level: 1, stars: 2)
-        progress.recordWin(level: 2, stars: 3)
-        let third = progress.recordWin(level: 3, stars: 1)
-        #expect(third == 15)
-        #expect(progress.completedLevel == 3)
-        #expect(progress.bestWinStreak == 3)
-        progress.recordLoss()
-        #expect(progress.winStreak == 0)
-        progress.recordWin(level: 1, stars: 1)
-        #expect(progress.stars[1] == 2)  // keeps the best
-        #expect(progress.completedLevel == 3)
+        let first = progress.recordRun(RunSummary(score: 300), today: 1)
+        let second = progress.recordRun(RunSummary(score: 200), today: 1)
+        #expect(first.newRecord)
+        #expect(!second.newRecord)
+        #expect(second.previousBest == 300)
+        #expect(progress.endlessBest == 300)
+        #expect(progress.coins >= 20)  // 12 + 8 from the scores, plus anything the missions paid
         #expect(!progress.showsMetaFeatures)
-        progress.completedLevel = 5
+        progress.recordRun(RunSummary(score: 10), today: 1)
         #expect(progress.showsMetaFeatures)
+    }
+
+    @Test func boosterRawValuesMatchOldSaves() {
+        #expect(Booster.hammer.rawValue == "removeCandy")
+        #expect(Booster.slowDown.rawValue == "extraSlot")
+        #expect(Booster.allCases.map(\.price) == [60, 90, 120])
     }
 
     @Test func cosmetics() {
@@ -61,32 +57,8 @@ struct EconomyTests {
         #expect(progress.board == .mintMarble)
         #expect(progress.candyStyle == .classicCandy)
         #expect(Cosmetic.items(of: .board).count == 4)
-        progress.equip(.goldenCandy)
-        #expect(progress.candyStyle == .classicCandy)  // VIP only
-        progress.equip(.goldenCandy, isVIP: true)
-        #expect(progress.candyStyle == .goldenCandy)
+        #expect(Cosmetic.goldenCandy.price == 1500)
         #expect(Cosmetic.defaultItem(for: .candyStyle).price == 0)
-    }
-}
-
-@Suite("VIP & starter pack")
-struct VIPTests {
-    @Test func dailyHintsOncePerDay() {
-        var progress = PlayerProgress()
-        #expect(progress.grantVIPBonus(today: 4) == 3)
-        #expect(progress.grantVIPBonus(today: 4) == 0)
-        #expect(progress.grantVIPBonus(today: 5) == 3)
-        #expect(progress.boosters[.hint] == 6)
-    }
-
-    @Test func starterPackOnceFromLevel15() {
-        var progress = PlayerProgress()
-        progress.completedLevel = 14
-        #expect(!progress.showsStarterPack(fromLevel: 15))
-        progress.completedLevel = 15
-        #expect(progress.showsStarterPack(fromLevel: 15))
-        progress.starterPackBought = true
-        #expect(!progress.showsStarterPack(fromLevel: 15))
     }
 }
 
@@ -116,7 +88,7 @@ struct DailyRewardTests {
         var progress = PlayerProgress()
         progress.apply(DailyRewardState.rewards[6].doubled())
         #expect(progress.coins == 200)
-        #expect(progress.boosters[.extraSlot] == 2)
+        #expect(progress.boosters[.slowDown] == 2)
     }
 
     @Test func dayNumbers() {
@@ -127,88 +99,46 @@ struct DailyRewardTests {
     }
 }
 
-@Suite("Daily puzzle")
-struct DailyPuzzleTests {
-    @Test func streakAndBest() {
-        var state = DailyPuzzleState()
-        let result8 = state.record(DailyResult(taps: 20, seconds: 90, stars: 2), day: 5)
-        #expect(result8)
-        let result9 = state.record(DailyResult(taps: 22, seconds: 80, stars: 3), day: 6)
-        #expect(result9)
-        #expect(state.streak == 2)
-        let result10 = state.record(DailyResult(taps: 18, seconds: 40, stars: 3), day: 6)
-        #expect(!result10)
-        #expect(state.results[6]?.seconds == 40)
-        let result11 = state.record(DailyResult(taps: 30, seconds: 300, stars: 1), day: 6)
-        #expect(!result11)
-        #expect(state.results[6]?.seconds == 40)
-        #expect(state.currentStreak(today: 7) == 2)
-        #expect(state.currentStreak(today: 8) == 0)
-        let result12 = state.record(DailyResult(taps: 20, seconds: 60, stars: 3), day: 9)
-        #expect(result12)
-        #expect(state.streak == 1)
-        #expect(state.bestStreak == 2)
-    }
-
-    @Test func poolWrapsAround() {
-        #expect(DailyPuzzleState.puzzleNumber(day: 0, poolSize: 365) == 1)
-        #expect(DailyPuzzleState.puzzleNumber(day: 365, poolSize: 365) == 1)
-        #expect(DailyPuzzleState.puzzleNumber(day: -1, poolSize: 365) == 365)
-    }
-
-    @Test func shareText() {
-        let text = DailyPuzzleState.shareText(puzzle: 12, result: DailyResult(taps: 24, seconds: 75, stars: 2), streak: 3)
-        #expect(text.contains("#12"))
-        #expect(text.contains("⭐⭐▫️"))
-        #expect(text.contains("1m 15s"))
-        #expect(text.contains("🔥3"))
-    }
-}
-
 @Suite("Progress sync")
 struct ProgressSyncTests {
     @Test func mergeKeepsEverythingEarned() {
         var phone = PlayerProgress()
-        phone.completedLevel = 40
-        phone.stars = [1: 3, 2: 1]
+        phone.endlessBest = 900
+        phone.endlessRuns = 12
         phone.coins = 500
         phone.ownedCosmetics.insert(.mintMarble)
-        phone.dailyPuzzle.record(DailyResult(taps: 10, seconds: 50, stars: 3), day: 3)
         phone.updatedAt = Date(timeIntervalSince1970: 1000)
 
         var tablet = PlayerProgress()
-        tablet.completedLevel = 25
-        tablet.stars = [2: 3, 3: 2]
+        tablet.endlessBest = 400
+        tablet.endlessRuns = 20
         tablet.coins = 120
         tablet.ownedCosmetics.insert(.pastelCandy)
-        tablet.dailyPuzzle.record(DailyResult(taps: 12, seconds: 70, stars: 3), day: 4)
         tablet.updatedAt = Date(timeIntervalSince1970: 2000)
 
         let merged = phone.merged(with: tablet)
-        #expect(merged.completedLevel == 40)
-        #expect(merged.stars == [1: 3, 2: 3, 3: 2])
+        #expect(merged.endlessBest == 900)
+        #expect(merged.endlessRuns == 20)
         #expect(merged.coins == 120)  // wallet from the newest copy
         #expect(merged.ownedCosmetics.isSuperset(of: [.mintMarble, .pastelCandy]))
-        #expect(merged.dailyPuzzle.results.keys.sorted() == [3, 4])
         #expect(merged.updatedAt == Date(timeIntervalSince1970: 2000))
         #expect(tablet.merged(with: phone) == merged)
     }
 
     @Test func oldSavesStillDecode() throws {
-        let json = #"{"completedLevel":7,"stars":{"1":3,"2":2},"coins":55,"winStreak":2,"settings":{"music":false}}"#
+        // A save from the puzzle version: level fields are ignored, the rest is kept.
+        let json = #"{"completedLevel":7,"stars":{"1":3},"coins":55,"winStreak":2,"boosters":{"counts":["extraSlot",2]},"settings":{"music":false}}"#
         let progress = try JSONDecoder().decode(PlayerProgress.self, from: Data(json.utf8))
-        #expect(progress.completedLevel == 7)
-        #expect(progress.stars == [1: 3, 2: 2])
+        #expect(progress.coins == 55)
+        #expect(progress.boosters[.slowDown] == 2)
         #expect(progress.settings.music == false)
         #expect(progress.settings.sound == true)
         #expect(progress.board == .woodCounter)
-        #expect(progress.bestWinStreak == 2)
     }
 
     @Test func roundTrip() throws {
         var progress = PlayerProgress()
-        progress.boosters.add(.removeCandy, 2)
-        progress.seenElements = [.caramel]
+        progress.boosters.add(.hammer, 2)
         _ = progress.dailyReward.claim(today: 3)
         let data = try JSONEncoder().encode(progress)
         #expect(try JSONDecoder().decode(PlayerProgress.self, from: data) == progress)

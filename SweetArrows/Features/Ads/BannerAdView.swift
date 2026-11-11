@@ -4,7 +4,9 @@ import UIKit
 import GoogleMobileAds
 #endif
 
-/// Adaptive AdMob banner for the map and menus. Never shown during play.
+/// Adaptive AdMob banner at the bottom of the home screen, the shop and (owner's choice) the game,
+/// where it sits below the booster bar, never over the board or its buttons. Shows from the first run,
+/// once the consent flow is done.
 struct BannerAdView: View {
     let adUnitID: String
 

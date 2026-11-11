@@ -6,70 +6,83 @@ struct HomeView: View {
     @State private var showDailyReward = false
     @State private var showTrackingPrimer = false
 
+    @State private var pulse = false
+
     var body: some View {
         let progress = model.save.progress
-        let next = min(progress.nextLevel, max(model.levels.count, 1))
         ZStack {
-            Theme.cream.ignoresSafeArea()
-            VStack(spacing: 24) {
-                HStack {
-                    CoinBadge(coins: progress.coins)
-                    Spacer()
-                    RoundIconButton(systemName: "gearshape.fill", label: "Settings") {
-                        model.path.append(.settings)
+            CandySkyBackground()
+            ScrollView {
+                VStack(spacing: 18) {
+                    topBar(progress)
+                    VStack(spacing: 2) {
+                        JellyView(size: 104)
+                            .padding(.bottom, 6)
+                        Text(verbatim: "Sweet Arrows")
+                            .font(Theme.title(44))
+                            .foregroundStyle(.white)
+                            .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 3)
+                        Text("Tap, slide, pop the sweets")
+                            .font(Theme.body())
+                            .foregroundStyle(.white.opacity(0.95))
+                            .shadow(color: Theme.ink.opacity(0.25), radius: 2, y: 1)
+                    }
+                    .padding(.top, 8)
+
+                    statsRow(progress)
+
+                    Button {
+                        model.path.append(.endless)
+                    } label: {
+                        Label("Play", systemImage: "play.fill")
+                            .font(Theme.title(30))
+                            .frame(maxWidth: 260)
+                            .padding(.vertical, 6)
+                    }
+                    .buttonStyle(CandyButtonStyle())
+                    .scaleEffect(pulse ? 1.04 : 1)
+                    .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
+                    .accessibilityIdentifier("playButton")
+
+                    if !progress.missions.missions.isEmpty {
+                        missionsCard(progress.missions)
+                    }
+
+                    if progress.showsMetaFeatures {
+                        HStack(spacing: 12) {
+                            Button {
+                                model.path.append(.shop)
+                            } label: {
+                                Label("Shop", systemImage: "bag.fill")
+                            }
+                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                            .accessibilityIdentifier("shopButton")
+                            Button {
+                                showDailyReward = true
+                            } label: {
+                                Label("Gift", systemImage: "gift.fill")
+                            }
+                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
+                            .overlay(alignment: .topTrailing) {
+                                if progress.dailyReward.claimableStep(today: model.today) != nil {
+                                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                                        .offset(x: 2, y: -2)
+                                }
+                            }
+                            .accessibilityIdentifier("giftButton")
+                        }
                     }
                 }
                 .padding(.horizontal)
-
-                Spacer()
-                JellyView(size: 120)
-                VStack(spacing: 4) {
-                    Text(verbatim: "Sweet Arrows")
-                        .font(Theme.title(44))
-                        .foregroundStyle(Theme.ink)
-                    Text("Tap, slide, pop the sweets")
-                        .font(Theme.body())
-                        .foregroundStyle(Theme.inkSoft)
-                }
-                Spacer()
-
-                // The main game is endless; the hand-made and generated levels live under "Puzzles".
-                Button {
-                    model.path.append(.endless)
-                } label: {
-                    VStack(spacing: 2) {
-                        Text("Play")
-                        if progress.endlessBest > 0 {
-                            Text("Best \(progress.endlessBest)")
-                                .font(Theme.body(15))
-                                .opacity(0.9)
-                        }
-                    }
-                    .frame(maxWidth: 240)
-                }
-                .buttonStyle(CandyButtonStyle())
-                .accessibilityIdentifier("playButton")
-
-                HStack(spacing: 16) {
-                    Button("Puzzles") { model.path.append(.level(next)) }
-                        .buttonStyle(CandyButtonStyle(color: Color(hex: 0x5B6CFF)))
-                        .accessibilityIdentifier("puzzlesButton")
-                    Button("Map") { model.path.append(.map) }
-                        .buttonStyle(CandyButtonStyle(color: Color(hex: 0xA259FF)))
-                    if progress.showsMetaFeatures {
-                        Button("Shop") { model.path.append(.shop) }
-                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
-                    }
-                }
-                if progress.showsMetaFeatures, model.levels.dailyCount > 0 {
-                    DailyPuzzleCard(state: progress.dailyPuzzle, today: model.today) {
-                        model.path.append(.daily(model.today))
-                    }
-                    .padding(.horizontal, 32)
-                }
-                Spacer().frame(height: 24)
+                .padding(.bottom, 24)
             }
-            .padding(.vertical)
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        .safeAreaInset(edge: .bottom) {
+            if model.showsBanner {
+                BannerAdView(adUnitID: model.ads.bannerAdUnitID)
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showDailyReward) {
@@ -88,56 +101,104 @@ struct HomeView: View {
             .interactiveDismissDisabled()
         }
         .onAppear {
+            pulse = true
+            let today = model.today
+            if model.save.progress.missions.day != today {
+                model.save.update { $0.refreshMissions(today: today) }
+            }
             let progress = model.save.progress
-            // App Tracking Transparency: only after level 3, with our own explanation first.
-            if progress.completedLevel >= 3, model.consent.needsTrackingPrompt {
+            // App Tracking Transparency: only after a few runs, with our own explanation first.
+            if progress.endlessRuns >= 2, model.consent.needsTrackingPrompt {
                 showTrackingPrimer = true
-            // Daily reward pops up once a day, from level 5 on (never at the very first start).
+            // Daily reward pops up once a day, after the first runs (never at the very first start).
             } else if progress.showsMetaFeatures, progress.dailyReward.claimableStep(today: model.today) != nil {
                 showDailyReward = true
             }
         }
     }
-}
 
-/// Today's daily puzzle: done or not, and the streak.
-struct DailyPuzzleCard: View {
-    let state: DailyPuzzleState
-    let today: Int
-    let play: () -> Void
+    private func topBar(_ progress: PlayerProgress) -> some View {
+        HStack(spacing: 10) {
+            LevelBadge(level: progress.level, size: 46)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Level \(progress.level)")
+                    .font(Theme.heading(16))
+                    .foregroundStyle(Theme.ink)
+                XPBar(fraction: Double(progress.xpIntoLevel) / Double(max(progress.xpForLevel, 1)), height: 10)
+                    .frame(width: 110)
+            }
+            Spacer()
+            CoinBadge(coins: progress.coins)
+            RoundIconButton(systemName: "gearshape.fill", label: "Settings") {
+                model.path.append(.settings)
+            }
+        }
+        .padding(.top, 4)
+    }
 
-    var body: some View {
-        Button(action: play) {
-            HStack(spacing: 12) {
-                Image(systemName: state.isCompleted(day: today) ? "checkmark.seal.fill" : "calendar")
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(state.isCompleted(day: today) ? Color(hex: 0x3DDC97) : Theme.heart)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Daily puzzle")
-                        .font(Theme.heading(18))
-                        .foregroundStyle(Theme.ink)
-                    Group {
-                        if let result = state.results[today] {
-                            Text("Done in \(result.seconds) s · play again for a better time")
-                        } else {
-                            Text("A new puzzle every day")
-                        }
-                    }
+    private func statsRow(_ progress: PlayerProgress) -> some View {
+        HStack(spacing: 10) {
+            StatChip(icon: "trophy.fill", tint: Theme.gold, value: "\(progress.endlessBest)", label: "Best")
+            StatChip(icon: "flame.fill", tint: Color(hex: 0xFF9F1C),
+                     value: "\(progress.streak.current(today: model.today))", label: "Days in a row")
+        }
+    }
+
+    private func missionsCard(_ missions: DailyMissions) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("Daily missions", systemImage: "checklist")
+                    .font(Theme.heading(18))
+                    .foregroundStyle(Theme.ink)
+                Spacer()
+                Text("\(missions.missions.filter(\.isDone).count)/\(missions.missions.count)")
+                    .font(Theme.heading(15))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            ForEach(missions.missions, id: \.kind) { mission in
+                MissionRow(mission: mission)
+            }
+            if missions.allDone {
+                Label("All done! Come back tomorrow for new missions.", systemImage: "party.popper.fill")
+                    .font(Theme.body(14))
+                    .foregroundStyle(Theme.heart)
+            } else {
+                Text("Finish all three for a bonus gift")
                     .font(Theme.body(13))
                     .foregroundStyle(Theme.inkSoft)
-                }
-                Spacer()
-                let streak = state.currentStreak(today: today)
-                if streak > 0 {
-                    Label("\(streak)", systemImage: "flame.fill")
-                        .font(Theme.heading(16))
-                        .foregroundStyle(Color(hex: 0xFF9F1C))
-                }
             }
-            .padding(14)
-            .background(RoundedRectangle(cornerRadius: 20).fill(.white).shadow(color: Theme.ink.opacity(0.1), radius: 4, y: 2))
         }
-        .accessibilityIdentifier("dailyPuzzleButton")
+        .candyCard()
+        .accessibilityIdentifier("missionsCard")
+    }
+}
+
+/// Small white pill with an icon, a number and a label.
+struct StatChip: View {
+    let icon: String
+    let tint: Color
+    let value: String
+    let label: LocalizedStringKey
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(tint)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(value)
+                    .font(Theme.heading(18))
+                    .foregroundStyle(Theme.ink)
+                    .monospacedDigit()
+                Text(label)
+                    .font(Theme.body(11))
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+        .candyCard(padding: 10)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -163,44 +224,111 @@ struct CoinBadge: View {
     }
 }
 
-/// Placeholder for the mascot Jelly until real artwork arrives: a pink gummy with big eyes.
+/// The mascot from the app icon: a smiling lemon star candy that gently squishes.
 struct JellyView: View {
     var size: CGFloat = 100
     @State private var squish = false
 
     var body: some View {
+        if let artwork = UIImage(named: "mascot") {
+            // Real artwork, when it has been added to the asset catalog.
+            Image(uiImage: artwork)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 1.15, height: size * 1.15)
+                .scaleEffect(x: squish ? 1.05 : 1, y: squish ? 0.95 : 1, anchor: .bottom)
+                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: squish)
+                .onAppear { squish = true }
+                .accessibilityHidden(true)
+        } else {
+            drawnStar
+        }
+    }
+
+    private var drawnStar: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: size * 0.42)
-                .fill(Theme.heart.gradient)
-                .frame(width: size, height: size * 0.9)
-                .overlay(alignment: .topLeading) {
-                    Ellipse()
-                        .fill(.white.opacity(0.5))
-                        .frame(width: size * 0.28, height: size * 0.14)
-                        .rotationEffect(.degrees(-20))
-                        .offset(x: size * 0.16, y: size * 0.12)
-                }
-            HStack(spacing: size * 0.16) {
+            StarShape()
+                .fill(.white)
+                .frame(width: size * 1.12, height: size * 1.12)
+            StarShape()
+                .fill(LinearGradient(
+                    colors: [Color(hex: 0xFFE27A), Color(hex: 0xF2C230)], startPoint: .top, endPoint: .bottom
+                ))
+                .frame(width: size, height: size)
+            Ellipse()
+                .fill(.white.opacity(0.55))
+                .frame(width: size * 0.2, height: size * 0.09)
+                .offset(x: -size * 0.04, y: -size * 0.2)
+            HStack(spacing: size * 0.09) {
                 eye
                 eye
             }
-            .offset(y: -size * 0.04)
+            .offset(y: size * 0.02)
+            HStack(spacing: size * 0.32) {
+                cheek
+                cheek
+            }
+            .offset(y: size * 0.11)
             Capsule()
-                .fill(Theme.ink)
-                .frame(width: size * 0.18, height: size * 0.07)
-                .offset(y: size * 0.17)
+                .fill(Color(hex: 0x6E1E32))
+                .frame(width: size * 0.13, height: size * 0.05)
+                .offset(y: size * 0.15)
         }
-        .scaleEffect(x: squish ? 1.06 : 1, y: squish ? 0.94 : 1, anchor: .bottom)
+        .scaleEffect(x: squish ? 1.05 : 1, y: squish ? 0.95 : 1, anchor: .bottom)
         .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: squish)
         .onAppear { squish = true }
         .accessibilityHidden(true)
     }
 
     private var eye: some View {
-        Circle()
+        Ellipse()
             .fill(.white)
-            .frame(width: size * 0.24, height: size * 0.24)
-            .overlay(Circle().fill(Theme.ink).frame(width: size * 0.12).offset(x: size * 0.02, y: size * 0.02))
+            .frame(width: size * 0.12, height: size * 0.15)
+            .overlay(
+                Ellipse()
+                    .fill(Theme.ink)
+                    .frame(width: size * 0.08, height: size * 0.1)
+                    .offset(x: size * 0.006, y: size * 0.012)
+            )
+    }
+
+    private var cheek: some View {
+        Ellipse()
+            .fill(Color(hex: 0xFF96AF))
+            .frame(width: size * 0.09, height: size * 0.045)
+    }
+}
+
+/// Five-point star with softly rounded tips.
+struct StarShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY + rect.height * 0.04)
+        let outer = min(rect.width, rect.height) / 2
+        let inner = outer * 0.5
+        var points: [CGPoint] = []
+        for i in 0..<10 {
+            let radius = i.isMultiple(of: 2) ? outer : inner
+            let angle = Double(i) * .pi / 5 - .pi / 2
+            points.append(CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius))
+        }
+        var path = Path()
+        let corner = outer * 0.12
+        for i in points.indices {
+            let previous = points[(i + points.count - 1) % points.count]
+            let current = points[i]
+            let next = points[(i + 1) % points.count]
+            let start = Self.point(from: current, toward: previous, distance: corner)
+            let end = Self.point(from: current, toward: next, distance: corner)
+            if i == 0 { path.move(to: start) } else { path.addLine(to: start) }
+            path.addQuadCurve(to: end, control: current)
+        }
+        path.closeSubpath()
+        return path
+    }
+
+    private static func point(from a: CGPoint, toward b: CGPoint, distance: CGFloat) -> CGPoint {
+        let length = max(hypot(b.x - a.x, b.y - a.y), 0.001)
+        return CGPoint(x: a.x + (b.x - a.x) / length * distance, y: a.y + (b.y - a.y) / length * distance)
     }
 }
 

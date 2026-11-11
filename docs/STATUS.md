@@ -2,6 +2,12 @@
 
 Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens het bouwen gemaakt zijn.
 
+> **November 2026:** het spel is omgebouwd. Het hoofdspel is nu **Glijden & matchen** (zie hieronder).
+> De pijlpuzzels met levels, de kaart, de dagpuzzel, de levelgenerator en de solver zijn op verzoek van de
+> eigenaar verwijderd. Ook **alle in-app-aankopen** zijn eruit (Remove Ads, VIP, muntenpakketten, starterspakket):
+> de app verdient alleen aan advertenties. Waar de fasentabel nog over levels of aankopen spreekt, beschrijft
+> hij hoe het eerst gebouwd was.
+
 ## Fasen
 
 | Fase | Stand |
@@ -24,67 +30,18 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
 4. In Debug geven de "advertentie"-knoppen (extra vakje, 3 hartjes, hint) direct de beloning, zodat je
    die flows kunt testen. In Release staan ze uit tot fase 6.
 
-## Spelregels zoals gebouwd
-
-Waar het plan ruimte liet, is dit gekozen (alles staat in `Packages/SweetArrowsCore`):
-
-- **Botsen of vliegen is alles-of-niets.** Een snoepje vliegt alleen als de hele lijn tot de rand vrij is;
-  anders stuitert het terug naar zijn plek en kost het een hartje. Elk level heeft 3 hartjes.
-- **Een botsing is geen zet**: draaisnoepjes draaien niet en ongedaan maken slaat hem over.
-- **Snoepbak**: snoepjes landen naast dezelfde kleur; bij 3 dezelfde ploppen ze. Zijn alle vakjes bezet
-  zonder plop, dan is het level verloren (tenzij het bord op dat moment leeg is: dan win je).
-- **Ongedaan maken** zet bord en pot terug, maar geeft geen hartjes terug. Na een volle pot kun je met
-  ongedaan maken verder. **Altijd gratis** (keuze van de eigenaar): geen munten, geen advertentie.
-- **Snoepje weg** (booster) haalt een snoepje van het bord zonder dat het in de pot gaat en wist de
-  ongedaan-maken-geschiedenis, zodat je de booster niet per ongeluk terugdraait.
-- **Tutorial (1–10) is niet te verliezen**: botsingen kosten geen hartje en de pot is altijd groot genoeg
-  (2 kleuren bij 5 vakjes; 3 kleuren bij 7 vakjes in level 9–10). De solver controleert dat er geen enkele
-  verliezende zet is.
-- **Sterren**: 3 zonder botsing, 2 na één botsing, anders 1.
-
-### Speciale elementen per wereld
-
-De 300 levels zijn verdeeld over **8 werelden** (38, 38, 38, 38, 37, 37, 37, 37 levels). Het plan noemt
-zes elementen; ze zijn thematisch verdeeld, elke wereld introduceert er één en houdt de eerdere:
-
-| Wereld | Nieuw element | Regel |
-|---|---|---|
-| 1. Gummy Garden | – | basis |
-| 2. Lollipop Lane | lolly-paal | vast obstakel, snoepjes moeten eromheen |
-| 3. Chocolate Falls | chocoladereep | 2 vakjes lang, gaat als één snoepje in de pot |
-| 4. Marshmallow Mountains | verpakt snoepje | kleur verborgen tot de weg vrij is |
-| 5. Caramel Canyon | karamel | eerste tik (met vrije weg) kraakt de karamel, tweede tik vliegt |
-| 6. Cotton Candy Clouds | ijsblokje | bevroren tot een buurman het bord verlaat; tikken doet niets en kost niets |
-| 7. Licorice Lab | draaisnoepje | pijl draait een kwartslag met de klok mee na elke geslaagde zet |
-| 8. Ice Cream Island | – | alles door elkaar |
-
-Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er nieuwe werelden zijn.
-
-## Levels: hoe de generator werkt
-
-- De generator bouwt levels **achterstevoren**: hij plaatst snoepjes in omgekeerde volgorde, telkens zo
-  dat het nieuwe snoepje een vrije weg heeft langs de snoepjes die er al liggen. Omgedraaid is dat een
-  winnende volgorde. Daarna worden kleuren zo verdeeld dat de pot langs die volgorde nooit vol raakt.
-- De **solver** (in `SweetArrowsCore`, ook gebruikt voor de hint-knop) zoekt met geheugen over alle
-  standen (twee 64-bit maskers) en bewijst dat het level te winnen is zonder botsing en zonder volle pot.
-  Hij telt de **valkuilzetten** langs de oplossing (toegestane zetten die het level onwinbaar maken) en
-  het aantal oplossingen (afgekapt op 10.000).
-- **Moeilijkheid (0–100)** = bordgrootte + aantal kleuren + valkuilen per zet + hoe vol de pot wordt +
-  speciale elementen. De curve: 4 makkelijk, 1 middel, 1 moeilijk ("Hard level"), langzaam oplopend.
-- Elk level is reproduceerbaar uit de seed. Levels nooit met de hand aanpassen: wijzig de generator of
-  `HandmadeLevels.swift` en draai `levelgen` opnieuw. `levelgen show 42` toont een level als ASCII.
-
 ## Fase 5: wat je zelf nog moet instellen
 
 - **iCloud**: de app gebruikt iCloud key-value-opslag (`NSUbiquitousKeyValueStore`), een onderdeel van iCloud
   dat genoeg is voor de voortgang (enkele kB) en geen CloudKit-schema nodig heeft. Bij automatisch
   ondertekenen zet Xcode de iCloud-capability aan zodra je `DEVELOPMENT_TEAM` hebt ingevuld.
-  Samenvoegen: levels, sterren, cosmetica en dagpuzzel-uitslagen worden samengevoegd; munten, boosters en
+  Samenvoegen: beste score, aantal potjes en cosmetica worden samengevoegd; munten, boosters en
   instellingen komen van het toestel dat het laatst iets veranderde.
 - **Game Center**: maak in App Store Connect aan:
-  - Prestaties: `sweetarrows.first_win`, `sweetarrows.tutorial_done`, `sweetarrows.world_1` t/m
-    `sweetarrows.world_8`, `sweetarrows.stars_100`, `sweetarrows.daily_streak_7`.
-  - Ranglijst `sweetarrows.daily_time`: terugkerend (dagelijks), "laag naar hoog", score = seconden.
+  - Prestaties: `sweetarrows.first_pop`, `sweetarrows.score_1000`, `sweetarrows.score_5000`,
+    `sweetarrows.combo_5`, `sweetarrows.speed_10`, `sweetarrows.runs_50`.
+  - Ranglijst `sweetarrows.endless_score`: altijd, "hoog naar laag", score = punten.
+  - De oude prestaties (werelden, sterren, dagpuzzel) en de ranglijst `sweetarrows.daily_time` zijn niet meer nodig.
 
 ## Fase 6–7: wat je zelf nog moet instellen
 
@@ -93,92 +50,116 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
   Zet bij meer netwerken (mediation) hun SKAdNetwork-ID's in `project.yml` onder `SKAdNetworkItems`.
 - **Firebase**: maak een project, voeg de iOS-app toe met je bundle-ID en zet `GoogleService-Info.plist` in
   `SweetArrows/App/` (staat in `.gitignore`). Daarmee gaan Analytics, Crashlytics en Remote Config aan.
-  Maak in Remote Config de sleutels uit PLAN.md aan; `level_overrides` is JSON, bijv.
-  `{"23": {"bagCapacity": 6}, "41": {"hearts": 4}}`.
-- **App Store Connect – aankopen** (ID's exact zo):
-  - `com.lucthomasdewit.sweetarrows.removeads` — non-consumable, € 4,99
-  - abonnementsgroep "VIP": `…vip.weekly` (€ 3,99/week) en `…vip.monthly` (€ 9,99/maand), beide met
-    introductieaanbod 3 dagen gratis
-  - consumables `…coins.500` (€ 1,99), `…coins.1500` (€ 4,99), `…coins.4000` (€ 9,99), `…coins.10000` (€ 19,99),
-    `…starterpack` (€ 2,99)
-  - Lokaal testen kan meteen: het schema gebruikt `SweetArrows/Resources/SweetArrows.storekit`.
+  Maak in Remote Config de sleutels uit PLAN.md aan (behalve `level_overrides`, die bestaat niet meer).
+  "Level" in de sleutelnamen betekent nu een gespeeld potje: `interstitial_min_level` (standaard 4),
+  `interstitial_level_gap` (2). `starter_pack_level` is niet meer nodig.
+- **App Store Connect – aankopen**: niet nodig, de app heeft geen in-app-aankopen. Heb je daar al producten
+  aangemaakt (Remove Ads, VIP, munten, starterspakket), dan kun je die verwijderen of laten staan; dien ze niet
+  mee in ter beoordeling.
 
 ## Afwijkingen van het plan
 
 - **iCloud key-value-opslag** in plaats van een CloudKit-database: eenvoudiger, zelfde resultaat voor deze hoeveelheid data.
 - **CI via GitHub Actions** in plaats van Xcode Cloud (Xcode Cloud kan later nog naast of in plaats van).
-- **Level-tool in Swift** (`swift run levelgen`) i.p.v. een Dart-script: dan delen app en tool exact
-  dezelfde regels en solver.
 - **SwiftLint draait in CI** (en lokaal via een build-fase als het geïnstalleerd is), niet in de CI-build van Xcode zelf.
 - **Lettertype**: Fredoka (OFL) staat in `SweetArrows/Resources/Fonts`, licentie in `docs/licenses/`.
-- **App-icoon** is een placeholder in code getekend (roze hartgummy met pijl op crème), zoals het plan
-  voorschrijft voor fase 1–3.
+- **App-icoon** (keuze van de eigenaar, ontwerp D): een lachend geel sterretje-snoepje op een grote witte pijl,
+  voor een groen-paarse snoephemel met stralen, glitters en een paar snoepjes in de vormen uit het spel;
+  gemaakt door `Tools/Icon/make_icon.py`. De mascotte in de app (`JellyView`) is hetzelfde sterretje.
+  Vrolijk en speels, maar bewust niet kinderachtig: de app blijft voor algemeen publiek (geen Kids-categorie).
 
-## Klok en nieuwe elementen (na de eerste TestFlight)
+## Hoofdspel: Glijden & matchen
 
-Op verzoek van de eigenaar, en anders dan het oorspronkelijke plan:
+De eigenaar vond het wegschieten met pijlen niet leuk genoeg en koos een nieuw spel dat erop lijkt
+(`SlideGame` in SweetArrowsCore, `SlideSession`/`SlideScene` in de app, scherm `EndlessView`).
+De pijlpuzzels zijn daarna helemaal verwijderd.
 
-- **Elk level heeft een klok.** Hij start pas bij de eerste tik, zodat je het bord rustig kunt bekijken,
-  en staat stil tijdens introkaarten, de uitslagkaart en als de app op de achtergrond staat. Tijd op =
-  verloren, met een aanbod "+15 seconden" (beloningsvideo). De tijd volgt uit de oplossing van de solver:
-  12 s + per tik 3,2 s (makkelijk), 2,8 s (middel) of 2,4 s (moeilijk), afgerond op 5 s, minimaal 30 s;
-  de tutorial krijgt 6 s per tik (minimaal 45 s). Let op: een vaste klok is precies wat Block Out! doet.
-- **Vier nieuwe elementen**, in de regels, de solver en de generator:
-  - *Bumper*: buigt een vliegend snoepje een kwartslag af (chocoladerepen kunnen niet afbuigen).
-  - *Slot & sleutel*: snoepjes op slot gaan open zodra het sleutel-snoepje van het bord is.
-  - *Bom*: neemt de snoepjes ernaast mee; die gaan niet in de pot.
-  - *Kleurwisselaar*: krijgt na elke zet de volgende kleur van het level.
-- **Elke halve wereld een nieuw element** (10 elementen, 8 werelden):
-
-| Wereld | Eerste helft | Tweede helft |
-|---|---|---|
-| 1. Gummy Garden | – | – |
-| 2. Lollipop Lane | lolly-paal | bumper |
-| 3. Chocolate Falls | chocoladereep | verpakt snoepje |
-| 4. Marshmallow Mountains | slot & sleutel | karamel |
-| 5. Caramel Canyon | bom | ijsblokje |
-| 6. Cotton Candy Clouds | kleurwisselaar | draaisnoepje |
-| 7–8 | alles door elkaar | |
-
-- **Duidelijk moeilijker**: de curve ligt zo'n 25% hoger (gemiddeld makkelijk 47, middel 58, moeilijk 73 van 100).
-
-## Eindeloze modus (hoofdspel)
-
-Op verzoek van de eigenaar is het hoofdspel nu **eindeloos**; de levels blijven als modus "Puzzels".
-
-- Bord van 6×6. Er komt steeds een snoepje bij op een vrij vakje, met eerst een schaduw van 1 seconde.
-  Het tempo begint bij één per 2,6 s en wordt elke "snelheid" (6 keer ploppen) 10% sneller, tot één per 0,8 s.
-- Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciale snoepjes komen erbij naarmate je
-  verder komt: karamel, bom, verpakt, kleurwisselaar, draaisnoepje.
-- **Eerlijk:** een nieuw snoepje krijgt alleen een richting waarmee het bord (los van de pot) oplosbaar blijft,
-  en de helft van de keren een kleur die al in de pot ligt.
-- **Af:** bord vol of pot vol. Eén keer per potje doorgaan met een beloningsvideo: de pot wordt leeggemaakt en
+- **Tik** op een snoepje: het glijdt in de richting van zijn pijl tot de rand of een ander snoepje.
+  Kan het niet bewegen, dan draait de pijl een kwartslag (met de klok mee). Elke tik doet dus iets; geen hartjes.
+- **3 of meer** van dezelfde kleur op een rij (horizontaal of verticaal) ploppen. Er valt niets; het bord is een tafel.
+- Bord van 7×8, start met 12 snoepjes. Elke 2,4 s komt er een snoepje bij (eerst 1 s een schaduw);
+  elke "snelheid" (15 snoepjes geplopt) 8% sneller, tot één per 0,7 s. Een nieuw snoepje maakt nooit zelf een rij.
+- Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciaal: **bom** (vanaf snelheid 2, popt 3×3),
+  **steen** (vanaf 3, kan niet bewegen, breekt als ernaast iets popt), **regenboog** (vanaf 4, telt als elke kleur).
+- **Af:** geen vrij vakje voor een nieuw snoepje. Eén keer per potje doorgaan met een beloningsvideo:
   een derde van de snoepjes verdwijnt.
-- **Punten:** 1 per weggeschoten snoepje, 10 per plop × combo (ploppen binnen 3 s na elkaar, max. ×5),
-  50 voor een leeg bord. Munten: score ÷ 10. Record wordt bewaard en gaat naar Game Center
-  (ranglijst `sweetarrows.endless_score`, "hoog naar laag").
-- Bounces kosten in deze modus geen hartjes; geen klok, het tempo is de klok.
+- **Punten:** 10 per gepopt snoepje, +20 per snoepje boven de 3 in een rij, 5 per gebroken steen, alles × combo
+  (ploppen binnen 3 s na elkaar, max. ×5), +100 voor een leeg bord. Munten: score ÷ 25. Record en Game Center-ranglijst
+  `sweetarrows.endless_score` zoals voorheen.
+- Simulatie (20 potjes, speler die één zet vooruit kijkt, één tik per seconde): potjes duren 4–6 minuten, snelheid 4–6.
+- Eerste twee potjes: uitleg bovenin en een handje dat een snoepje aanwijst dat meteen een rij maakt.
+- **Boosters** (onder het bord; uit voorraad, voor munten of met een beloningsvideo):
+  *Tip* (60) laat een snoepje knipperen dat meteen een rij maakt (je betaalt alleen als er zo'n zet is),
+  *Hamer* (90) tik daarna een snoepje of steen weg, *Slowmo* (120) 15 s lang komen nieuwe snoepjes half zo snel.
+  In oude saves heten ze nog `removeCandy` en `extraSlot`; die voorraad blijft dus bewaard.
+- **Game feel** (op verzoek van de eigenaar, naar voorbeeld van een opname; eigen stijl): bij elke plop flitst
+  het vakje wit op, schiet er een gloeiende streep langs de rij en spatten snoepstukjes met zwaartekracht weg;
+  lof-woorden groeien mee met de zet (*Lekker!*, *Heerlijk!*, *Suikerfeest!*, *Bord leeg!*, plus "Combo ×N");
+  het bord schudt harder bij grotere zetten en bommen (schokgolf); vanaf combo 3 gloeit er een rand in
+  wisselende snoepkleuren om het bord en kleurt de achtergrond roze; de score pompt op en kleurt mee.
+  Trillingen groeien mee (1–5 tikken, met een doorlopende tril bij grote zetten, een rommel bij bommen).
+  Met "Beweging verminderen" aan: geen schudden en minder stukjes.
+- **Banner onder het spelbord** (keuze van de eigenaar, wijkt af van het plan "nooit tijdens het spelen"):
+  onder de boosterbalk, met ruimte ertussen. Op verzoek van de eigenaar vaak zichtbaar: vanaf het eerste potje
+  (zodra de toestemmingsvraag is afgerond), ook onderin het startscherm en de winkel. Remote Config-sleutel
+  `banner_from_level` (standaard 0) en `banner_enabled` om hem op afstand te regelen.
+- **Meta:** winkel (alleen munten: boosters, toonbanken en snoepstijlen, ook "Goud" voor 1500) en dagbeloning
+  na 3 potjes, ATT-vraag na 2, advertenties na 2 potjes,
+  interstitial pas vanaf potje 4, hooguit om de 2 potjes, alleen bij "Opnieuw spelen".
+
+## Doorspelen en uitstraling (november 2026)
+
+Op verzoek van de eigenaar ("alles mag") zodat spelers blijven terugkomen:
+
+- **Spelersniveau met XP** (`PlayerLevel`): elk potje geeft 20 XP + score/25 + 15 per leeg bord. Een niveau kost
+  100 XP, daarna 40 meer per niveau. Elk niveau geeft 40 + 10×niveau munten; elk 5e niveau 1 van elke booster;
+  niveau 3, 6, 10 en 15 geven een nieuwe **achtergrond** (Snoepweide, IJsjesbaai, Chocoladerivier,
+  Suikerspinlucht, Sterrennacht). Achtergronden kies je in de winkel.
+- **3 dagopdrachten** (`DailyMissions`): elke dag andere, voor iedereen met hetzelfde niveau gelijk, doelen
+  groeien met je niveau (bijv. "Haal 1500 punten in één potje", "Laat 50 snoepjes ploppen", "Haal combo ×4").
+  Munten per opdracht en een bonuscadeau (munten + tip) als alle drie klaar zijn.
+- **Speelreeks** (`PlayStreak`): dagen op rij met minstens één potje, met vlammetje op het startscherm.
+- **Na een potje:** eerst het doorspeel-aanbod (filmpje), pas daarna wordt het potje geteld (dus nooit dubbel).
+  De uitslagkaart toont de XP-balk die vol loopt, level-ups met beloning, gehaalde opdrachten, alle munten
+  en "nog X punten tot je record".
+- **Startscherm:** snoephemel met zwevende snoepjes, niveau + XP-balk, munten, record en speelreeks,
+  een grote kloppende Speel-knop, de dagopdrachten en knoppen voor winkel en cadeau (met stip als het klaarstaat).
+- **Eén stijl:** glanzende 3D-knoppen, witte kaarten op de snoephemel (startscherm en winkel), score en
+  boosters op een lichte ondergrond zodat ze op elke achtergrond leesbaar zijn.
+- **Snoepjes:** donkerdere onderkant en extra glimlichtje voor meer diepte, en een zachte "ademhaling" als ze
+  stilliggen (uit met Beweging verminderen). Combo-koorts kleurt nu de achtergrond roze in plaats van de kleur te wisselen.
+
+### Echte illustraties later toevoegen
+
+Alles is nu met code getekend. Komen er later echte tekeningen (bijv. van een illustrator), zet ze dan als
+afbeelding in `SweetArrows/Resources/Assets.xcassets` met precies deze namen; de app gebruikt ze dan vanzelf:
+
+| Wat | Naam in de asset catalog | Formaat |
+|---|---|---|
+| Snoepje per kleur | `candy-strawberry`, `candy-lemon`, `candy-mint`, `candy-blueberry`, `candy-orange`, `candy-grape` | vierkant, transparant, 256×256 |
+| Snoepje per kleur en stijl (optioneel) | bijv. `candy-lemon-pastelCandy`, `candy-mint-goldenCandy` | idem |
+| Mascotte (sterretje) | `mascot` | vierkant, transparant, 512×512 |
+| Achtergrond | `backdrop-candyMeadow`, `backdrop-iceCreamBay`, `backdrop-chocolateRiver`, `backdrop-cottonSky`, `backdrop-starryNight` | staand, 1290×2796 |
+
+De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die dus niet in de afbeelding.
 
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;
   een bundle-ID kan daar niet meer veranderen). Team-ID `7BDZ6994AD`. Beide in `Config/Shared.xcconfig`.
-  De aankoop-ID's houden het voorvoegsel `com.lucthomasdewit.sweetarrows.` – die hoeven niet gelijk te zijn aan de bundle-ID.
-- **8 werelden** voor de 300 levels.
-- **Ongedaan maken blijft gratis.**
+- Hoofdspel **Glijden & matchen**; de pijlpuzzels met levels zijn verwijderd.
+- **Geen in-app-aankopen**; alleen advertenties.
 
 ## Checklist: klaar voor lancering (uit PLAN.md)
 
 | Punt | Stand |
 |---|---|
-| 300 levels, allemaal door de solver goedgekeurd | ✅ (+ 365 dagpuzzels; CI controleert ze) |
-| Levels 1–10 getest door 5 mensen zonder uitleg | ❌ jij — nog niemand heeft het gespeeld |
+| Eerste potjes getest door 5 mensen zonder uitleg | ❌ jij — nog niemand heeft het gespeeld |
 | 60 fps oud toestel, koude start < 3 s, download < 80 MB | 🟡 voorbereid (texturen, FPS-teller in Debug); meten op een iPhone 11 met Instruments |
 | Speelbaar zonder internet | ✅ in code; testen op toestel |
 | UMP- en ATT-flow; advertenties pas daarna | ✅ in code; testen op toestel in de EU |
 | Advertentieregels getest | ✅ unit tests (`AdPolicyTests`) |
 | Remote Config met lokale standaardwaarden | ✅ |
-| Remove Ads, VIP, Aankopen herstellen (sandbox + TestFlight) | 🟡 lokaal testbaar met het StoreKit-bestand; producten aanmaken in App Store Connect |
 | Analytics-events in Firebase DebugView | 🟡 `GoogleService-Info.plist` nodig |
 | Crashlytics actief | 🟡 `GoogleService-Info.plist` nodig |
 | Kleurenblind-modus, geluid/muziek/trillen los | ✅ |
@@ -186,7 +167,7 @@ Op verzoek van de eigenaar is het hoofdspel nu **eindeloos**; de levels blijven 
 | Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site`; domein + GitHub Pages aanzetten, publisher-id invullen |
 | Privacylabels, leeftijdsclassificatie, handelaarsstatus | ❌ jij, in App Store Connect |
 | Echte advertentie-ID's alleen in Release | ✅ via `Config/Secrets.xcconfig` |
-| Store-pagina: icoon, screenshots, video, teksten per taal | ❌ icoon is een placeholder; screenshots uit de UI-test als basis |
+| Store-pagina: icoon, screenshots, video, teksten per taal | 🟡 icoon klaar; screenshots uit de UI-test als basis |
 | KvK en belastinggegevens | ❌ jij |
 | Naam vrij, domein, geen merkconflict | ❌ jij (App Store, sweetarrowsgame.com, EUIPO/BOIP) |
 | Snoepthema doorgevoerd | 🟡 in code-tekeningen; echte artwork nog niet |
