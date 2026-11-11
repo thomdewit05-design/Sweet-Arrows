@@ -32,7 +32,7 @@ struct ShopView: View {
             .padding()
         }
         .safeAreaInset(edge: .bottom) {
-            if model.ads.canShowBanner {
+            if model.showsBanner {
                 BannerAdView(adUnitID: model.ads.bannerAdUnitID)
             }
         }

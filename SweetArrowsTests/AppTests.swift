@@ -91,12 +91,13 @@ struct AppTests {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [
             "interstitial_min_level", "interstitial_level_gap", "interstitial_min_seconds",
-            "rewarded_daily_cap", "banner_enabled", "app_open_enabled",
+            "rewarded_daily_cap", "banner_enabled", "banner_from_level", "app_open_enabled",
         ])
         let defaults = RemoteValues()
         #expect(defaults.interstitialMinLevel == 4)
         #expect(defaults.interstitialLevelGap == 2)
         #expect(defaults.adLimits.adsFromLevel == 2)
+        #expect(defaults.adLimits.bannerFromLevel == 0)
     }
 }
 

@@ -19,7 +19,7 @@ struct EndlessView: View {
     private static let boosterBarHeight: CGFloat = 66
     private static let bannerHeight: CGFloat = 68
 
-    private var showsBanner: Bool { model.ads.canShowBanner }
+    private var showsBanner: Bool { model.showsBanner }
 
     /// Room the scene keeps free under the board: booster bar, and the banner when it shows.
     private var bottomInset: CGFloat {

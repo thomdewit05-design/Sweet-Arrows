@@ -9,6 +9,8 @@ public struct AdLimits: Hashable, Codable, Sendable {
     /// No ads and no consent questions before this level is completed (except the GDPR form).
     public var adsFromLevel = 3
     public var bannerEnabled = true
+    /// The banner may show from this many finished runs (0 = from the very first run, after consent).
+    public var bannerFromLevel = 0
     public var appOpenEnabled = false
     public var appOpenMinHoursAway: Double = 4
     /// App-open ads only from this day after install (1 = install day).
@@ -77,7 +79,7 @@ public struct AdPolicy: Sendable {
     }
 
     public func canShowBanner(completedLevel: Int) -> Bool {
-        limits.bannerEnabled && completedLevel >= limits.adsFromLevel
+        limits.bannerEnabled && completedLevel >= limits.bannerFromLevel
     }
 
     // MARK: Recording

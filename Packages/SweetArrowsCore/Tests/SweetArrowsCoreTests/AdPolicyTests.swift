@@ -62,6 +62,8 @@ struct AdPolicyTests {
 
     @Test func banner() {
         var p = AdPolicy()
+        #expect(p.canShowBanner(completedLevel: 0))  // from the first run
+        p.limits.bannerFromLevel = 2
         #expect(!p.canShowBanner(completedLevel: 1))
         #expect(p.canShowBanner(completedLevel: 3))
         p.limits.bannerEnabled = false

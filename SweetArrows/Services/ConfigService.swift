@@ -14,6 +14,8 @@ struct RemoteValues: Equatable, Sendable {
     var interstitialMinSeconds = 90
     var rewardedDailyCap = 20
     var bannerEnabled = true
+    /// Finished runs before the banner shows (0 = from the first run).
+    var bannerFromLevel = 0
     var appOpenEnabled = false
 
     /// The ad rules as `AdPolicy` uses them.
@@ -24,6 +26,7 @@ struct RemoteValues: Equatable, Sendable {
         limits.interstitialMinSeconds = TimeInterval(interstitialMinSeconds)
         limits.rewardedDailyCap = rewardedDailyCap
         limits.bannerEnabled = bannerEnabled
+        limits.bannerFromLevel = bannerFromLevel
         limits.appOpenEnabled = appOpenEnabled
         limits.adsFromLevel = 2
         return limits
@@ -36,6 +39,7 @@ struct RemoteValues: Equatable, Sendable {
         case interstitialMinSeconds = "interstitial_min_seconds"
         case rewardedDailyCap = "rewarded_daily_cap"
         case bannerEnabled = "banner_enabled"
+        case bannerFromLevel = "banner_from_level"
         case appOpenEnabled = "app_open_enabled"
     }
 
@@ -47,6 +51,7 @@ struct RemoteValues: Equatable, Sendable {
             Key.interstitialMinSeconds.rawValue: NSNumber(value: interstitialMinSeconds),
             Key.rewardedDailyCap.rawValue: NSNumber(value: rewardedDailyCap),
             Key.bannerEnabled.rawValue: NSNumber(value: bannerEnabled),
+            Key.bannerFromLevel.rawValue: NSNumber(value: bannerFromLevel),
             Key.appOpenEnabled.rawValue: NSNumber(value: appOpenEnabled),
         ]
     }
@@ -97,6 +102,7 @@ final class FirebaseConfigService: ConfigService {
         next.interstitialMinSeconds = int(.interstitialMinSeconds)
         next.rewardedDailyCap = int(.rewardedDailyCap)
         next.bannerEnabled = bool(.bannerEnabled)
+        next.bannerFromLevel = int(.bannerFromLevel)
         next.appOpenEnabled = bool(.appOpenEnabled)
         values = next
         onChange?(next)

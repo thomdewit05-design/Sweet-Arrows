@@ -57,6 +57,11 @@ struct HomeView: View {
             }
             .padding(.vertical)
         }
+        .safeAreaInset(edge: .bottom) {
+            if model.showsBanner {
+                BannerAdView(adUnitID: model.ads.bannerAdUnitID)
+            }
+        }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showDailyReward) {
             DailyRewardView()

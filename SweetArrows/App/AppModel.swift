@@ -104,7 +104,14 @@ final class AppModel {
         await config.refresh()
         await consent.gatherConsent()
         ads.start()
+        adsStarted = true
     }
+
+    /// Set once consent is done and the ad SDK runs, so screens can show the banner right away.
+    private(set) var adsStarted = false
+
+    /// Whether a banner may show at the bottom of a screen now.
+    var showsBanner: Bool { adsStarted && ads.canShowBanner }
 
     /// Reports the achievements a finished run earned (cheap; Game Center ignores repeats).
     func reportAchievements(after run: SlideGame) {

@@ -100,7 +100,9 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
   Trillingen groeien mee (1–5 tikken, met een doorlopende tril bij grote zetten, een rommel bij bommen).
   Met "Beweging verminderen" aan: geen schudden en minder stukjes.
 - **Banner onder het spelbord** (keuze van de eigenaar, wijkt af van het plan "nooit tijdens het spelen"):
-  onder de boosterbalk, met ruimte ertussen; pas na 2 potjes.
+  onder de boosterbalk, met ruimte ertussen. Op verzoek van de eigenaar vaak zichtbaar: vanaf het eerste potje
+  (zodra de toestemmingsvraag is afgerond), ook onderin het startscherm en de winkel. Remote Config-sleutel
+  `banner_from_level` (standaard 0) en `banner_enabled` om hem op afstand te regelen.
 - **Meta:** winkel (alleen munten: boosters, toonbanken en snoepstijlen, ook "Goud" voor 1500) en dagbeloning
   na 3 potjes, ATT-vraag na 2, advertenties na 2 potjes,
   interstitial pas vanaf potje 4, hooguit om de 2 potjes, alleen bij "Opnieuw spelen".
