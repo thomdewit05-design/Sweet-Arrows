@@ -10,7 +10,8 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
 | 2. Kernmechaniek | ✅ Regels in `SweetArrowsCore` (pure Swift, getest), SpriteKit-bord met snoepbak, hartjes, tikbediening, ongedaan maken, 10 handgemaakte tutoriallevels. Basale animaties (wegschieten, boog naar de pot, stuiteren, plop) zodat je kunt zien wat er gebeurt. |
 | 3. Generator + solver | ✅ `swift run levelgen`: 300 levels, allemaal door de solver goedgekeurd, rapport in [level-report.md](level-report.md). CI controleert elk level opnieuw. |
 | 4. Game feel | 🚧 Gebouwd, nog te testen op een iPhone: gummy-wiebel bij elke tik, ease-out-slide (150–250 ms) en boog naar de pot, pot toont de drie dezelfde en plopt ze met een suikerwolkje in hun kleur, oplopende xylofoontonen per plop op rij, zachte bonk bij een botsing, Core Haptics (met UIKit-terugval), confetti + sterren één voor één + munten die naar de teller vliegen, waarschuwing bij nog één vrij vakje, tutorial levels 1–3 met Jelly en een wijzende hand (de hand wijst altijd een veilige zet aan, via de solver). Snoepjes en pijlen worden als gecachete texturen getekend voor 60 fps; in Debug staan FPS en aantal nodes in beeld. Geluiden en de achtergrondmuziek (ukulele-lounge-loop van 42 s, laag volume, los uit te zetten) zijn zelf gesynthetiseerd (`Tools/Sounds`). Nog niet: echte artwork, meting met Instruments op een iPhone 11. |
-| 5–8 | ⏳ Nog niet begonnen. Services staan klaar als placeholders met de juiste protocollen. |
+| 5. Meta-laag | 🚧 Gebouwd, nog te testen op een iPhone: munten (10 per level + sterrenbonus + win-streak-bonus vanaf 3 op rij), boosters (hint 60, snoepje weg 90, extra vakje 120 munten — of met een advertentie), dagbeloning met 7-dagenreeks (verdubbelen met een advertentie), dagpuzzel (365 door de solver goedgekeurde puzzels, dezelfde voor iedereen, met reeks en deelbare uitslag), winkel met boosters en cosmetica (4 toonbanken, 3 snoepstijlen), introkaart per nieuw wereldelement, voortgang met iCloud-sync, Game Center (prestaties + ranglijst dagpuzzel). Winkel, dagbeloning en dagpuzzel verschijnen pas na level 5. Alles werkt offline. |
+| 6–8 | ⏳ Nog niet begonnen. Services staan klaar als placeholders met de juiste protocollen. |
 
 ## Zo test je het op je iPhone
 
@@ -71,8 +72,21 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
 - Elk level is reproduceerbaar uit de seed. Levels nooit met de hand aanpassen: wijzig de generator of
   `HandmadeLevels.swift` en draai `levelgen` opnieuw. `levelgen show 42` toont een level als ASCII.
 
+## Fase 5: wat je zelf nog moet instellen
+
+- **iCloud**: de app gebruikt iCloud key-value-opslag (`NSUbiquitousKeyValueStore`), een onderdeel van iCloud
+  dat genoeg is voor de voortgang (enkele kB) en geen CloudKit-schema nodig heeft. Bij automatisch
+  ondertekenen zet Xcode de iCloud-capability aan zodra je `DEVELOPMENT_TEAM` hebt ingevuld.
+  Samenvoegen: levels, sterren, cosmetica en dagpuzzel-uitslagen worden samengevoegd; munten, boosters en
+  instellingen komen van het toestel dat het laatst iets veranderde.
+- **Game Center**: maak in App Store Connect aan:
+  - Prestaties: `sweetarrows.first_win`, `sweetarrows.tutorial_done`, `sweetarrows.world_1` t/m
+    `sweetarrows.world_8`, `sweetarrows.stars_100`, `sweetarrows.daily_streak_7`.
+  - Ranglijst `sweetarrows.daily_time`: terugkerend (dagelijks), "laag naar hoog", score = seconden.
+
 ## Afwijkingen van het plan
 
+- **iCloud key-value-opslag** in plaats van een CloudKit-database: eenvoudiger, zelfde resultaat voor deze hoeveelheid data.
 - **CI via GitHub Actions** in plaats van Xcode Cloud (Xcode Cloud kan later nog naast of in plaats van).
 - **Level-tool in Swift** (`swift run levelgen`) i.p.v. een Dart-script: dan delen app en tool exact
   dezelfde regels en solver.

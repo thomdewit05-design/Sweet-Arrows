@@ -25,6 +25,47 @@ public enum LevelPack {
         "level-" + String(format: "%03d", id) + ".json"
     }
 
+    /// Daily puzzles use ids from here on, so they never clash with campaign levels.
+    public static let dailyIDBase = 100_000
+
+    public static func dailyFileName(for number: Int) -> String {
+        "daily-" + String(format: "%03d", number) + ".json"
+    }
+
+    /// The plan for daily puzzle `number` (1-based): every element, a weekly rhythm from
+    /// gentle to tough, never tutorial-easy.
+    public static func dailyPlan(number: Int) -> Curve.Plan {
+        let rhythm: [Double] = [34, 38, 42, 46, 50, 56, 62]
+        let target = rhythm[(number - 1) % rhythm.count]
+        let world = World(id: World.count)
+        return Curve.Plan(
+            id: dailyIDBase + number, slot: target >= 56 ? .hard : .medium, target: target,
+            world: world, elements: world.availableElements, featured: nil
+        )
+    }
+
+    /// Generates the daily puzzle pool in parallel.
+    public static func generateDaily(
+        count: Int,
+        seed: UInt64 = defaultSeed,
+        generator: Generator = Generator()
+    ) async throws -> [Level] {
+        try await withThrowingTaskGroup(of: Level.self) { group in
+            for number in 1...count {
+                group.addTask {
+                    guard var level = generator.level(for: dailyPlan(number: number), seed: seed ^ 0xDA11) else {
+                        throw PackError.generationFailed(dailyIDBase + number)
+                    }
+                    level.hard = false
+                    return level
+                }
+            }
+            var levels: [Level] = []
+            for try await level in group { levels.append(level) }
+            return levels.sorted { $0.id < $1.id }
+        }
+    }
+
     /// The tutorial levels, approved by the solver and checked to be unlosable.
     public static func tutorial() throws -> [Level] {
         try HandmadeLevels.levels().map { level in
@@ -88,31 +129,35 @@ public enum LevelPack {
 
     // MARK: Files
 
-    public static func write(_ levels: [Level], to directory: URL) throws {
+    public static func write(_ levels: [Level], to directory: URL, daily: Bool = false) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let prefix = daily ? "daily-" : "level-"
         let existing = (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? []
-        for name in existing where name.hasPrefix("level-") && name.hasSuffix(".json") {
+        for name in existing where name.hasPrefix(prefix) && name.hasSuffix(".json") {
             try FileManager.default.removeItem(at: directory.appendingPathComponent(name))
         }
         for level in levels {
             var data = try level.encoded(pretty: false)
             data.append(0x0A)
-            try data.write(to: directory.appendingPathComponent(fileName(for: level.id)))
+            let name = daily ? dailyFileName(for: level.id - dailyIDBase) : fileName(for: level.id)
+            try data.write(to: directory.appendingPathComponent(name))
         }
     }
 
-    public static func read(from directory: URL) throws -> [Level] {
+    public static func read(from directory: URL, daily: Bool = false) throws -> [Level] {
+        let prefix = daily ? "daily-" : "level-"
         let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
-            .filter { $0.hasPrefix("level-") && $0.hasSuffix(".json") }
+            .filter { $0.hasPrefix(prefix) && $0.hasSuffix(".json") }
             .sorted()
         return try names.map { try Level.decode(from: Data(contentsOf: directory.appendingPathComponent($0))) }
     }
 
     /// Re-runs the solver on every level file. Nothing ships without passing this.
-    public static func verify(_ levels: [Level]) -> [String] {
+    public static func verify(_ levels: [Level], daily: Bool = false) -> [String] {
         var problems: [String] = []
         let ids = levels.map(\.id)
-        if !levels.isEmpty, ids != Array(1...levels.count) {
+        let expected = daily ? Array((dailyIDBase + 1)...(dailyIDBase + max(levels.count, 1))) : Array(1...max(levels.count, 1))
+        if !levels.isEmpty, ids != Array(expected.prefix(levels.count)) {
             problems.append("level ids are not 1...\(levels.count) without gaps")
         }
         for level in levels {

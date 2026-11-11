@@ -36,7 +36,7 @@ final class CandyNode: SKNode {
     private var spinnerBadge: SKShapeNode?
     private let color: CandyColor
 
-    init(state: CandyState, cellSize: CGFloat, colorBlind: Bool, art: CandyArt? = nil) {
+    init(state: CandyState, cellSize: CGFloat, colorBlind: Bool, style: Cosmetic = .classicCandy, art: CandyArt? = nil) {
         candyID = state.id
         color = state.color
         let size = cellSize * 0.86
@@ -49,8 +49,8 @@ final class CandyNode: SKNode {
             : CGSize(width: cellSize * 1.2, height: cellSize * 2.1)
         } ?? CGSize(width: cellSize * 1.2, height: cellSize * 1.2)
         let barKey = bar?.rawValue ?? "single"
-        let bodyKey = "body-\(candyColor.rawValue)-\(barKey)-\(Int(cellSize * 10))"
-        let build = { CandyNode.makeBody(color: candyColor, bar: bar, cellSize: cellSize) }
+        let bodyKey = "body-\(candyColor.rawValue)-\(barKey)-\(style.rawValue)-\(Int(cellSize * 10))"
+        let build = { CandyNode.makeBody(color: candyColor, bar: bar, cellSize: cellSize, style: style) }
         let bodyRoot = SKNode()
         if let texture = art?.texture(key: bodyKey, extent: extent, build: build) {
             bodyRoot.addChild(SKSpriteNode(texture: texture, size: extent))
@@ -83,7 +83,7 @@ final class CandyNode: SKNode {
         if !state.revealed { addWrapper(size: size, bar: bar, cellSize: cellSize) }
     }
 
-    private static func makeBody(color: CandyColor, bar: Axis?, cellSize: CGFloat) -> SKNode {
+    private static func makeBody(color: CandyColor, bar: Axis?, cellSize: CGFloat, style: Cosmetic) -> SKNode {
         let size = cellSize * 0.86
         let path = bar.map { CandyShapes.barPath(length: cellSize * 1.86, thickness: size, axis: $0) }
             ?? CandyShapes.path(for: color.shape, size: size)
@@ -96,7 +96,7 @@ final class CandyNode: SKNode {
         root.addChild(shadow)
 
         let candy = SKShapeNode(path: path)
-        candy.fillColor = UIColor.candy(color)
+        candy.fillColor = style == .pastelCandy ? UIColor.candy(color).mixed(with: .white, amount: 0.38) : UIColor.candy(color)
         candy.strokeColor = UIColor.white.withAlphaComponent(0.9)
         candy.lineWidth = max(2, cellSize * 0.05)
         candy.lineJoin = .round
@@ -109,6 +109,17 @@ final class CandyNode: SKNode {
         shine.position = CGPoint(x: -size * 0.16, y: size * 0.2)
         shine.zRotation = 0.5
         root.addChild(shine)
+
+        if style == .sparkleCandy {
+            // Three tiny glitter stars.
+            for (x, y, r) in [(0.22, 0.18, 0.05), (0.12, -0.2, 0.035), (-0.22, -0.08, 0.03)] {
+                let star = SKShapeNode(path: CandyShapes.path(for: .star, size: size * CGFloat(r) * 4))
+                star.fillColor = .white
+                star.strokeColor = .clear
+                star.position = CGPoint(x: size * CGFloat(x), y: size * CGFloat(y))
+                root.addChild(star)
+            }
+        }
         return root
     }
 
@@ -297,5 +308,19 @@ final class MiniCandyNode: SKShapeNode {
         strokeColor = UIColor.white.withAlphaComponent(0.9)
         lineWidth = 2
         lineJoin = .round
+    }
+}
+
+extension UIColor {
+    /// Blends towards `other` by `amount` (0...1).
+    func mixed(with other: UIColor, amount: CGFloat) -> UIColor {
+        var (r1, g1, b1, a1): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
+        var (r2, g2, b2, a2): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
+        getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+        other.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+        return UIColor(
+            red: r1 + (r2 - r1) * amount, green: g1 + (g2 - g1) * amount,
+            blue: b1 + (b2 - b1) * amount, alpha: a1 + (a2 - a1) * amount
+        )
     }
 }

@@ -1,46 +1,50 @@
 import Foundation
 import Observation
+import SweetArrowsCore
 
-/// Player settings, stored with the progress.
-struct GameSettings: Codable, Equatable, Sendable {
-    var sound = true
-    var music = true
-    var haptics = true
-    var colorBlind = false
+/// The bit of iCloud key-value storage we use, behind a protocol so tests can fake it.
+@MainActor
+protocol CloudKeyValueStore: AnyObject {
+    func data(forKey key: String) -> Data?
+    func set(_ data: Data?, forKey key: String)
+    @discardableResult func synchronize() -> Bool
 }
 
-/// Everything we keep about the player. Saved after every level.
-struct PlayerProgress: Codable, Equatable, Sendable {
-    /// Highest level completed (0 = none yet).
-    var completedLevel = 0
-    /// Best stars per level id (1–3).
-    var stars: [Int: Int] = [:]
-    var coins = 0
-    var winStreak = 0
-    var settings = GameSettings()
+extension NSUbiquitousKeyValueStore: CloudKeyValueStore {}
 
-    var nextLevel: Int { completedLevel + 1 }
-    var totalStars: Int { stars.values.reduce(0, +) }
-
-    func isUnlocked(_ level: Int) -> Bool { level <= nextLevel }
-}
-
-/// Stores progress as JSON in Application Support. iCloud sync comes in phase 5.
+/// Stores progress as JSON in Application Support and syncs it through iCloud
+/// (key-value storage), so a new iPhone picks up where the old one stopped.
+/// Works fully offline; the copies are merged without losing anything earned.
 @MainActor
 @Observable
 final class SaveService {
+    static let cloudKey = "progress.v1"
+
     private(set) var progress: PlayerProgress
     private let url: URL?
+    private let cloud: CloudKeyValueStore?
+    @ObservationIgnored private var observer: NSObjectProtocol?
 
-    /// - Parameter url: file to use; nil keeps everything in memory (tests, previews).
-    init(url: URL? = SaveService.defaultURL) {
+    /// - Parameters:
+    ///   - url: file to use; nil keeps everything in memory (tests, previews).
+    ///   - cloud: iCloud store; nil disables sync.
+    init(url: URL? = SaveService.defaultURL, cloud: CloudKeyValueStore? = nil) {
         self.url = url
+        self.cloud = cloud
         if let url, let data = try? Data(contentsOf: url),
            let saved = try? JSONDecoder().decode(PlayerProgress.self, from: data) {
             progress = saved
         } else {
             progress = PlayerProgress()
         }
+        guard cloud != nil else { return }
+        observer = NotificationCenter.default.addObserver(
+            forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.pullFromCloud() }
+        }
+        cloud?.synchronize()
+        pullFromCloud()
     }
 
     static var defaultURL: URL? {
@@ -49,26 +53,48 @@ final class SaveService {
         return folder.appendingPathComponent("progress.json")
     }
 
+    // MARK: Changes
+
     func update(_ change: (inout PlayerProgress) -> Void) {
         change(&progress)
+        progress.updatedAt = Date()
         persist()
+        pushToCloud()
     }
 
     /// Records a won level and returns the coins earned.
     @discardableResult
-    func recordWin(level: Int, stars: Int, coins: Int) -> Int {
-        update { progress in
-            progress.completedLevel = max(progress.completedLevel, level)
-            progress.stars[level] = max(progress.stars[level] ?? 0, stars)
-            progress.winStreak += 1
-            progress.coins += coins
-        }
-        return coins
+    func recordWin(level: Int, stars: Int) -> Int {
+        var earned = 0
+        update { earned = $0.recordWin(level: level, stars: stars) }
+        return earned
     }
 
     func recordLoss() {
-        update { $0.winStreak = 0 }
+        update { $0.recordLoss() }
     }
+
+    /// Uses a booster from stock or pays coins for it. Returns false if the player can't afford it.
+    func spend(_ booster: Booster) -> Bool {
+        var paid = false
+        update { paid = $0.spend(booster) }
+        return paid
+    }
+
+    /// Records a finished daily puzzle; returns the coins earned (only the first completion pays).
+    @discardableResult
+    func recordDaily(_ result: DailyResult, day: Int) -> Int {
+        var earned = 0
+        update { progress in
+            if progress.dailyPuzzle.record(result, day: day) {
+                earned = Economy.dailyPuzzleReward
+                progress.coins += earned
+            }
+        }
+        return earned
+    }
+
+    // MARK: Disk & iCloud
 
     private func persist() {
         guard let url else { return }
@@ -81,5 +107,22 @@ final class SaveService {
         } catch {
             assertionFailure("Could not save progress: \(error)")
         }
+    }
+
+    private func pushToCloud() {
+        guard let cloud, let data = try? JSONEncoder().encode(progress) else { return }
+        cloud.set(data, forKey: Self.cloudKey)
+    }
+
+    /// Merges the iCloud copy into ours. Public for tests.
+    func pullFromCloud() {
+        guard let cloud, let data = cloud.data(forKey: Self.cloudKey),
+              let remote = try? JSONDecoder().decode(PlayerProgress.self, from: data)
+        else { return }
+        let merged = progress.merged(with: remote)
+        guard merged != progress else { return }
+        progress = merged
+        persist()
+        if merged != remote { pushToCloud() }
     }
 }

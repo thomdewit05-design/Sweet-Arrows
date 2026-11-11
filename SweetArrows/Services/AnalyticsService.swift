@@ -15,6 +15,9 @@ enum AnalyticsEvent: Equatable, Sendable {
     case levelQuit(level: Int, moves: Int)
     case boosterUsed(type: String, source: String)
     case tutorialStep(step: Int)
+    case dailyRewardClaimed(day: Int, doubled: Bool)
+    case storeOpen
+    case cosmeticBought(item: String, price: Int)
 
     var name: String {
         switch self {
@@ -25,6 +28,9 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .levelQuit: "level_quit"
         case .boosterUsed: "booster_used"
         case .tutorialStep: "tutorial_step"
+        case .dailyRewardClaimed: "daily_reward_claimed"
+        case .storeOpen: "store_open"
+        case .cosmeticBought: "cosmetic_bought"
         }
     }
 
@@ -38,6 +44,9 @@ enum AnalyticsEvent: Equatable, Sendable {
         case let .levelQuit(level, moves): ["level": "\(level)", "moves": "\(moves)"]
         case let .boosterUsed(type, source): ["type": type, "source": source]
         case .tutorialStep(let step): ["step": "\(step)"]
+        case let .dailyRewardClaimed(day, doubled): ["day": "\(day)", "doubled": doubled ? "1" : "0"]
+        case .storeOpen: [:]
+        case let .cosmeticBought(item, price): ["item": item, "price": "\(price)"]
         }
     }
 }

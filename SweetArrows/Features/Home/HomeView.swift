@@ -1,7 +1,9 @@
 import SwiftUI
+import SweetArrowsCore
 
 struct HomeView: View {
     @Environment(AppModel.self) private var model
+    @State private var showDailyReward = false
 
     var body: some View {
         let progress = model.save.progress
@@ -47,14 +49,74 @@ struct HomeView: View {
                 HStack(spacing: 16) {
                     Button("Map") { model.path.append(.map) }
                         .buttonStyle(CandyButtonStyle(color: Color(hex: 0x5B6CFF)))
-                    Button("Shop") { model.path.append(.shop) }
-                        .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                    if progress.showsMetaFeatures {
+                        Button("Shop") { model.path.append(.shop) }
+                            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                    }
+                }
+                if progress.showsMetaFeatures, model.levels.dailyCount > 0 {
+                    DailyPuzzleCard(state: progress.dailyPuzzle, today: model.today) {
+                        model.path.append(.daily(model.today))
+                    }
+                    .padding(.horizontal, 32)
                 }
                 Spacer().frame(height: 24)
             }
             .padding(.vertical)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showDailyReward) {
+            DailyRewardView()
+                .presentationDetents([.medium, .large])
+        }
+        .onAppear {
+            // Daily reward pops up once a day, from level 5 on (never at the very first start).
+            let progress = model.save.progress
+            if progress.showsMetaFeatures, progress.dailyReward.claimableStep(today: model.today) != nil {
+                showDailyReward = true
+            }
+        }
+    }
+}
+
+/// Today's daily puzzle: done or not, and the streak.
+struct DailyPuzzleCard: View {
+    let state: DailyPuzzleState
+    let today: Int
+    let play: () -> Void
+
+    var body: some View {
+        Button(action: play) {
+            HStack(spacing: 12) {
+                Image(systemName: state.isCompleted(day: today) ? "checkmark.seal.fill" : "calendar")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundStyle(state.isCompleted(day: today) ? Color(hex: 0x3DDC97) : Theme.heart)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Daily puzzle")
+                        .font(Theme.heading(18))
+                        .foregroundStyle(Theme.ink)
+                    Group {
+                        if let result = state.results[today] {
+                            Text("Done in \(result.seconds) s · play again for a better time")
+                        } else {
+                            Text("A new puzzle every day")
+                        }
+                    }
+                    .font(Theme.body(13))
+                    .foregroundStyle(Theme.inkSoft)
+                }
+                Spacer()
+                let streak = state.currentStreak(today: today)
+                if streak > 0 {
+                    Label("\(streak)", systemImage: "flame.fill")
+                        .font(Theme.heading(16))
+                        .foregroundStyle(Color(hex: 0xFF9F1C))
+                }
+            }
+            .padding(14)
+            .background(RoundedRectangle(cornerRadius: 20).fill(.white).shadow(color: Theme.ink.opacity(0.1), radius: 4, y: 2))
+        }
+        .accessibilityIdentifier("dailyPuzzleButton")
     }
 }
 

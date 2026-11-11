@@ -8,7 +8,10 @@ struct SweetArrowsApp: App {
         WindowGroup {
             RootView()
                 .environment(model)
-                .task { model.analytics.log(.sessionStart) }
+                .task {
+                    model.analytics.log(.sessionStart)
+                    model.gameCenter.authenticate()
+                }
         }
     }
 }
@@ -24,7 +27,8 @@ struct RootView: View {
                 .navigationDestination(for: Route.self) { route in
                     switch route {
                     case .map: MapView()
-                    case .level(let id): LevelView(levelID: id)
+                    case .level(let id): LevelView(mode: .campaign(id))
+                    case .daily(let day): LevelView(mode: .daily(day: day))
                     case .shop: ShopView()
                     case .settings: SettingsView()
                     case .dailyReward: DailyRewardView()

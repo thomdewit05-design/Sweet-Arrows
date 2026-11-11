@@ -2,15 +2,33 @@ import SpriteKit
 import SwiftUI
 import SweetArrowsCore
 
-/// One level: the SpriteKit board with a SwiftUI HUD and the win/lose card on top.
+/// What is being played: a campaign level or the daily puzzle of a given day.
+enum PlayMode: Hashable {
+    case campaign(Int)
+    case daily(day: Int)
+
+    var campaignLevel: Int? {
+        if case .campaign(let id) = self { return id }
+        return nil
+    }
+}
+
+/// One level: the SpriteKit board with a SwiftUI HUD, boosters and the win/lose card on top.
 struct LevelView: View {
-    let levelID: Int
+    let mode: PlayMode
 
     @Environment(AppModel.self) private var model
     @State private var session: GameSession?
     @State private var scene: GameScene?
     @State private var showResult = false
     @State private var coinsEarned = 0
+    @State private var choosingCandyToRemove = false
+    @State private var introElement: BoardElement?
+    @State private var lastDailyResult: DailyResult?
+
+    /// Space below the booster bar that the scene uses for the jar.
+    private static let jarSpace: CGFloat = 24 + 96 + 10
+    private static let boosterBarHeight: CGFloat = 66
 
     var body: some View {
         ZStack {
@@ -19,37 +37,18 @@ struct LevelView: View {
                 SpriteView(scene: scene, preferredFramesPerSecond: 60, debugOptions: Self.spriteDebugOptions)
                     .ignoresSafeArea()
                     .accessibilityIdentifier("board")
-                VStack(spacing: 8) {
-                    LevelHUD(
-                        levelID: levelID,
-                        session: session,
-                        back: leave,
-                        undo: { session.undo() },
-                        hint: { requestHint(session) }
-                    )
-                    if let tip = TutorialTip(level: levelID, tutorial: session.level.tutorial), session.status == .playing {
-                        JellyTipView(tip: tip)
-                            .transition(.move(edge: .top).combined(with: .opacity))
+                overlay(session)
+                    .padding(.horizontal)
+                if let element = introElement {
+                    ElementIntroCard(element: element) {
+                        model.save.update { $0.seenElements.insert(element) }
+                        introElement = nil
                     }
-                    Spacer()
+                    .transition(.scale(scale: 0.85).combined(with: .opacity))
                 }
-                .padding(.horizontal)
                 if showResult {
-                    ResultCard(
-                        session: session,
-                        coins: coinsEarned,
-                        totalCoins: model.save.progress.coins,
-                        audio: model.audio,
-                        adReady: model.ads.isRewardedReady,
-                        hasNext: levelID < model.levels.count,
-                        onNext: goToNextLevel,
-                        onRetry: { retry(session) },
-                        onUndo: { session.undo(); showResult = false },
-                        onExtraSlot: { continueWithReward(.extraSlot, session) },
-                        onExtraHearts: { continueWithReward(.extraHearts, session) },
-                        onHome: leave
-                    )
-                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    resultCard(session)
+                        .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             } else {
                 VStack(spacing: 16) {
@@ -60,12 +59,64 @@ struct LevelView: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: showResult)
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: introElement)
         .toolbar(.hidden, for: .navigationBar)
-        .task(id: levelID) { load() }
+        .task(id: mode) { load() }
         .onChange(of: session?.boardVersion) { _, _ in scene?.rebuild() }
         .onChange(of: session?.status) { _, status in
             if let status { statusChanged(status) }
         }
+    }
+
+    private func overlay(_ session: GameSession) -> some View {
+        VStack(spacing: 8) {
+            LevelHUD(title: title, session: session, back: leave, undo: { session.undo() })
+            if let tip = TutorialTip(level: mode.campaignLevel ?? 0, tutorial: session.level.tutorial),
+               session.status == .playing {
+                JellyTipView(text: tip.text)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            if choosingCandyToRemove {
+                JellyTipView(text: "Tap the candy you want to remove.")
+                    .onTapGesture { cancelRemoval() }
+            }
+            Spacer()
+            if showsBoosters(session.level) {
+                BoosterBar(
+                    progress: model.save.progress,
+                    adReady: model.ads.isRewardedReady,
+                    enabled: session.status == .playing && !choosingCandyToRemove,
+                    canAddSlot: session.game.bag.capacity < Bag.maxCapacity,
+                    use: { useBooster($0) }
+                )
+                .frame(height: Self.boosterBarHeight)
+            }
+            Spacer().frame(height: Self.jarSpace)
+        }
+    }
+
+    private func resultCard(_ session: GameSession) -> some View {
+        ResultCard(
+            session: session,
+            coins: coinsEarned,
+            totalCoins: model.save.progress.coins,
+            audio: model.audio,
+            adReady: model.ads.isRewardedReady,
+            canAffordSlot: model.save.progress.canAfford(.extraSlot),
+            slotsInStock: model.save.progress.boosters[.extraSlot],
+            hasNext: hasNextLevel,
+            shareText: shareText,
+            onNext: goToNextLevel,
+            onRetry: { retry(session) },
+            onUndo: {
+                session.undo()
+                showResult = false
+            },
+            onExtraSlot: { useBooster(.extraSlot, viaAd: false) },
+            onExtraSlotAd: { useBooster(.extraSlot, viaAd: true) },
+            onExtraHearts: { continueWithHearts(session) },
+            onHome: leave
+        )
     }
 
     /// FPS and node count on screen in Debug builds, to check the 60 fps goal on a real device.
@@ -77,26 +128,70 @@ struct LevelView: View {
         #endif
     }
 
+    /// Boosters stay hidden during the first tutorial levels.
+    private func showsBoosters(_ level: Level) -> Bool {
+        !level.tutorial || (mode.campaignLevel ?? 0) > 5
+    }
+
+    private var title: LocalizedStringKey {
+        switch mode {
+        case .campaign(let id): "Level \(id)"
+        case .daily: "Daily puzzle"
+        }
+    }
+
+    private var hasNextLevel: Bool {
+        guard let id = mode.campaignLevel else { return false }
+        return id < model.levels.count
+    }
+
+    private var shareText: String? {
+        guard case .daily(let day) = mode, let result = lastDailyResult else { return nil }
+        return DailyPuzzleState.shareText(
+            puzzle: day + 1, result: result,
+            streak: model.save.progress.dailyPuzzle.currentStreak(today: day)
+        )
+    }
+
     // MARK: Flow
 
     private func load() {
         showResult = false
-        guard let level = model.level(levelID) else {
+        choosingCandyToRemove = false
+        lastDailyResult = nil
+        let level: Level? = switch mode {
+        case .campaign(let id): model.level(id)
+        case .daily(let day): model.levels.dailyPuzzle(model.dailyPuzzleNumber(day: day))
+        }
+        guard let level else {
             session = nil
             scene = nil
             return
         }
+        let progress = model.save.progress
         let newSession = GameSession(level: level)
         let newScene = GameScene(
             session: newSession, haptics: model.haptics, audio: model.audio,
-            colorBlind: model.settings.colorBlind
+            colorBlind: progress.settings.colorBlind,
+            boardStyle: progress.board, candyStyle: progress.candyStyle
         )
-        let hasTip = TutorialTip(level: levelID, tutorial: level.tutorial) != nil
+        let id = mode.campaignLevel ?? 0
+        let hasTip = TutorialTip(level: id, tutorial: level.tutorial) != nil
         newScene.topInset = hasTip ? 188 : 124
-        if hasTip { model.analytics.log(.tutorialStep(step: levelID)) }
+        newScene.boosterBarHeight = showsBoosters(level) ? Self.boosterBarHeight : 0
+        if hasTip { model.analytics.log(.tutorialStep(step: id)) }
         session = newSession
         scene = newScene
-        model.analytics.log(.levelStart(level: levelID))
+
+        // A world's first level introduces its new element once.
+        let world = World.forLevel(id)
+        if mode.campaignLevel != nil, id == world.firstLevel, let element = world.newElement,
+           !progress.seenElements.contains(element) {
+            introElement = element
+        } else {
+            introElement = nil
+        }
+        model.analytics.log(.levelStart(level: level.id))
     }
 
     private func statusChanged(_ status: GameStatus) {
@@ -106,17 +201,25 @@ struct LevelView: View {
             showResult = false
             return
         case .won:
-            let streakBonus = model.save.progress.winStreak >= 2 ? 5 : 0
-            coinsEarned = model.save.recordWin(level: levelID, stars: session.stars, coins: 10 + streakBonus)
+            switch mode {
+            case .campaign(let id):
+                coinsEarned = model.save.recordWin(level: id, stars: session.stars)
+                if id <= 3 { model.analytics.log(.tutorialStep(step: id * 10)) }
+            case .daily(let day):
+                let result = DailyResult(taps: session.moves, seconds: session.secondsPlayed, stars: session.stars)
+                lastDailyResult = result
+                coinsEarned = model.save.recordDaily(result, day: day)
+                model.gameCenter.submitDailyTime(seconds: result.seconds)
+            }
+            model.reportAchievements()
             model.analytics.log(.levelComplete(
-                level: levelID, moves: session.moves, seconds: session.secondsPlayed, stars: session.stars
+                level: session.level.id, moves: session.moves, seconds: session.secondsPlayed, stars: session.stars
             ))
             model.haptics.success()
             model.audio.play(.win)
-            if levelID <= 3 { model.analytics.log(.tutorialStep(step: levelID * 10)) }
         case .lost(let reason):
             model.analytics.log(.levelFail(
-                level: levelID, reason: reason == .bagFull ? "bag_full" : "out_of_hearts", moves: session.moves
+                level: session.level.id, reason: reason == .bagFull ? "bag_full" : "out_of_hearts", moves: session.moves
             ))
             model.audio.play(.lose)
         }
@@ -128,293 +231,90 @@ struct LevelView: View {
 
     private func leave() {
         if let session, session.status == .playing, session.moves > 0 {
-            model.analytics.log(.levelQuit(level: levelID, moves: session.moves))
+            model.analytics.log(.levelQuit(level: session.level.id, moves: session.moves))
         }
         if !model.path.isEmpty { model.path.removeLast() }
     }
 
     private func goToNextLevel() {
-        model.ads.maybeShowInterstitial(afterLevel: levelID)
+        guard let id = mode.campaignLevel else { return }
+        model.ads.maybeShowInterstitial(afterLevel: id)
         guard !model.path.isEmpty else { return }
-        model.path[model.path.count - 1] = .level(levelID + 1)
+        model.path[model.path.count - 1] = .level(id + 1)
     }
 
     private func retry(_ session: GameSession) {
-        if session.status.isOver, session.status != .won { model.save.recordLoss() }
+        if session.status.isOver, session.status != .won, mode.campaignLevel != nil { model.save.recordLoss() }
         showResult = false
         session.restart()
-        model.analytics.log(.levelStart(level: levelID))
+        model.analytics.log(.levelStart(level: session.level.id))
     }
 
-    private func continueWithReward(_ reason: RewardReason, _ session: GameSession) {
-        Task { @MainActor in
-            guard await model.ads.showRewarded(reason: reason) else { return }
-            model.analytics.log(.boosterUsed(type: reason.rawValue, source: "ad"))
-            switch reason {
-            case .extraSlot: session.addBagSlot()
-            case .extraHearts: session.addHearts(3)
-            default: break
+    // MARK: Boosters
+
+    private func useBooster(_ booster: Booster) {
+        useBooster(booster, viaAd: !model.save.progress.canAfford(booster))
+    }
+
+    /// Pays with stock/coins or a rewarded ad, then applies the booster.
+    private func useBooster(_ booster: Booster, viaAd: Bool) {
+        guard let session else { return }
+        if booster == .removeCandy {
+            // Pay only once a candy has actually been picked.
+            choosingCandyToRemove = true
+            scene?.onCandySelected = { id in
+                Task { @MainActor in
+                    guard await pay(for: .removeCandy, viaAd: viaAd) else {
+                        cancelRemoval()
+                        return
+                    }
+                    choosingCandyToRemove = false
+                    session.removeCandy(id)
+                }
             }
+            return
+        }
+        Task { @MainActor in
+            guard await pay(for: booster, viaAd: viaAd) else { return }
+            switch booster {
+            case .extraSlot:
+                session.addBagSlot()
+                showResult = false
+            case .hint:
+                if session.hint() != nil { scene?.showHint() }
+            case .removeCandy:
+                break
+            }
+        }
+    }
+
+    private func pay(for booster: Booster, viaAd: Bool) async -> Bool {
+        guard viaAd else {
+            guard model.save.spend(booster) else { return false }
+            model.analytics.log(.boosterUsed(type: booster.rawValue, source: "coins"))
+            return true
+        }
+        let reason: RewardReason = switch booster {
+        case .extraSlot: .extraSlot
+        case .hint: .hint
+        case .removeCandy: .removeCandy
+        }
+        guard await model.ads.showRewarded(reason: reason) else { return false }
+        model.analytics.log(.boosterUsed(type: booster.rawValue, source: "ad"))
+        return true
+    }
+
+    private func cancelRemoval() {
+        choosingCandyToRemove = false
+        scene?.onCandySelected = nil
+    }
+
+    private func continueWithHearts(_ session: GameSession) {
+        Task { @MainActor in
+            guard await model.ads.showRewarded(reason: .extraHearts) else { return }
+            model.analytics.log(.boosterUsed(type: "extra_hearts", source: "ad"))
+            session.addHearts(3)
             showResult = false
         }
-    }
-
-    private func requestHint(_ session: GameSession) {
-        Task { @MainActor in
-            guard await model.ads.showRewarded(reason: .hint) else { return }
-            model.analytics.log(.boosterUsed(type: "hint", source: "ad"))
-            if session.hint() != nil { scene?.showHint() }
-        }
-    }
-}
-
-// MARK: - HUD
-
-private struct LevelHUD: View {
-    let levelID: Int
-    let session: GameSession
-    let back: () -> Void
-    let undo: () -> Void
-    let hint: () -> Void
-
-    var body: some View {
-        VStack(spacing: 10) {
-            HStack {
-                RoundIconButton(systemName: "chevron.left", label: "Back", action: back)
-                    .accessibilityIdentifier("backButton")
-                Spacer()
-                VStack(spacing: 2) {
-                    Text("Level \(levelID)")
-                        .font(Theme.heading())
-                        .foregroundStyle(Theme.ink)
-                    if session.level.hard {
-                        Text("Hard level")
-                            .font(Theme.body(13))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(Theme.heart))
-                    }
-                }
-                Spacer()
-                HeartsView(hearts: session.hearts, total: session.level.hearts, tutorial: session.level.tutorial)
-            }
-            HStack {
-                Spacer()
-                RoundIconButton(systemName: "lightbulb.fill", label: "Hint", enabled: session.status == .playing, action: hint)
-                RoundIconButton(systemName: "arrow.uturn.backward", label: "Undo", enabled: session.canUndo, action: undo)
-                    .accessibilityIdentifier("undoButton")
-            }
-        }
-        .padding(.top, 4)
-    }
-}
-
-private struct HeartsView: View {
-    let hearts: Int
-    let total: Int
-    let tutorial: Bool
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(0..<max(total, hearts), id: \.self) { index in
-                Image(systemName: index < hearts ? "heart.fill" : "heart")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(Theme.heart)
-                    .scaleEffect(index < hearts ? 1 : 0.85)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: hearts)
-            }
-        }
-        .frame(minWidth: 48, alignment: .trailing)
-        .opacity(tutorial ? 0.5 : 1)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("\(hearts) hearts left"))
-        .accessibilityIdentifier("hearts")
-    }
-}
-
-// MARK: - Result card
-
-private struct ResultCard: View {
-    let session: GameSession
-    let coins: Int
-    let totalCoins: Int
-    let audio: AudioService
-    let adReady: Bool
-    let hasNext: Bool
-    let onNext: () -> Void
-    let onRetry: () -> Void
-    let onUndo: () -> Void
-    let onExtraSlot: () -> Void
-    let onExtraHearts: () -> Void
-    let onHome: () -> Void
-
-    var body: some View {
-        ZStack {
-            Color.black.opacity(0.35).ignoresSafeArea()
-            VStack(spacing: 18) {
-                switch session.status {
-                case .won: won
-                case .lost(.bagFull): bagFull
-                case .lost(.outOfHearts): outOfHearts
-                case .playing: EmptyView()
-                }
-            }
-            .padding(28)
-            .frame(maxWidth: 340)
-            .background(RoundedRectangle(cornerRadius: 32).fill(Theme.cream))
-            .padding()
-        }
-        .accessibilityIdentifier("resultCard")
-    }
-
-    @State private var shownStars = 0
-    @State private var shownCoins = 0
-    @State private var flyingCoins = false
-
-    @ViewBuilder private var won: some View {
-        JellyView(size: 70)
-        Text("Sweet!")
-            .font(Theme.title())
-            .foregroundStyle(Theme.ink)
-        HStack(spacing: 8) {
-            ForEach(0..<3, id: \.self) { index in
-                Image(systemName: "star.fill")
-                    .font(.system(size: 36))
-                    .foregroundStyle(index < shownStars ? Theme.gold : Theme.inkSoft.opacity(0.25))
-                    .scaleEffect(index < shownStars ? 1 : 0.6)
-                    .rotationEffect(.degrees(index < shownStars ? 0 : -30))
-                    .animation(.spring(response: 0.35, dampingFraction: 0.45), value: shownStars)
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("\(session.stars) stars"))
-        ZStack {
-            CoinBadge(coins: totalCoins - coins + shownCoins)
-            // Coins fly up from the stars into the counter.
-            ForEach(0..<min(coins, 8), id: \.self) { index in
-                Circle()
-                    .fill(Theme.gold)
-                    .overlay(Circle().stroke(.white, lineWidth: 2))
-                    .frame(width: 18, height: 18)
-                    .offset(x: CGFloat(index - 4) * 9, y: flyingCoins ? 0 : -60)
-                    .opacity(flyingCoins ? 0 : 1)
-                    .animation(.easeIn(duration: 0.45).delay(Double(index) * 0.06), value: flyingCoins)
-                    .accessibilityHidden(true)
-            }
-            .opacity(shownStars >= session.stars && coins > 0 ? 1 : 0)
-        }
-        .task { await celebrate() }
-        if hasNext {
-            Button("Next level", action: onNext)
-                .buttonStyle(CandyButtonStyle())
-                .accessibilityIdentifier("nextLevelButton")
-        }
-        Button("Home", action: onHome)
-            .font(Theme.body())
-            .foregroundStyle(Theme.inkSoft)
-    }
-
-    /// Stars land one by one, then the coins count up.
-    private func celebrate() async {
-        guard session.status == .won, shownStars == 0 else { return }
-        for star in 1...max(session.stars, 1) {
-            try? await Task.sleep(for: .milliseconds(320))
-            shownStars = star
-            audio.play(.star)
-        }
-        guard coins > 0 else { return }
-        try? await Task.sleep(for: .milliseconds(200))
-        flyingCoins = true
-        let steps = min(coins, 10)
-        for step in 1...steps {
-            try? await Task.sleep(for: .milliseconds(60))
-            shownCoins = coins * step / steps
-            if step.isMultiple(of: 2) { audio.play(.coin) }
-        }
-    }
-
-    @ViewBuilder private var bagFull: some View {
-        Text("The jar is full!")
-            .font(Theme.title(28))
-            .foregroundStyle(Theme.ink)
-            .multilineTextAlignment(.center)
-        Text("Get one more slot and keep going.")
-            .font(Theme.body())
-            .foregroundStyle(Theme.inkSoft)
-            .multilineTextAlignment(.center)
-        if adReady {
-            Button(action: onExtraSlot) {
-                Label("Extra slot", systemImage: "play.rectangle.fill")
-            }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
-        }
-        if session.canUndo {
-            Button(action: onUndo) {
-                Label("Undo last move", systemImage: "arrow.uturn.backward")
-            }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x5B6CFF)))
-        }
-        Button("Try again", action: onRetry)
-            .font(Theme.body())
-            .foregroundStyle(Theme.inkSoft)
-    }
-
-    @ViewBuilder private var outOfHearts: some View {
-        Text("Out of hearts")
-            .font(Theme.title(28))
-            .foregroundStyle(Theme.ink)
-        Text("Bounced too often. Want three more hearts?")
-            .font(Theme.body())
-            .foregroundStyle(Theme.inkSoft)
-            .multilineTextAlignment(.center)
-        if adReady {
-            Button(action: onExtraHearts) {
-                Label("3 hearts", systemImage: "play.rectangle.fill")
-            }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
-        }
-        Button("Try again", action: onRetry)
-            .buttonStyle(CandyButtonStyle())
-    }
-}
-
-// MARK: - Tutorial
-
-/// Jelly's one-line tips for the first levels. No walls of text: the hand on the board does the rest.
-struct TutorialTip {
-    let text: LocalizedStringKey
-
-    init?(level: Int, tutorial: Bool) {
-        guard tutorial else { return nil }
-        switch level {
-        case 1: text = "Tap a candy: it flies off where its arrow points!"
-        case 2: text = "Something in the way? Start with the candy in front."
-        case 3: text = "Three of the same in the jar go pop!"
-        default: return nil
-        }
-    }
-}
-
-private struct JellyTipView: View {
-    let tip: TutorialTip
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 10) {
-            JellyView(size: 46)
-            Text(tip.text)
-                .font(Theme.body(16))
-                .foregroundStyle(Theme.ink)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(.white)
-                        .shadow(color: Theme.ink.opacity(0.12), radius: 4, y: 2)
-                )
-            Spacer(minLength: 0)
-        }
-        .accessibilityElement(children: .combine)
     }
 }

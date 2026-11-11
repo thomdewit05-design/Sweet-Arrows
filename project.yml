@@ -46,7 +46,13 @@ targets:
         excludes:
           - "Resources/levels"
           - "Resources/levels/**"
+          - "Resources/daily"
+          - "Resources/daily/**"
+          - "App/SweetArrows.entitlements"
       - path: SweetArrows/Resources/levels
+        type: folder
+        buildPhase: resources
+      - path: SweetArrows/Resources/daily
         type: folder
         buildPhase: resources
     dependencies:
@@ -84,6 +90,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(SWEETARROWS_BUNDLE_ID)
         TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_ENTITLEMENTS: SweetArrows/App/SweetArrows.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         OTHER_LDFLAGS: ["$(inherited)", "-ObjC"]

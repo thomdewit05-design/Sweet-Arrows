@@ -116,6 +116,15 @@ struct GeneratorTests {
         }
     }
 
+    @Test func dailyPuzzlesAreSolvableAndUseAllElements() async throws {
+        let daily = try await LevelPack.generateDaily(count: 3, seed: 5, generator: fast)
+        #expect(daily.map(\.id) == [100_001, 100_002, 100_003])
+        #expect(LevelPack.verify(daily, daily: true).isEmpty)
+        #expect(LevelPack.dailyPlan(number: 1).elements.count == 6)
+        #expect(LevelPack.dailyPlan(number: 7).target > LevelPack.dailyPlan(number: 1).target)
+        #expect(LevelPack.dailyFileName(for: 7) == "daily-007.json")
+    }
+
     @Test func verifyCatchesTamperedLevels() throws {
         var levels = try LevelPack.tutorial()
         levels[1].stats?.solution.reverse()

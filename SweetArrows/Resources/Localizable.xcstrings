@@ -34,12 +34,32 @@
         }
       }
     },
+    "+%lld coins": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld munten"
+          }
+        }
+      }
+    },
     "3 hearts": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "3 hartjes"
+          }
+        }
+      }
+    },
+    "A new puzzle every day": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elke dag een nieuwe puzzel"
           }
         }
       }
@@ -54,12 +74,32 @@
         }
       }
     },
+    "Boosters": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boosters"
+          }
+        }
+      }
+    },
     "Bounced too often. Want three more hearts?": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Te vaak gebotst. Wil je drie extra hartjes?"
+          }
+        }
+      }
+    },
+    "Candy styles": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoepstijlen"
           }
         }
       }
@@ -84,6 +124,16 @@
         }
       }
     },
+    "Caramel needs two taps: the first cracks it, the second sends it flying.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karamel heeft twee tikken nodig: de eerste kraakt hem, de tweede laat hem vliegen."
+          }
+        }
+      }
+    },
     "Chocolate bars": {
       "localizations": {
         "nl": {
@@ -94,12 +144,52 @@
         }
       }
     },
+    "Chocolate bars are two cells long and fly as one.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chocoladerepen zijn twee vakjes lang en vliegen als één geheel."
+          }
+        }
+      }
+    },
     "Chocolate Falls": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Chocolate Falls"
+          }
+        }
+      }
+    },
+    "Claim": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ophalen"
+          }
+        }
+      }
+    },
+    "Classic": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klassiek"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sluiten"
           }
         }
       }
@@ -124,6 +214,16 @@
         }
       }
     },
+    "Come back tomorrow!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kom morgen terug!"
+          }
+        }
+      }
+    },
     "Cotton Candy Clouds": {
       "localizations": {
         "nl": {
@@ -134,12 +234,62 @@
         }
       }
     },
+    "Counters": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toonbanken"
+          }
+        }
+      }
+    },
+    "Daily puzzle": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dagpuzzel"
+          }
+        }
+      }
+    },
     "Daily reward": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Dagelijkse beloning"
+          }
+        }
+      }
+    },
+    "Day %lld": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dag %lld"
+          }
+        }
+      }
+    },
+    "Done in %lld s · play again for a better time": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klaar in %lld s · speel opnieuw voor een betere tijd"
+          }
+        }
+      }
+    },
+    "Double it": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verdubbelen"
           }
         }
       }
@@ -164,12 +314,42 @@
         }
       }
     },
+    "Extra slot (%lld)": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra vakje (%lld)"
+          }
+        }
+      }
+    },
+    "Extra slot · %lld": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra vakje · %lld"
+          }
+        }
+      }
+    },
     "Get one more slot and keep going.": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Krijg een extra vakje en speel verder."
+          }
+        }
+      }
+    },
+    "Got it": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begrepen"
           }
         }
       }
@@ -234,6 +414,36 @@
         }
       }
     },
+    "Iced candies stay frozen until a neighbour leaves the board.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bevroren snoepjes blijven vastzitten tot een buurman het bord verlaat."
+          }
+        }
+      }
+    },
+    "In stock: %lld": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op voorraad: %lld"
+          }
+        }
+      }
+    },
+    "In use": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In gebruik"
+          }
+        }
+      }
+    },
     "Level %lld": {
       "localizations": {
         "nl": {
@@ -284,6 +494,16 @@
         }
       }
     },
+    "Lollipop poles never move. Candies have to go around them.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lollypalen staan vast. Snoepjes moeten eromheen."
+          }
+        }
+      }
+    },
     "Map": {
       "localizations": {
         "nl": {
@@ -304,12 +524,42 @@
         }
       }
     },
+    "Midnight candy": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middernachtsnoep"
+          }
+        }
+      }
+    },
+    "Mint marble": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muntmarmer"
+          }
+        }
+      }
+    },
     "Music": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Muziek"
+          }
+        }
+      }
+    },
+    "New!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuw!"
           }
         }
       }
@@ -334,6 +584,16 @@
         }
       }
     },
+    "Pastel": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pastel"
+          }
+        }
+      }
+    },
     "Play": {
       "localizations": {
         "nl": {
@@ -354,6 +614,16 @@
         }
       }
     },
+    "Remove": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weghalen"
+          }
+        }
+      }
+    },
     "Restore purchases": {
       "localizations": {
         "nl": {
@@ -370,6 +640,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Instellingen"
+          }
+        }
+      }
+    },
+    "Share result": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deel je resultaat"
           }
         }
       }
@@ -404,6 +684,16 @@
         }
       }
     },
+    "Sparkle": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Glitter"
+          }
+        }
+      }
+    },
     "Spend your coins on hints, undos and new candy styles.": {
       "localizations": {
         "nl": {
@@ -424,6 +714,26 @@
         }
       }
     },
+    "Spinners turn their arrow a quarter turn after every move.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draaisnoepjes draaien hun pijl een kwartslag na elke zet."
+          }
+        }
+      }
+    },
+    "Strawberry check": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aardbeienruit"
+          }
+        }
+      }
+    },
     "Sweet!": {
       "localizations": {
         "nl": {
@@ -440,6 +750,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tik op een snoepje: het schiet weg waar de pijl heen wijst!"
+          }
+        }
+      }
+    },
+    "Tap the candy you want to remove.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op het snoepje dat weg moet."
           }
         }
       }
@@ -514,6 +834,16 @@
         }
       }
     },
+    "Use": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebruiken"
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "nl": {
@@ -534,12 +864,32 @@
         }
       }
     },
+    "Wooden counter": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Houten toonbank"
+          }
+        }
+      }
+    },
     "Wrapped sweets": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Verpakte snoepjes"
+          }
+        }
+      }
+    },
+    "Wrapped sweets hide their color until their path is clear.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verpakte snoepjes laten hun kleur pas zien als de weg vrij is."
           }
         }
       }

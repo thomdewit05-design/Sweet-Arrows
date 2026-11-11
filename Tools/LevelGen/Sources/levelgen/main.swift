@@ -9,8 +9,8 @@ import SweetArrowsCore
 //   swift run levelgen show 42               print a level as ASCII with its stats
 
 let usage = """
-usage: levelgen [generate] [--count N] [--seed N] [--out DIR] [--report FILE]
-       levelgen verify [--out DIR]
+usage: levelgen [generate] [--count N] [--daily N] [--seed N] [--out DIR] [--daily-out DIR] [--report FILE]
+       levelgen verify [--out DIR] [--daily-out DIR]
        levelgen show <level> [--out DIR]
 """
 
@@ -35,6 +35,9 @@ func option(_ name: String) -> String? {
 let root = repositoryRoot()
 let levelsDirectory = option("--out").map { URL(fileURLWithPath: $0) }
     ?? root.appendingPathComponent("SweetArrows/Resources/levels")
+let dailyDirectory = option("--daily-out").map { URL(fileURLWithPath: $0) }
+    ?? root.appendingPathComponent("SweetArrows/Resources/daily")
+let dailyCount = option("--daily").flatMap { Int($0) } ?? 365
 let reportFile = option("--report").map { URL(fileURLWithPath: $0) }
     ?? root.appendingPathComponent("docs/level-report.md")
 let seed = option("--seed").flatMap { UInt64($0) } ?? LevelPack.defaultSeed
@@ -66,6 +69,13 @@ case "generate":
             at: reportFile.deletingLastPathComponent(), withIntermediateDirectories: true
         )
         try Report.markdown(levels, seed: seed).write(to: reportFile, atomically: true, encoding: .utf8)
+        if dailyCount > 0 {
+            let daily = try await LevelPack.generateDaily(count: dailyCount, seed: seed)
+            let dailyProblems = LevelPack.verify(daily, daily: true)
+            guard dailyProblems.isEmpty else { fail(dailyProblems.joined(separator: "\n")) }
+            try LevelPack.write(daily, to: dailyDirectory, daily: true)
+            print("✓ wrote \(daily.count) daily puzzles to \(dailyDirectory.path)")
+        }
         let seconds = Int(Date().timeIntervalSince(start))
         print("✓ wrote \(levels.count) levels to \(levelsDirectory.path) in \(seconds)s")
         print("✓ report: \(reportFile.path)")
@@ -80,6 +90,12 @@ case "verify":
         let problems = LevelPack.verify(levels)
         guard problems.isEmpty else { fail("✗ " + problems.joined(separator: "\n✗ ")) }
         print("✓ all \(levels.count) levels pass the solver check")
+        if FileManager.default.fileExists(atPath: dailyDirectory.path) {
+            let daily = try LevelPack.read(from: dailyDirectory, daily: true)
+            let dailyProblems = LevelPack.verify(daily, daily: true)
+            guard dailyProblems.isEmpty else { fail("✗ " + dailyProblems.joined(separator: "\n✗ ")) }
+            print("✓ all \(daily.count) daily puzzles pass the solver check")
+        }
     } catch {
         fail("✗ \(error)")
     }

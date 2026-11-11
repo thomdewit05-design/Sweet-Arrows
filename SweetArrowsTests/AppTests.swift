@@ -22,14 +22,14 @@ struct AppTests {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
         defer { try? FileManager.default.removeItem(at: url) }
         let save = SaveService(url: url)
-        save.recordWin(level: 1, stars: 2, coins: 10)
-        save.recordWin(level: 1, stars: 3, coins: 10)
+        let first = save.recordWin(level: 1, stars: 2)
+        let second = save.recordWin(level: 1, stars: 3)
         save.update { $0.settings.music = false }
 
         let reloaded = SaveService(url: url)
         #expect(reloaded.progress.completedLevel == 1)
         #expect(reloaded.progress.stars[1] == 3)
-        #expect(reloaded.progress.coins == 20)
+        #expect(reloaded.progress.coins == first + second)
         #expect(reloaded.progress.winStreak == 2)
         #expect(reloaded.progress.settings.music == false)
         #expect(reloaded.progress.isUnlocked(2))
@@ -37,6 +37,40 @@ struct AppTests {
 
         reloaded.recordLoss()
         #expect(reloaded.progress.winStreak == 0)
+    }
+
+    @Test func iCloudCopiesAreMerged() {
+        let cloud = FakeCloud()
+        let phone = SaveService(url: nil, cloud: cloud)
+        phone.recordWin(level: 1, stars: 3)
+        phone.recordWin(level: 2, stars: 2)
+
+        // A second device starts empty and picks up the iCloud copy.
+        let tablet = SaveService(url: nil, cloud: cloud)
+        #expect(tablet.progress.completedLevel == 2)
+        #expect(tablet.progress.stars[1] == 3)
+
+        tablet.recordWin(level: 3, stars: 1)
+        phone.pullFromCloud()
+        #expect(phone.progress.completedLevel == 3)
+    }
+
+    @Test func dailyPuzzlesShip() throws {
+        let library = LevelLibrary()
+        #expect(library.dailyCount >= 365)
+        let puzzle = try #require(library.dailyPuzzle(1))
+        #expect(puzzle.stats != nil)
+        let save = SaveService(url: nil)
+        #expect(save.recordDaily(DailyResult(taps: 20, seconds: 60, stars: 3), day: 10) == Economy.dailyPuzzleReward)
+        #expect(save.recordDaily(DailyResult(taps: 18, seconds: 50, stars: 3), day: 10) == 0)
+    }
+
+    @Test func boostersCostCoins() {
+        let save = SaveService(url: nil)
+        #expect(!save.spend(.hint))
+        save.update { $0.coins = 100 }
+        #expect(save.spend(.hint))
+        #expect(save.progress.coins == 100 - Booster.hint.price)
     }
 
     @Test func sessionStarsFollowHearts() throws {
@@ -86,4 +120,12 @@ struct AppTests {
         let model = AppModel.preview()
         #expect(model.level(1)?.bagCapacity == 5)
     }
+}
+
+@MainActor
+final class FakeCloud: CloudKeyValueStore {
+    private var storage: [String: Data] = [:]
+    func data(forKey key: String) -> Data? { storage[key] }
+    func set(_ data: Data?, forKey key: String) { storage[key] = data }
+    func synchronize() -> Bool { true }
 }

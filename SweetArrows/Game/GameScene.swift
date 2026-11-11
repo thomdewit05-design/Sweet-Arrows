@@ -10,6 +10,13 @@ final class GameScene: SKScene {
     private let haptics: HapticsService
     private let audio: AudioService
     private let colorBlind: Bool
+    private let boardStyle: Cosmetic
+    private let candyStyle: Cosmetic
+
+    /// When set, the next tap on a candy is handed here instead of playing it ("remove candy" booster).
+    var onCandySelected: ((Int) -> Void)?
+    /// Room SwiftUI needs between the board and the jar (booster bar).
+    var boosterBarHeight: CGFloat = 0 { didSet { needsLayout = true } }
 
     /// Space SwiftUI uses above the board (HUD) and the scene keeps below it (jar).
     var topInset: CGFloat = 96 { didSet { needsLayout = true } }
@@ -27,11 +34,20 @@ final class GameScene: SKScene {
     private var tutorialHand: SKNode?
     private var art: CandyArt?
 
-    init(session: GameSession, haptics: HapticsService, audio: AudioService, colorBlind: Bool) {
+    init(
+        session: GameSession,
+        haptics: HapticsService,
+        audio: AudioService,
+        colorBlind: Bool,
+        boardStyle: Cosmetic = .woodCounter,
+        candyStyle: Cosmetic = .classicCandy
+    ) {
         self.session = session
         self.haptics = haptics
         self.audio = audio
         self.colorBlind = colorBlind
+        self.boardStyle = boardStyle
+        self.candyStyle = candyStyle
         super.init(size: CGSize(width: 390, height: 844))
         scaleMode = .resizeFill
         backgroundColor = UIColor(hex: 0xFFF4E6)
@@ -74,7 +90,7 @@ final class GameScene: SKScene {
 
         let availableWidth = size.width - margin * 2
         let top = size.height - safeTop - topInset
-        let bottom = safeBottom + bottomInset + jarHeight + 20
+        let bottom = safeBottom + bottomInset + jarHeight + 20 + boosterBarHeight
         let availableHeight = max(top - bottom, 100)
 
         cell = min(availableWidth / CGFloat(level.width), availableHeight / CGFloat(level.height), 72)
@@ -88,8 +104,9 @@ final class GameScene: SKScene {
         let padding = cell * 0.25
         let rect = CGRect(origin: boardOrigin, size: boardSize).insetBy(dx: -padding, dy: -padding)
         counter.path = CGPath(roundedRect: rect, cornerWidth: cell * 0.4, cornerHeight: cell * 0.4, transform: nil)
-        counter.fillColor = UIColor(hex: 0xF6D7B0)
-        counter.strokeColor = UIColor(hex: 0xE9B98A)
+        let palette = BoardPalette(boardStyle)
+        counter.fillColor = palette.fill
+        counter.strokeColor = palette.edge
         counter.lineWidth = 4
         counter.zPosition = -10
         counter.removeAllChildren()
@@ -105,7 +122,7 @@ final class GameScene: SKScene {
                     x: boardOrigin.x + CGFloat(x) * cell, y: boardOrigin.y + CGFloat(level.height - 1 - y) * cell,
                     width: cell, height: cell
                 ), cornerRadius: cell * 0.18)
-                tile.fillColor = UIColor(hex: 0xFFFFFF, alpha: 0.22)
+                tile.fillColor = palette.tile
                 tile.strokeColor = .clear
                 counter.addChild(tile)
             }
@@ -156,7 +173,7 @@ final class GameScene: SKScene {
         poleNodes.forEach(candyLayer.addChild)
 
         for state in session.game.remainingCandies {
-            let node = CandyNode(state: state, cellSize: cell, colorBlind: colorBlind, art: art)
+            let node = CandyNode(state: state, cellSize: cell, colorBlind: colorBlind, style: candyStyle, art: art)
             node.position = center(of: state)
             candyLayer.addChild(node)
             nodes[state.id] = node
@@ -201,6 +218,11 @@ final class GameScene: SKScene {
               let cellPoint = gridPoint(at: touch.location(in: self)),
               let state = session.game.candy(at: cellPoint)
         else { return }
+        if let select = onCandySelected {
+            onCandySelected = nil
+            select(state.id)
+            return
+        }
         handleTap(on: state.id)
     }
 
@@ -418,5 +440,25 @@ final class GameScene: SKScene {
             node.addChild(sprite)
         }
         return node
+    }
+}
+
+/// Counter colors for each board cosmetic.
+struct BoardPalette {
+    let fill: UIColor
+    let edge: UIColor
+    let tile: UIColor
+
+    init(_ style: Cosmetic) {
+        switch style {
+        case .mintMarble:
+            fill = UIColor(hex: 0xD6F5E8); edge = UIColor(hex: 0x9EDFC4); tile = UIColor(hex: 0xFFFFFF, alpha: 0.35)
+        case .strawberryCheck:
+            fill = UIColor(hex: 0xFFE1EA); edge = UIColor(hex: 0xFFB1C6); tile = UIColor(hex: 0xFF5C8A, alpha: 0.12)
+        case .midnightCandy:
+            fill = UIColor(hex: 0x3B2F5C); edge = UIColor(hex: 0x2A2145); tile = UIColor(hex: 0xFFFFFF, alpha: 0.08)
+        default:
+            fill = UIColor(hex: 0xF6D7B0); edge = UIColor(hex: 0xE9B98A); tile = UIColor(hex: 0xFFFFFF, alpha: 0.22)
+        }
     }
 }
