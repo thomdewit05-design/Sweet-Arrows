@@ -77,16 +77,16 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 - **Tik** op een snoepje: het glijdt in de richting van zijn pijl tot de rand of een ander snoepje.
   Kan het niet bewegen, dan draait de pijl een kwartslag (met de klok mee). Elke tik doet dus iets; geen hartjes.
 - **3 of meer** van dezelfde kleur op een rij (horizontaal of verticaal) ploppen. Er valt niets; het bord is een tafel.
-- Bord van 7×8, start met 12 snoepjes. Elke 2,4 s komt er een snoepje bij (eerst 1 s een schaduw);
-  elke "snelheid" (15 snoepjes geplopt) 8% sneller, tot één per 0,7 s. Een nieuw snoepje maakt nooit zelf een rij.
-- Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciaal: **bom** (vanaf snelheid 2, popt 3×3),
+- Bord van **5×5** (keuze van de eigenaar; eerst 7×8, toen 6×6), start met 5 snoepjes. Elke 3,0 s komt er een snoepje bij (eerst 1 s een schaduw);
+  elke "snelheid" (10 snoepjes geplopt) 8% sneller, tot één per 1,0 s. Een nieuw snoepje maakt nooit zelf een rij.
+- Eerst 3 kleuren, daarna 4 (op het kleine bord nooit meer dan 4, anders zijn rijtjes bijna onmogelijk). Speciaal: **bom** (vanaf snelheid 2, popt 3×3),
   **steen** (vanaf 3, kan niet bewegen, breekt als ernaast iets popt), **regenboog** (vanaf 4, telt als elke kleur).
 - **Af:** geen vrij vakje voor een nieuw snoepje. Eén keer per potje doorgaan met een beloningsvideo:
   een derde van de snoepjes verdwijnt.
 - **Punten:** 10 per gepopt snoepje, +20 per snoepje boven de 3 in een rij, 5 per gebroken steen, alles × combo
   (ploppen binnen 3 s na elkaar, max. ×5), +100 voor een leeg bord. Munten: score ÷ 25. Record en Game Center-ranglijst
   `sweetarrows.endless_score` zoals voorheen.
-- Simulatie (20 potjes, speler die één zet vooruit kijkt, één tik per seconde): potjes duren 4–6 minuten, snelheid 4–6.
+- Simulatie op 5×5 (20 potjes, speler die één zet vooruit kijkt, een tik per 0,8–1,2 s): potjes duren gemiddeld ongeveer 3 minuten; met 4 kleuren gaan ze langer en scoren ze beter dan met 5 of 6.
 - Eerste twee potjes: uitleg bovenin en een handje dat een snoepje aanwijst dat meteen een rij maakt.
 - **Boosters** (onder het bord; uit voorraad, voor munten of met een beloningsvideo):
   *Tip* (60) laat een snoepje knipperen dat meteen een rij maakt (je betaalt alleen als er zo'n zet is),
@@ -99,6 +99,12 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
   wisselende snoepkleuren om het bord en kleurt de achtergrond roze; de score pompt op en kleurt mee.
   Trillingen groeien mee (1–5 tikken, met een doorlopende tril bij grote zetten, een rommel bij bommen).
   Met "Beweging verminderen" aan: geen schudden en minder stukjes.
+- **Arcade-gevoel** (op verzoek: "zoals een casino, maar iets minder"): lampjes rond het bord die bij elke goede
+  zet een rondje knipperen en tijdens combo-koorts blijven lopen; gouden muntjes die in een boog naar de score
+  vliegen (3–12, met rinkel en tikje); draaiende gouden stralen achter de grote lof-woorden; de woorden komen letter
+  voor letter binnen en huppelen, vanaf "Suikerfeest!" lopen de kleuren door de letters; gouden, grotere punten bij
+  grote zetten; twinkelsterretjes bij elke plop en af en toe op een stilliggend snoepje; een korte witte flits bij
+  de allergrootste zetten. Met "Beweging verminderen" aan blijft het rustig.
 - **Banner onder het spelbord** (keuze van de eigenaar, wijkt af van het plan "nooit tijdens het spelen"):
   onder de boosterbalk, met ruimte ertussen. Op verzoek van de eigenaar vaak zichtbaar: vanaf het eerste potje
   (zodra de toestemmingsvraag is afgerond), ook onderin het startscherm en de winkel. Remote Config-sleutel
@@ -128,6 +134,15 @@ Op verzoek van de eigenaar ("alles mag") zodat spelers blijven terugkomen:
   boosters op een lichte ondergrond zodat ze op elke achtergrond leesbaar zijn.
 - **Snoepjes:** donkerdere onderkant en extra glimlichtje voor meer diepte, en een zachte "ademhaling" als ze
   stilliggen (uit met Beweging verminderen). Combo-koorts kleurt nu de achtergrond roze in plaats van de kleur te wisselen.
+
+- **Animaties in de menu's** (`App/Animations.swift`): onderdelen poppen na elkaar binnen (startscherm,
+  winkel, uitslag, dagbeloning); er strijkt een glimlicht over de grote knoppen; de score en munten tellen op
+  op de uitslagkaart; konfetti bij een record, een level-up en een geclaimde dagbeloning; de munt draait en de
+  teller wipt als je munten krijgt; het niveausterretje draait bij een nieuw niveau; de XP- en opdrachtbalken
+  lopen vloeiend vol; een vinkje springt bij een gehaalde opdracht; het cadeau en de beloning van vandaag
+  bewegen tot je ze ophaalt; boosterpictogrammen springen als je voorraad verandert; kaarten en tegels geven
+  mee als je erop drukt. Het sterretje knippert met zijn ogen en wiebelt als je erop tikt.
+  Met "Beweging verminderen" aan staat dit allemaal stil.
 
 ### Echte illustraties later toevoegen
 

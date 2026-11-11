@@ -31,6 +31,8 @@ final class CandyNode: SKNode {
     let isBomb: Bool
     private let body: SKNode
     private let arrow: SKNode
+    /// Where the arrow should end up (its real angle can be halfway through a turn).
+    private var arrowAngle: CGFloat = 0
 
     init(piece: SlideGame.Piece, cellSize: CGFloat, colorBlind: Bool, style: Cosmetic = .classicCandy, art: CandyArt? = nil) {
         candyID = piece.id
@@ -50,6 +52,7 @@ final class CandyNode: SKNode {
             arrow = buildArrow()
         }
         arrow.zRotation = CandyShapes.rotation(for: piece.direction)
+        arrowAngle = arrow.zRotation
         arrow.zPosition = 3
 
         super.init()
@@ -231,16 +234,25 @@ final class CandyNode: SKNode {
     /// The arrow turns, always clockwise.
     func turn(to direction: Direction, animated: Bool) {
         let target = CandyShapes.rotation(for: direction)
-        guard animated else {
-            arrow.zRotation = target
-            return
-        }
-        var delta = target - arrow.zRotation
+        // Count from where the arrow is heading, not from where it is right now: a quick second tap
+        // used to start from a half-finished turn and leave the arrow crooked.
+        var delta = target - arrowAngle
         while delta > 0 { delta -= 2 * .pi }
         while delta <= -2 * .pi { delta += 2 * .pi }
-        let spin = SKAction.rotate(byAngle: delta, duration: 0.22)
+        arrowAngle += delta
+        arrow.removeAction(forKey: "turn")
+        guard animated, !UIAccessibility.isReduceMotionEnabled else {
+            arrow.zRotation = arrowAngle
+            return
+        }
+        let spin = SKAction.rotate(toAngle: arrowAngle, duration: 0.22, shortestUnitArc: false)
         spin.timingMode = .easeOut
-        arrow.run(spin)
+        // Land exactly on the angle, whatever happened in between.
+        let angle = arrowAngle
+        let snap = SKAction.customAction(withDuration: 0) { node, _ in
+            MainActor.assumeIsolated { node.zRotation = angle }
+        }
+        arrow.run(.sequence([spin, snap]), withKey: "turn")
     }
 
     /// Pops (line, bomb blast or hammer).

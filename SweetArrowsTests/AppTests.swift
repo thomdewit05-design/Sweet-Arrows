@@ -57,7 +57,7 @@ struct AppTests {
 
     @Test func slideSessionPlaysAndRestarts() {
         let session = SlideSession(seed: 9)
-        #expect(session.run.pieces.count == 12)
+        #expect(session.run.pieces.count == 5)
         #expect(session.score == 0)
         let movable = session.run.sortedPieces.first { $0.canMove }
         if let piece = movable {
@@ -73,7 +73,7 @@ struct AppTests {
         session.restart()
         #expect(session.score == 0)
         #expect(!session.isOver)
-        #expect(session.run.pieces.count == 12)
+        #expect(session.run.pieces.count == 5)
     }
 
     @Test func endlessRecordIsSaved() {

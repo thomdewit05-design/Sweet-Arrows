@@ -29,6 +29,9 @@ final class SlideScene: SKScene {
     private let counter = SKShapeNode()
     private let candyLayer = SKNode()
     private let effects = SlideEffects()
+    private let marquee = MarqueeLights()
+    /// Time of the last idle sparkle on a random candy.
+    private var lastGlint: TimeInterval = 0
     private var nodes: [Int: SKNode] = [:]
     /// Candy color per piece, for shards and streaks.
     private var colors: [Int: UIColor] = [:]
@@ -74,6 +77,8 @@ final class SlideScene: SKScene {
         boardRoot.addChild(counter)
         boardRoot.addChild(candyLayer)
         boardRoot.addChild(effects)
+        marquee.zPosition = -5
+        boardRoot.addChild(marquee)
     }
 
     @available(*, unavailable)
@@ -98,8 +103,14 @@ final class SlideScene: SKScene {
         }
         // Combo fever: a glowing frame and a warmer background while pops keep coming.
         let fever = run.comboIsLive && run.combo >= 3 && !run.isOver
+        // Now and then a candy catches the light.
+        if currentTime - lastGlint > 2.8, !run.isOver, let node = nodes.values.randomElement() {
+            lastGlint = currentTime
+            effects.twinkles(at: node.position, cell: cell, count: 1)
+        }
         if fever != feverOn {
             feverOn = fever
+            marquee.setRunning(fever)
             effects.setFever(fever, around: boardFrame, cornerRadius: cell * 0.4)
             feverTint.removeAllActions()
             feverTint.run(fever
@@ -129,6 +140,7 @@ final class SlideScene: SKScene {
         let padding = cell * 0.25
         let rect = CGRect(origin: boardOrigin, size: boardSize).insetBy(dx: -padding, dy: -padding)
         boardFrame = rect.insetBy(dx: -4, dy: -4)
+        marquee.layout(around: rect.insetBy(dx: -10, dy: -10), cornerRadius: cell * 0.5, cell: cell)
         let path = CGPath(roundedRect: rect, cornerWidth: cell * 0.4, cornerHeight: cell * 0.4, transform: nil)
         counter.path = path
         let palette = BoardPalette(boardStyle)
@@ -291,7 +303,8 @@ final class SlideScene: SKScene {
             haptics.rumble()
         }
         let landingPoint = point(for: landing)
-        effects.points(report.points, at: landingPoint, cell: cell, big: report.combo > 1)
+        effects.points(report.points, at: landingPoint, cell: cell, big: report.combo > 1 || level >= 3)
+        celebrateArcade(level: level, from: landingPoint)
         let shakes: [CGFloat] = [0, 0, 3, 6, 9, 12]
         let blast: CGFloat = report.exploded.isEmpty ? 1 : 1.4
         effects.shake(boardRoot, strength: shakes[min(level, 5)] * blast)
@@ -299,9 +312,24 @@ final class SlideScene: SKScene {
             let combo = report.combo > 1
                 ? String(localized: "Combo ×\(min(report.combo, SlideGame.maxComboMultiplier))") : nil
             let center = CGPoint(x: boardFrame.midX, y: boardFrame.midY + cell * 0.5)
+            if level >= 3 { effects.sunburst(at: center, level: level, cell: cell) }
             effects.praise(word, subtitle: combo, level: level, at: center, cell: cell)
         }
         if report.clearedBoard { celebrate() }
+    }
+
+    /// The arcade touch: chasing lights, a shower of coins into the score and, for the biggest moves, a flash.
+    private func celebrateArcade(level: Int, from origin: CGPoint) {
+        guard level >= 2 else { return }
+        marquee.chase(loops: level >= 4 ? 2 : 1)
+        let coins = [0, 0, 3, 6, 9, 12][min(level, 5)]
+        let safeTop = view?.safeAreaInsets.top ?? 0
+        let scoreSpot = CGPoint(x: size.width / 2, y: size.height - safeTop - 40)
+        effects.coinShower(from: origin, to: scoreSpot, count: coins, cell: cell) { [weak self] in
+            self?.audio.play(.coin)
+            self?.haptics.tap()
+        }
+        if level >= 4 { effects.screenFlash(size: size) }
     }
 
     /// Words that grow with the move (level 1, a plain line of three, gets none).
@@ -336,6 +364,7 @@ final class SlideScene: SKScene {
         guard let node = nodes.removeValue(forKey: id) else { return }
         let color = colors.removeValue(forKey: id) ?? .white
         effects.flash(at: node.position, cell: cell, delay: delay)
+        effects.twinkles(at: node.position, cell: cell, count: 2)
         effects.shards(at: node.position, color: color, cell: cell, delay: delay)
         if (node as? CandyNode)?.isBomb == true {
             effects.shockwave(at: node.position, cell: cell)

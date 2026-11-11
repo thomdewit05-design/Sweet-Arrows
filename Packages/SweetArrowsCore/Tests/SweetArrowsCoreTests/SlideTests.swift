@@ -220,7 +220,7 @@ struct SlideTests {
 
     @Test func startsWithAFairBoardWithoutLines() {
         let game = SlideGame(seed: 7)
-        #expect(game.pieces.count == 12)
+        #expect(game.pieces.count == 5)
         #expect(game.matchedIDs().isEmpty)
         #expect(game.colorCount == 3)
         #expect(game.unlockedKinds.isEmpty)
@@ -245,7 +245,7 @@ struct SlideTests {
         }
         #expect(full)
         #expect(game.isOver)
-        #expect(spawned > 20)
+        #expect(spawned == game.width * game.height - game.settings.startCandies)  // fills every free cell
         #expect(warned >= spawned)
         #expect(game.advance(by: 1).isEmpty)
         #expect(game.tap(game.sortedPieces[0].id).move == .ignored)
@@ -286,7 +286,7 @@ struct SlideTests {
         #expect(game.score > 0)
         #expect(!stages.isEmpty)
         #expect(game.interval < game.settings.startInterval)
-        #expect(game.colorCount > 3)
+        #expect(game.colorCount == 4)  // capped at maxColors on the small board
         #expect(game.unlockedKinds.contains(.bomb))
         #expect(game.coinsEarned == game.score / 25)
     }

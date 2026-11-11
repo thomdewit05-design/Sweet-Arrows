@@ -57,6 +57,7 @@ struct ShopView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .candyCard()
+        .popIn()
     }
 
     private func cosmeticsGrid(_ kind: Cosmetic.Kind, progress: PlayerProgress) -> some View {
@@ -117,6 +118,7 @@ private struct BoosterRow: View {
             Image(systemName: booster.icon)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(Theme.ink)
+                .symbolEffect(.bounce, value: stock)
                 .frame(width: 44, height: 44)
                 .background(RoundedRectangle(cornerRadius: 12).fill(.white))
             VStack(alignment: .leading, spacing: 2) {
@@ -124,6 +126,8 @@ private struct BoosterRow: View {
                     .font(Theme.heading(17))
                     .foregroundStyle(Theme.ink)
                 Text("In stock: \(stock)")
+                    .contentTransition(.numericText(value: Double(stock)))
+                    .animation(.spring(response: 0.3), value: stock)
                     .font(Theme.body(13))
                     .foregroundStyle(Theme.inkSoft)
             }
@@ -179,7 +183,10 @@ private struct CosmeticCard: View {
                     .fill(.white)
                     .overlay(RoundedRectangle(cornerRadius: 20).stroke(equipped ? Theme.heart : .clear, lineWidth: 3))
             )
+            .scaleEffect(equipped ? 1.04 : 1)
+            .animation(.spring(response: 0.35, dampingFraction: 0.5), value: equipped)
         }
+        .buttonStyle(SquishButtonStyle())
         .disabled(!usable)
         .opacity(usable ? 1 : 0.55)
     }
