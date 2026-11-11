@@ -198,12 +198,14 @@ struct LevelTests {
 struct WorldTests {
     @Test func levelToWorld() {
         #expect(World.number(forLevel: 1) == 1)
-        #expect(World.number(forLevel: 20) == 1)
-        #expect(World.number(forLevel: 21) == 2)
-        #expect(World.number(forLevel: 300) == 15)
-        #expect(World(id: 9).theme == .gummyGarden)
-        #expect(World(id: 9).season == 2)
-        #expect(World(id: 2).levels == 21...40)
+        #expect(World.number(forLevel: 38) == 1)
+        #expect(World.number(forLevel: 39) == 2)
+        #expect(World.number(forLevel: 300) == 8)
+        #expect(World.number(forLevel: 350) == 8)
+        #expect(World.sizes == [38, 38, 38, 38, 37, 37, 37, 37])
+        #expect(World(id: 2).levels == 39...76)
+        #expect(World(id: 8).levels == 264...300)
+        #expect(World.all.count == 8)
     }
 
     @Test func elementsUnlockPerWorld() {
@@ -213,7 +215,6 @@ struct WorldTests {
         #expect(World(id: 7).newElement == .rotating)
         #expect(World(id: 7).availableElements.count == 6)
         #expect(World(id: 8).newElement == nil)
-        #expect(World(id: 10).availableElements.count == 6)
     }
 
     @Test func everyColorHasItsOwnShape() {

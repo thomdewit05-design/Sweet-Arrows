@@ -27,7 +27,7 @@ public enum Report {
             let difficulties = group.compactMap { $0.stats?.difficulty }
             let avg = difficulties.isEmpty ? 0 : difficulties.reduce(0, +) / Double(difficulties.count)
             let w = World(id: world)
-            let name = w.theme.displayName + (w.season > 1 ? " \(w.season)" : "")
+            let name = w.theme.displayName
             lines.append("| \(world). \(name) | \(group.first!.id)–\(group.last!.id) | "
                 + "\(w.newElement?.displayName ?? "–") | \(format(avg)) | \(format(difficulties.max() ?? 0)) |")
         }

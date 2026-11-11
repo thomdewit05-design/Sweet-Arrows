@@ -51,7 +51,7 @@ struct CurveTests {
     }
 
     @Test func worldIntroFeaturesNewElement() {
-        let plan = Curve.plan(for: 41)
+        let plan = Curve.plan(for: World(id: 3).firstLevel)
         #expect(plan.featured == .chocolateBar)
         #expect(plan.slot == .easy)
     }
@@ -96,7 +96,7 @@ struct GeneratorTests {
     }
 
     @Test func featuredElementAppears() throws {
-        for id in [21, 41, 61, 81, 101, 121] {
+        for id in (2...7).map({ World(id: $0).firstLevel }) {
             let plan = Curve.plan(for: id)
             let level = try #require(fast.level(for: plan, seed: 1))
             #expect(level.elements.contains(plan.featured!), "level \(id) should show \(plan.featured!)")

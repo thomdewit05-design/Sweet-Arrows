@@ -5,16 +5,12 @@ import SweetArrowsCore
 struct MapView: View {
     @Environment(AppModel.self) private var model
 
-    private var worldCount: Int {
-        max(1, (model.levels.count + World.levelsPerWorld - 1) / World.levelsPerWorld)
-    }
-
     var body: some View {
         let progress = model.save.progress
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 20) {
-                    ForEach(1...worldCount, id: \.self) { id in
+                    ForEach(1...World.count, id: \.self) { id in
                         WorldCard(world: World(id: id), progress: progress, levelCount: model.levels.count) { level in
                             model.path.append(.level(level))
                         }
@@ -115,7 +111,7 @@ private struct LevelBubble: View {
 
 extension World {
     var displayName: String {
-        let name: String = switch theme {
+        switch theme {
         case .gummyGarden: String(localized: "Gummy Garden")
         case .lollipopLane: String(localized: "Lollipop Lane")
         case .chocolateFalls: String(localized: "Chocolate Falls")
@@ -125,7 +121,6 @@ extension World {
         case .licoriceLab: String(localized: "Licorice Lab")
         case .iceCreamIsland: String(localized: "Ice Cream Island")
         }
-        return season > 1 ? "\(name) \(season)" : name
     }
 
     var tint: Color {

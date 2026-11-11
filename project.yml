@@ -3,7 +3,7 @@
 name: SweetArrows
 
 options:
-  bundleIdPrefix: com.sweetarrows
+  bundleIdPrefix: com.lucthomasdewit
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en

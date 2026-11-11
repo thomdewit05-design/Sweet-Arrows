@@ -61,6 +61,8 @@ block-jam-games in de hitlijsten.
   icoon van events. Houdt het spel herkenbaar zonder dat het een verhaal nodig heeft.
 
 ### Werelden (20 levels per wereld)
+
+> Besluit tijdens de bouw: de 300 levels van v1 zijn verdeeld over deze 8 werelden (37–38 per wereld).
 1. Gummy Garden
 2. Lollipop Lane
 3. Chocolate Falls
