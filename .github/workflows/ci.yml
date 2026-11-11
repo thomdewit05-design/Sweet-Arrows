@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Rules, solver & levels (Linux)
+    runs-on: ubuntu-latest
+    container: swift:6.0-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test SweetArrowsCore
+        run: swift test --package-path Packages/SweetArrowsCore --enable-code-coverage
+      - name: Coverage of the rules (goal 90%+)
+        continue-on-error: true
+        run: |
+          BIN=$(swift build --package-path Packages/SweetArrowsCore --show-bin-path)
+          llvm-cov report "$BIN/SweetArrowsCorePackageTests.xctest" \
+            -instr-profile "$BIN/codecov/default.profdata" \
+            -ignore-filename-regex='(\.build|Tests)/' | tail -n 15
+      - name: Test LevelGen
+        run: swift test --package-path Tools/LevelGen
+      - name: Every shipped level passes the solver
+        run: swift run --package-path Tools/LevelGen -c release levelgen verify --out SweetArrows/Resources/levels
+
+  lint:
+    name: SwiftLint
+    runs-on: ubuntu-latest
+    container: ghcr.io/realm/swiftlint:0.57.0
+    steps:
+      - uses: actions/checkout@v4
+      - run: swiftlint --reporter github-actions-logging
+
+  ios:
+    name: iOS build & tests (Simulator)
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)
+          echo "Using $XCODE"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Cache Swift packages
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: spm-${{ hashFiles('project.yml') }}
+      - name: Pick a simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(p) for p in k.split("iOS-")[-1].split("-")])
+          for runtime in reversed(ios):
+              phones = [d for d in devices[runtime] if d["name"].startswith("iPhone") and "Pro" not in d["name"]]
+              phones = phones or [d for d in devices[runtime] if d["name"].startswith("iPhone")]
+              if phones:
+                  print(phones[0]["udid"]); break
+          ')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices | grep "$UDID"
+      - name: Build and test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project SweetArrows.xcodeproj \
+            -scheme SweetArrows \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -skipPackagePluginValidation -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee xcodebuild.log | grep -E "error:|warning: .*(Sendable|isolat)|Test Suite|Test Case.*failed|\*\* (BUILD|TEST)" || true
+          grep -q "\*\* TEST SUCCEEDED \*\*" xcodebuild.log
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: xcodebuild.log

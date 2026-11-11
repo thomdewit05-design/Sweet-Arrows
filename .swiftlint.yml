@@ -1,0 +1,44 @@
+included:
+  - SweetArrows
+  - SweetArrowsTests
+  - SweetArrowsUITests
+  - Packages/SweetArrowsCore/Sources
+  - Packages/SweetArrowsCore/Tests
+  - Tools/LevelGen/Sources
+  - Tools/LevelGen/Tests
+excluded:
+  - "**/.build"
+  - SweetArrows/Resources
+
+disabled_rules:
+  - todo
+  - identifier_name          # x, y, dx, p are clear in grid code
+  - nesting
+  - force_unwrapping
+
+opt_in_rules:
+  - empty_count
+  - first_where
+  - contains_over_first_not_nil
+  - sorted_first_last
+  - modifier_order
+  - unused_import
+
+line_length:
+  warning: 130
+  error: 160
+  ignores_comments: true
+type_body_length:
+  warning: 400
+  error: 600
+file_length:
+  warning: 600
+  error: 900
+function_body_length:
+  warning: 80
+  error: 150
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+large_tuple:
+  warning: 4

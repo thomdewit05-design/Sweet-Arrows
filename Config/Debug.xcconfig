@@ -1,0 +1,5 @@
+#include "Shared.xcconfig"
+
+// Google's public test app id. Debug builds only ever show test ads.
+GAD_APPLICATION_ID = ca-app-pub-3940256099942544~1458002511
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG $(inherited)

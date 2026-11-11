@@ -1,0 +1,509 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%lld coins": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld munten"
+          }
+        }
+      }
+    },
+    "%lld hearts left": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog %lld hartjes"
+          }
+        }
+      }
+    },
+    "3 hearts": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 hartjes"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terug"
+          }
+        }
+      }
+    },
+    "Bounced too often. Want three more hearts?": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te vaak gebotst. Wil je drie extra hartjes?"
+          }
+        }
+      }
+    },
+    "Caramel": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karamel"
+          }
+        }
+      }
+    },
+    "Caramel Canyon": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caramel Canyon"
+          }
+        }
+      }
+    },
+    "Chocolate bars": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chocoladerepen"
+          }
+        }
+      }
+    },
+    "Chocolate Falls": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chocolate Falls"
+          }
+        }
+      }
+    },
+    "Color-blind mode": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleurenblindmodus"
+          }
+        }
+      }
+    },
+    "Come back every day for sweeter rewards.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kom elke dag terug voor nog zoetere beloningen."
+          }
+        }
+      }
+    },
+    "Cotton Candy Clouds": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cotton Candy Clouds"
+          }
+        }
+      }
+    },
+    "Daily reward": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dagelijkse beloning"
+          }
+        }
+      }
+    },
+    "Every color already has its own shape. Color-blind mode adds a letter to each candy.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elke kleur heeft al een eigen vorm. De kleurenblindmodus zet er ook een letter op."
+          }
+        }
+      }
+    },
+    "Extra slot": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra vakje"
+          }
+        }
+      }
+    },
+    "Get one more slot and keep going.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krijg een extra vakje en speel verder."
+          }
+        }
+      }
+    },
+    "Gummy Garden": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gummy Garden"
+          }
+        }
+      }
+    },
+    "Hard level": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moeilijk level"
+          }
+        }
+      }
+    },
+    "Hint": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hint"
+          }
+        }
+      }
+    },
+    "Home": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        }
+      }
+    },
+    "Ice Cream Island": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ice Cream Island"
+          }
+        }
+      }
+    },
+    "Ice cubes": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IJsblokjes"
+          }
+        }
+      }
+    },
+    "Level %lld": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level %lld"
+          }
+        }
+      }
+    },
+    "Level not found": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level niet gevonden"
+          }
+        }
+      }
+    },
+    "Licorice Lab": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licorice Lab"
+          }
+        }
+      }
+    },
+    "Lollipop Lane": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lollipop Lane"
+          }
+        }
+      }
+    },
+    "Lollipop poles": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lollypalen"
+          }
+        }
+      }
+    },
+    "Map": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart"
+          }
+        }
+      }
+    },
+    "Marshmallow Mountains": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marshmallow Mountains"
+          }
+        }
+      }
+    },
+    "Music": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muziek"
+          }
+        }
+      }
+    },
+    "Next level": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volgend level"
+          }
+        }
+      }
+    },
+    "Out of hearts": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hartjes op"
+          }
+        }
+      }
+    },
+    "Play": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelen"
+          }
+        }
+      }
+    },
+    "Privacy settings": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy-instellingen"
+          }
+        }
+      }
+    },
+    "Restore purchases": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aankopen herstellen"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen"
+          }
+        }
+      }
+    },
+    "Shop": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Winkel"
+          }
+        }
+      }
+    },
+    "Sound": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geluid"
+          }
+        }
+      }
+    },
+    "Spend your coins on hints, undos and new candy styles.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Besteed je munten aan hints, zetten terugnemen en nieuwe snoepstijlen."
+          }
+        }
+      }
+    },
+    "Spinners": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draaisnoepjes"
+          }
+        }
+      }
+    },
+    "Sweet!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heerlijk!"
+          }
+        }
+      }
+    },
+    "Tap, slide, pop the sweets": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik, schiet, plop de snoepjes"
+          }
+        }
+      }
+    },
+    "The candy shop opens soon": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De snoepwinkel gaat binnenkort open"
+          }
+        }
+      }
+    },
+    "The jar is full!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De snoeppot is vol!"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw proberen"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongedaan maken"
+          }
+        }
+      }
+    },
+    "Undo last move": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste zet terug"
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versie"
+          }
+        }
+      }
+    },
+    "Vibration": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trillen"
+          }
+        }
+      }
+    },
+    "Wrapped sweets": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verpakte snoepjes"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "shouldTranslate": false
+    }
+  },
+  "version": "1.0"
+}
