@@ -99,6 +99,12 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
   wisselende snoepkleuren om het bord en kleurt de achtergrond roze; de score pompt op en kleurt mee.
   Trillingen groeien mee (1–5 tikken, met een doorlopende tril bij grote zetten, een rommel bij bommen).
   Met "Beweging verminderen" aan: geen schudden en minder stukjes.
+- **Arcade-gevoel** (op verzoek: "zoals een casino, maar iets minder"): lampjes rond het bord die bij elke goede
+  zet een rondje knipperen en tijdens combo-koorts blijven lopen; gouden muntjes die in een boog naar de score
+  vliegen (3–12, met rinkel en tikje); draaiende gouden stralen achter de grote lof-woorden; de woorden komen letter
+  voor letter binnen en huppelen, vanaf "Suikerfeest!" lopen de kleuren door de letters; gouden, grotere punten bij
+  grote zetten; twinkelsterretjes bij elke plop en af en toe op een stilliggend snoepje; een korte witte flits bij
+  de allergrootste zetten. Met "Beweging verminderen" aan blijft het rustig.
 - **Banner onder het spelbord** (keuze van de eigenaar, wijkt af van het plan "nooit tijdens het spelen"):
   onder de boosterbalk, met ruimte ertussen. Op verzoek van de eigenaar vaak zichtbaar: vanaf het eerste potje
   (zodra de toestemmingsvraag is afgerond), ook onderin het startscherm en de winkel. Remote Config-sleutel

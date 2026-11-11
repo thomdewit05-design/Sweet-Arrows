@@ -110,29 +110,76 @@ final class SlideEffects: SKNode {
 
     // MARK: Words
 
-    /// Big praise word (and an optional second line) that pops in, wobbles and floats away.
+    /// Big praise word, letter by letter like an arcade sign (and an optional second line).
+    /// From level 4 the letters cycle through the candy colors.
     func praise(_ text: String, subtitle: String?, level: Int, at position: CGPoint, cell: CGFloat) {
         let root = SKNode()
         root.position = position
         root.zPosition = 5
-        let colors: [UInt32] = [0xFF5C8A, 0xFF9F1C, 0xA259FF, 0x3DDC97, 0x5B6CFF]
-        let main = outlinedLabel(text, size: cell * (0.75 + CGFloat(min(level, 5)) * 0.1),
-                                 fill: UIColor(hex: colors[level % colors.count]))
-        root.addChild(main)
-        if let subtitle {
-            let sub = outlinedLabel(subtitle, size: cell * 0.55, fill: .white)
-            sub.position = CGPoint(x: 0, y: -cell * 0.8)
-            root.addChild(sub)
+        let palette: [UInt32] = [0xFF5C8A, 0xFF9F1C, 0xFFD23F, 0x3DDC97, 0x5B6CFF, 0xA259FF]
+        let size = cell * (0.75 + CGFloat(min(level, 5)) * 0.12)
+        let mainColor = UIColor(hex: palette[level % palette.count])
+
+        // Lay the letters out side by side, centred.
+        let letters = text.map { String($0) }
+        let widths = letters.map { letter -> CGFloat in
+            let probe = SKLabelNode(text: letter)
+            probe.fontName = Theme.spriteFontName
+            probe.fontSize = size
+            return letter == " " ? size * 0.3 : probe.frame.width
         }
-        root.setScale(0.2)
-        root.zRotation = -0.12
+        let total = widths.reduce(0, +)
+        var x = -total / 2
+        var letterNodes: [SKNode] = []
+        for (index, letter) in letters.enumerated() {
+            let fill = level >= 4 ? UIColor(hex: palette[index % palette.count]) : mainColor
+            let node = outlinedLabel(letter, size: size, fill: fill)
+            node.position = CGPoint(x: x + widths[index] / 2, y: 0)
+            x += widths[index]
+            node.setScale(0)
+            root.addChild(node)
+            letterNodes.append(node)
+            let pop = SKAction.scale(to: 1.25, duration: 0.1)
+            pop.timingMode = .easeOut
+            node.run(.sequence([
+                .wait(forDuration: reduceMotion ? 0 : Double(index) * 0.035),
+                pop,
+                .scale(to: 1, duration: 0.08),
+                // a little marquee hop, one letter after another
+                .repeatForever(.sequence([
+                    .moveBy(x: 0, y: size * 0.08, duration: 0.12),
+                    .moveBy(x: 0, y: -size * 0.08, duration: 0.12),
+                    .wait(forDuration: 0.25),
+                ])),
+            ]))
+        }
+        if level >= 4, !reduceMotion {
+            // Shift the colors along the letters, like chasing lights.
+            for (index, node) in letterNodes.enumerated() {
+                guard let label = node.children.first(where: { $0.zPosition == 1 }) as? SKLabelNode else { continue }
+                let count = palette.count
+                let cycle = SKAction.customAction(withDuration: Double(count) * 0.1) { target, elapsed in
+                    MainActor.assumeIsolated {
+                        let step = (index + Int(elapsed / 0.1)) % count
+                        (target as? SKLabelNode)?.fontColor = UIColor(hex: palette[step])
+                    }
+                }
+                label.run(.repeatForever(cycle))
+            }
+        }
+        if let subtitle {
+            let sub = outlinedLabel(subtitle, size: cell * 0.6, fill: UIColor(hex: 0xFFD23F))
+            sub.position = CGPoint(x: 0, y: -size * 0.95)
+            sub.setScale(0)
+            root.addChild(sub)
+            sub.run(.sequence([
+                .wait(forDuration: 0.15 + Double(letters.count) * 0.03),
+                .scale(to: 1.15, duration: 0.1), .scale(to: 1, duration: 0.08),
+            ]))
+        }
         addChild(root)
-        let pop = SKAction.scale(to: 1.15, duration: 0.14)
-        pop.timingMode = .easeOut
         root.run(.sequence([
-            .group([pop, .rotate(toAngle: 0.04, duration: 0.14)]),
-            .group([.scale(to: 1, duration: 0.1), .rotate(toAngle: 0, duration: 0.1)]),
-            .wait(forDuration: 0.45 + Double(level) * 0.05),
+            .wait(forDuration: 0.9 + Double(level) * 0.1),
             .group([.moveBy(x: 0, y: cell * 0.8, duration: 0.3), .fadeOut(withDuration: 0.3)]),
             .removeFromParent(),
         ]))
@@ -140,7 +187,7 @@ final class SlideEffects: SKNode {
 
     /// "+30" floats up from where the candy landed.
     func points(_ value: Int, at position: CGPoint, cell: CGFloat, big: Bool) {
-        let label = outlinedLabel("+\(value)", size: cell * (big ? 0.62 : 0.5), fill: .white)
+        let label = outlinedLabel("+\(value)", size: cell * (big ? 0.72 : 0.5), fill: big ? UIColor(hex: 0xFFD23F) : .white)
         label.position = position
         addChild(label)
         label.setScale(0.6)
@@ -151,7 +198,7 @@ final class SlideEffects: SKNode {
         ]))
     }
 
-    private func outlinedLabel(_ text: String, size: CGFloat, fill: UIColor) -> SKNode {
+    func outlinedLabel(_ text: String, size: CGFloat, fill: UIColor) -> SKNode {
         let node = SKNode()
         for (offset, color, z) in [(CGPoint(x: 2, y: -3), UIColor(hex: 0x4A2C2A), 0.0), (.zero, fill, 1.0)] {
             let label = SKLabelNode(text: text)
