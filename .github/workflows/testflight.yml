@@ -8,7 +8,7 @@ name: TestFlight
 #   ASC_ISSUER_ID         App Store Connect issuer id
 #   ASC_KEY_P8            the .p8 key file: open it in Notepad and paste everything,
 #                         including the BEGIN/END lines (or ASC_KEY_P8_BASE64, base64-encoded)
-#   DEVELOPMENT_TEAM      your Apple team id
+#   DEVELOPMENT_TEAM      optional: overrides the team id in Config/Shared.xcconfig
 #   SECRETS_XCCONFIG      contents of Config/Secrets.xcconfig (real AdMob ids)
 #   GOOGLE_SERVICE_INFO   GoogleService-Info.plist, base64-encoded (optional)
 
@@ -34,7 +34,10 @@ jobs:
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
         run: |
           printf '%s\n' "$SECRETS_XCCONFIG" > Config/Secrets.xcconfig
-          echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" >> Config/Secrets.xcconfig
+          # The team id also lives in Config/Shared.xcconfig; the secret only overrides it.
+          if [ -n "$DEVELOPMENT_TEAM" ]; then
+            echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" >> Config/Secrets.xcconfig
+          fi
           if [ -n "$GOOGLE_SERVICE_INFO" ]; then
             echo "$GOOGLE_SERVICE_INFO" | base64 --decode > SweetArrows/App/GoogleService-Info.plist
           fi
