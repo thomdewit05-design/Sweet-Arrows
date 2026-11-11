@@ -1,0 +1,33 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "CFBundleDisplayName": {
+      "shouldTranslate": false,
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows"
+          }
+        }
+      }
+    },
+    "NSUserTrackingUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows uses this to show you more relevant ads. The game stays fully playable either way."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows gebruikt dit om je relevantere advertenties te tonen. Het spel blijft hoe dan ook volledig speelbaar."
+          }
+        }
+      }
+    }
+  }
+}

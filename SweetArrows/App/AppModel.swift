@@ -61,9 +61,11 @@ final class AppModel {
             ? SaveService(url: nil)
             : SaveService(url: SaveService.defaultURL, cloud: NSUbiquitousKeyValueStore.default)
         let analytics = FirebaseAnalyticsService()
-        let config = LocalConfigService()
+        let config: ConfigService = isUITest ? LocalConfigService() : FirebaseConfigService()
         let consent: ConsentService = isUITest ? PlaceholderConsentService() : GoogleConsentService()
-        let purchases = PlaceholderPurchaseService()
+        let purchases: PurchaseService = isUITest
+            ? PlaceholderPurchaseService()
+            : StoreKitPurchaseService(save: save, analytics: analytics)
         let ads: AdService = isUITest
             ? PlaceholderAdService()
             : GoogleAdService(
@@ -71,6 +73,7 @@ final class AppModel {
                 today: { AppModel.currentDay() }
             )
         ads.updateLimits(config.values.adLimits)
+        config.onChange = { [weak ads] values in ads?.updateLimits(values.adLimits) }
         return AppModel(
             save: save,
             levels: LevelLibrary(),
@@ -113,8 +116,23 @@ final class AppModel {
 
     /// First start: GDPR consent (UMP), then the ad SDK. ATT is asked later, after level 3.
     func startConsentAndAds() async {
+        await config.refresh()
         await consent.gatherConsent()
         ads.start()
+        await purchases.refreshEntitlements()
+        grantVIPBonusIfNeeded()
+    }
+
+    /// VIP perk: three free hints a day.
+    func grantVIPBonusIfNeeded() {
+        guard purchases.isVIP else { return }
+        let day = today
+        save.update { _ = $0.grantVIPBonus(today: day) }
+    }
+
+    /// Whether the starter pack offer should be visible.
+    var showsStarterPack: Bool {
+        save.progress.showsStarterPack(fromLevel: config.values.starterPackLevel)
     }
 
     func dailyPuzzleNumber(day: Int) -> Int {

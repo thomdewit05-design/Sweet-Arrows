@@ -28,6 +28,13 @@ struct SettingsView: View {
             }
             Section {
                 LabeledContent("Version", value: Self.version)
+                #if DEBUG
+                NavigationLink {
+                    DebugMenuView()
+                } label: {
+                    Text(verbatim: "Debug menu")
+                }
+                #endif
             }
         }
         .font(Theme.body())

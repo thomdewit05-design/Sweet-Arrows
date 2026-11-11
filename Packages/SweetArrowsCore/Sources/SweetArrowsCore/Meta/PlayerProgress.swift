@@ -38,6 +38,9 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var candyStyle: Cosmetic = .classicCandy
     /// World elements whose intro card the player has seen.
     public var seenElements: Set<BoardElement> = []
+    public var starterPackBought = false
+    /// Day number on which the VIP daily hints were last given.
+    public var vipBonusDay: Int?
     public var settings = GameSettings()
     /// When this copy last changed (used to pick a winner when iCloud copies disagree).
     public var updatedAt = Date(timeIntervalSince1970: 0)
@@ -98,7 +101,24 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         return true
     }
 
-    public mutating func equip(_ item: Cosmetic) {
+    /// The starter pack is offered once, from `level` on.
+    public func showsStarterPack(fromLevel level: Int) -> Bool {
+        !starterPackBought && completedLevel >= level
+    }
+
+    /// VIP perk: free hints once a day. Returns the number granted (0 if already given today).
+    public mutating func grantVIPBonus(today: Int, hints: Int = 3) -> Int {
+        guard vipBonusDay != today else { return 0 }
+        vipBonusDay = today
+        boosters.add(.hint, hints)
+        return hints
+    }
+
+    public mutating func equip(_ item: Cosmetic, isVIP: Bool = false) {
+        if item.vipOnly {
+            guard isVIP else { return }
+            ownedCosmetics.insert(item)
+        }
         guard ownedCosmetics.contains(item) else { return }
         switch item.kind {
         case .board: board = item
@@ -121,6 +141,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         result.bestWinStreak = max(bestWinStreak, other.bestWinStreak)
         result.ownedCosmetics = ownedCosmetics.union(other.ownedCosmetics)
         result.seenElements = seenElements.union(other.seenElements)
+        result.starterPackBought = starterPackBought || other.starterPackBought
 
         var daily = newer.dailyPuzzle
         for (day, entry) in older.dailyPuzzle.results {
@@ -137,7 +158,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case completedLevel, stars, coins, winStreak, bestWinStreak, boosters, dailyReward, dailyPuzzle
-        case ownedCosmetics, board, candyStyle, seenElements, settings, updatedAt
+        case ownedCosmetics, board, candyStyle, seenElements, settings, updatedAt, starterPackBought, vipBonusDay
     }
 
     public init(from decoder: Decoder) throws {
@@ -154,6 +175,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         board = try c.decodeIfPresent(Cosmetic.self, forKey: .board) ?? .woodCounter
         candyStyle = try c.decodeIfPresent(Cosmetic.self, forKey: .candyStyle) ?? .classicCandy
         seenElements = try c.decodeIfPresent(Set<BoardElement>.self, forKey: .seenElements) ?? []
+        starterPackBought = try c.decodeIfPresent(Bool.self, forKey: .starterPackBought) ?? false
+        vipBonusDay = try c.decodeIfPresent(Int.self, forKey: .vipBonusDay)
         settings = try c.decodeIfPresent(GameSettings.self, forKey: .settings) ?? GameSettings()
         updatedAt = try c.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date(timeIntervalSince1970: 0)
     }

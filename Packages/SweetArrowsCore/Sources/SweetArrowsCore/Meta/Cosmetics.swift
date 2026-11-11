@@ -4,6 +4,8 @@ public enum Cosmetic: String, CaseIterable, Codable, Sendable {
     case woodCounter, mintMarble, strawberryCheck, midnightCandy
     // Candy styles
     case classicCandy, pastelCandy, sparkleCandy
+    /// VIP members only.
+    case goldenCandy
 
     public enum Kind: String, Sendable {
         case board, candyStyle
@@ -12,14 +14,14 @@ public enum Cosmetic: String, CaseIterable, Codable, Sendable {
     public var kind: Kind {
         switch self {
         case .woodCounter, .mintMarble, .strawberryCheck, .midnightCandy: .board
-        case .classicCandy, .pastelCandy, .sparkleCandy: .candyStyle
+        case .classicCandy, .pastelCandy, .sparkleCandy, .goldenCandy: .candyStyle
         }
     }
 
     /// 0 = owned from the start.
     public var price: Int {
         switch self {
-        case .woodCounter, .classicCandy: 0
+        case .woodCounter, .classicCandy, .goldenCandy: 0
         case .mintMarble: 300
         case .strawberryCheck: 400
         case .midnightCandy: 800
@@ -27,6 +29,8 @@ public enum Cosmetic: String, CaseIterable, Codable, Sendable {
         case .sparkleCandy: 600
         }
     }
+
+    public var vipOnly: Bool { self == .goldenCandy }
 
     public static func defaultItem(for kind: Kind) -> Cosmetic {
         kind == .board ? .woodCounter : .classicCandy

@@ -97,8 +97,8 @@ final class CandyNode: SKNode {
 
         let candy = SKShapeNode(path: path)
         candy.fillColor = style == .pastelCandy ? UIColor.candy(color).mixed(with: .white, amount: 0.38) : UIColor.candy(color)
-        candy.strokeColor = UIColor.white.withAlphaComponent(0.9)
-        candy.lineWidth = max(2, cellSize * 0.05)
+        candy.strokeColor = style == .goldenCandy ? UIColor(hex: 0xFFC233) : UIColor.white.withAlphaComponent(0.9)
+        candy.lineWidth = max(2, cellSize * (style == .goldenCandy ? 0.08 : 0.05))
         candy.lineJoin = .round
         root.addChild(candy)
 

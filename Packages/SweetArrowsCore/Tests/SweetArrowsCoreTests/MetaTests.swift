@@ -61,7 +61,32 @@ struct EconomyTests {
         #expect(progress.board == .mintMarble)
         #expect(progress.candyStyle == .classicCandy)
         #expect(Cosmetic.items(of: .board).count == 4)
+        progress.equip(.goldenCandy)
+        #expect(progress.candyStyle == .classicCandy)  // VIP only
+        progress.equip(.goldenCandy, isVIP: true)
+        #expect(progress.candyStyle == .goldenCandy)
         #expect(Cosmetic.defaultItem(for: .candyStyle).price == 0)
+    }
+}
+
+@Suite("VIP & starter pack")
+struct VIPTests {
+    @Test func dailyHintsOncePerDay() {
+        var progress = PlayerProgress()
+        #expect(progress.grantVIPBonus(today: 4) == 3)
+        #expect(progress.grantVIPBonus(today: 4) == 0)
+        #expect(progress.grantVIPBonus(today: 5) == 3)
+        #expect(progress.boosters[.hint] == 6)
+    }
+
+    @Test func starterPackOnceFromLevel15() {
+        var progress = PlayerProgress()
+        progress.completedLevel = 14
+        #expect(!progress.showsStarterPack(fromLevel: 15))
+        progress.completedLevel = 15
+        #expect(progress.showsStarterPack(fromLevel: 15))
+        progress.starterPackBought = true
+        #expect(!progress.showsStarterPack(fromLevel: 15))
     }
 }
 

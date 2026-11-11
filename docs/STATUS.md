@@ -11,7 +11,9 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
 | 3. Generator + solver | ✅ `swift run levelgen`: 300 levels, allemaal door de solver goedgekeurd, rapport in [level-report.md](level-report.md). CI controleert elk level opnieuw. |
 | 4. Game feel | 🚧 Gebouwd, nog te testen op een iPhone: gummy-wiebel bij elke tik, ease-out-slide (150–250 ms) en boog naar de pot, pot toont de drie dezelfde en plopt ze met een suikerwolkje in hun kleur, oplopende xylofoontonen per plop op rij, zachte bonk bij een botsing, Core Haptics (met UIKit-terugval), confetti + sterren één voor één + munten die naar de teller vliegen, waarschuwing bij nog één vrij vakje, tutorial levels 1–3 met Jelly en een wijzende hand (de hand wijst altijd een veilige zet aan, via de solver). Snoepjes en pijlen worden als gecachete texturen getekend voor 60 fps; in Debug staan FPS en aantal nodes in beeld. Geluiden en de achtergrondmuziek (ukulele-lounge-loop van 42 s, laag volume, los uit te zetten) zijn zelf gesynthetiseerd (`Tools/Sounds`). Nog niet: echte artwork, meting met Instruments op een iPhone 11. |
 | 5. Meta-laag | 🚧 Gebouwd, nog te testen op een iPhone: munten (10 per level + sterrenbonus + win-streak-bonus vanaf 3 op rij), boosters (hint 60, snoepje weg 90, extra vakje 120 munten — of met een advertentie), dagbeloning met 7-dagenreeks (verdubbelen met een advertentie), dagpuzzel (365 door de solver goedgekeurde puzzels, dezelfde voor iedereen, met reeks en deelbare uitslag), winkel met boosters en cosmetica (4 toonbanken, 3 snoepstijlen), introkaart per nieuw wereldelement, voortgang met iCloud-sync, Game Center (prestaties + ranglijst dagpuzzel). Winkel, dagbeloning en dagpuzzel verschijnen pas na level 5. Alles werkt offline. |
-| 6–8 | ⏳ Nog niet begonnen. Services staan klaar als placeholders met de juiste protocollen. |
+| 6. Toestemming & advertenties | 🚧 Gebouwd: Google UMP bij eerste start (pas daarna laden advertenties), ATT na level 3 met eigen voorscherm, AdMob met rewarded, interstitial, banner (kaart + winkel, nooit tijdens het spelen) en app-open. Alle regels in `AdPolicy` (kern, getest): interstitial vanaf level 8, max 1 per 2 levels, ≥ 90 s ertussen, nooit na verlies of vlak na een rewarded; rewarded max 20/dag; geen advertenties vóór level 3; app-open pas na 4 uur weg vanaf dag 2 en standaard uit. Test-ID's in Debug. |
+| 7. Aankopen, analytics, Remote Config | 🚧 Gebouwd: StoreKit 2 met Remove Ads, VIP (week/maand, 3 dagen gratis, via `SubscriptionStoreView`), 4 muntenpakketten, starterspakket (vanaf level 15, eenmalig), Aankopen herstellen; StoreKit-configuratiebestand voor lokaal testen; alle analytics-events; Crashlytics (dSYM-upload in Release); Remote Config met de sleutels uit het plan (incl. `level_overrides`); debugmenu in Instellingen (alleen Debug). |
+| 8. Afwerking & release | ⏳ Volgende stap. |
 
 ## Zo test je het op je iPhone
 
@@ -83,6 +85,23 @@ Nieuwe levels na v1 (elke 2 weken 50) komen voorlopig achter in wereld 8, tot er
   - Prestaties: `sweetarrows.first_win`, `sweetarrows.tutorial_done`, `sweetarrows.world_1` t/m
     `sweetarrows.world_8`, `sweetarrows.stars_100`, `sweetarrows.daily_streak_7`.
   - Ranglijst `sweetarrows.daily_time`: terugkerend (dagelijks), "laag naar hoog", score = seconden.
+
+## Fase 6–7: wat je zelf nog moet instellen
+
+- **AdMob**: maak de app aan in AdMob en vier ad units (rewarded, interstitial, banner, app-open). Kopieer
+  `Config/Secrets.example.xcconfig` naar `Config/Secrets.xcconfig` en vul de ID's in (alleen Release leest ze).
+  Zet bij meer netwerken (mediation) hun SKAdNetwork-ID's in `project.yml` onder `SKAdNetworkItems`.
+- **Firebase**: maak een project, voeg de iOS-app toe met je bundle-ID en zet `GoogleService-Info.plist` in
+  `SweetArrows/App/` (staat in `.gitignore`). Daarmee gaan Analytics, Crashlytics en Remote Config aan.
+  Maak in Remote Config de sleutels uit PLAN.md aan; `level_overrides` is JSON, bijv.
+  `{"23": {"bagCapacity": 6}, "41": {"hearts": 4}}`.
+- **App Store Connect – aankopen** (ID's exact zo):
+  - `com.lucthomasdewit.sweetarrows.removeads` — non-consumable, € 4,99
+  - abonnementsgroep "VIP": `…vip.weekly` (€ 3,99/week) en `…vip.monthly` (€ 9,99/maand), beide met
+    introductieaanbod 3 dagen gratis
+  - consumables `…coins.500` (€ 1,99), `…coins.1500` (€ 4,99), `…coins.4000` (€ 9,99), `…coins.10000` (€ 19,99),
+    `…starterpack` (€ 2,99)
+  - Lokaal testen kan meteen: het schema gebruikt `SweetArrows/Resources/SweetArrows.storekit`.
 
 ## Afwijkingen van het plan
 

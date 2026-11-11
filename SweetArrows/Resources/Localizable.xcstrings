@@ -44,6 +44,16 @@
         }
       }
     },
+    "1,000 coins and 3 of every booster. Only once.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1.000 munten en 3 van elke booster. Eenmalig."
+          }
+        }
+      }
+    },
     "3 hearts": {
       "localizations": {
         "nl": {
@@ -60,6 +70,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elke dag een nieuwe puzzel"
+          }
+        }
+      }
+    },
+    "Ads pay for the game. iOS will now ask if apps may track you. Allowing it shows you more relevant ads; either way you can keep playing everything.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advertenties betalen het spel. iOS vraagt zo of apps je mogen volgen. Sta je het toe, dan zie je relevantere advertenties; je kunt hoe dan ook alles blijven spelen."
           }
         }
       }
@@ -194,6 +214,16 @@
         }
       }
     },
+    "Coins": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Munten"
+          }
+        }
+      }
+    },
     "Color-blind mode": {
       "localizations": {
         "nl": {
@@ -220,6 +250,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kom morgen terug!"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verder"
           }
         }
       }
@@ -344,6 +384,16 @@
         }
       }
     },
+    "Golden (VIP)": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Goud (VIP)"
+          }
+        }
+      }
+    },
     "Got it": {
       "localizations": {
         "nl": {
@@ -440,6 +490,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "In gebruik"
+          }
+        }
+      }
+    },
+    "Keep Sweet Arrows free": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Houd Sweet Arrows gratis"
           }
         }
       }
@@ -574,6 +634,36 @@
         }
       }
     },
+    "No ads · 3 free hints every day · golden candy style · rewards without watching": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen advertenties · elke dag 3 gratis hints · gouden snoepstijl · beloningen zonder kijken"
+          }
+        }
+      }
+    },
+    "No ads, daily hints and more. 3 days free.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen advertenties, dagelijkse hints en meer. 3 dagen gratis."
+          }
+        }
+      }
+    },
+    "No more interstitials, banners or app-open ads. Rewarded stays optional.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen tussenadvertenties, banners of opstartadvertenties meer. Beloningsvideo's blijven optioneel."
+          }
+        }
+      }
+    },
     "Out of hearts": {
       "localizations": {
         "nl": {
@@ -620,6 +710,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Weghalen"
+          }
+        }
+      }
+    },
+    "Remove Ads": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen advertenties"
           }
         }
       }
@@ -724,12 +824,32 @@
         }
       }
     },
+    "Starter pack": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starterspakket"
+          }
+        }
+      }
+    },
     "Strawberry check": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
             "value": "Aardbeienruit"
+          }
+        }
+      }
+    },
+    "Sweet Arrows VIP": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows VIP"
           }
         }
       }
@@ -864,6 +984,16 @@
         }
       }
     },
+    "Without ads": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zonder advertenties"
+          }
+        }
+      }
+    },
     "Wooden counter": {
       "localizations": {
         "nl": {
@@ -890,6 +1020,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verpakte snoepjes laten hun kleur pas zien als de weg vrij is."
+          }
+        }
+      }
+    },
+    "You are VIP": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent VIP"
           }
         }
       }

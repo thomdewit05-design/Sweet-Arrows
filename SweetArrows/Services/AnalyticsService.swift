@@ -21,6 +21,8 @@ enum AnalyticsEvent: Equatable, Sendable {
     case adOfferShown(reason: String)
     case adOfferAccepted(reason: String)
     case adImpression(format: String, network: String, value: Double, currency: String)
+    case purchase(product: String, price: Double)
+    case subscriptionStart(product: String)
 
     var name: String {
         switch self {
@@ -37,6 +39,8 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .adOfferShown: "ad_offer_shown"
         case .adOfferAccepted: "ad_offer_accepted"
         case .adImpression: "ad_impression"
+        case .purchase: "purchase"
+        case .subscriptionStart: "subscription_start"
         }
     }
 
@@ -56,6 +60,8 @@ enum AnalyticsEvent: Equatable, Sendable {
         case .adOfferShown(let reason), .adOfferAccepted(let reason): ["reason": reason]
         case let .adImpression(format, network, value, currency):
             ["format": format, "network": network, "value": String(value), "currency": currency]
+        case let .purchase(product, price): ["product": product, "price": String(price)]
+        case .subscriptionStart(let product): ["product": product]
         }
     }
 }
