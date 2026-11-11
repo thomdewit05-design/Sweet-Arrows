@@ -142,6 +142,23 @@ Op verzoek van de eigenaar, en anders dan het oorspronkelijke plan:
 
 - **Duidelijk moeilijker**: de curve ligt zo'n 25% hoger (gemiddeld makkelijk 47, middel 58, moeilijk 73 van 100).
 
+## Eindeloze modus (hoofdspel)
+
+Op verzoek van de eigenaar is het hoofdspel nu **eindeloos**; de levels blijven als modus "Puzzels".
+
+- Bord van 6×6. Er komt steeds een snoepje bij op een vrij vakje, met eerst een schaduw van 1 seconde.
+  Het tempo begint bij één per 2,6 s en wordt elke "snelheid" (6 keer ploppen) 10% sneller, tot één per 0,8 s.
+- Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciale snoepjes komen erbij naarmate je
+  verder komt: karamel, bom, verpakt, kleurwisselaar, draaisnoepje.
+- **Eerlijk:** een nieuw snoepje krijgt alleen een richting waarmee het bord (los van de pot) oplosbaar blijft,
+  en de helft van de keren een kleur die al in de pot ligt.
+- **Af:** bord vol of pot vol. Eén keer per potje doorgaan met een beloningsvideo: de pot wordt leeggemaakt en
+  een derde van de snoepjes verdwijnt.
+- **Punten:** 1 per weggeschoten snoepje, 10 per plop × combo (ploppen binnen 3 s na elkaar, max. ×5),
+  50 voor een leeg bord. Munten: score ÷ 10. Record wordt bewaard en gaat naar Game Center
+  (ranglijst `sweetarrows.endless_score`, "hoog naar laag").
+- Bounces kosten in deze modus geen hartjes; geen klok, het tempo is de klok.
+
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;

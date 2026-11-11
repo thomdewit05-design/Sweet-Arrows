@@ -132,6 +132,13 @@ T = {
 "Locked candies open once the candy with the key has left the board.": ["Verschlossene Bonbons öffnen sich, sobald das Bonbon mit dem Schlüssel das Brett verlassen hat.", "Les bonbons verrouillés s'ouvrent quand le bonbon à la clé a quitté le plateau.", "Los caramelos con candado se abren cuando el caramelo con la llave sale del tablero.", "Doces trancados abrem quando o doce com a chave sai do tabuleiro.", "Kilitli şekerler, anahtarlı şeker tahtadan ayrılınca açılır.", "Permen tergembok terbuka setelah permen berkunci keluar dari papan."],
 "A bomb takes its neighbours with it. They don't go into the jar.": ["Eine Bombe nimmt ihre Nachbarn mit. Sie landen nicht im Glas.", "Une bombe emporte ses voisins. Ils ne vont pas dans le bocal.", "Una bomba se lleva a sus vecinos. No van al frasco.", "Uma bomba leva os vizinhos junto. Eles não vão para o pote.", "Bomba komşularını da götürür. Onlar kavanoza girmez.", "Bom membawa tetangganya pergi. Mereka tidak masuk toples."],
 "Color changers switch to the next color after every move. Time your tap!": ["Farbwechsler nehmen nach jedem Zug die nächste Farbe an. Wähle den richtigen Moment!", "Les caméléons changent de couleur à chaque coup. Choisis le bon moment !", "Los cambiacolores cambian de color tras cada jugada. ¡Elige el momento!", "Os muda-cores mudam de cor a cada jogada. Escolha o momento certo!", "Renk değiştiriciler her hamleden sonra sıradaki renge geçer. Zamanlamana dikkat!", "Pengubah warna berganti warna setiap langkah. Pilih waktu yang tepat!"],
+"Puzzles": ["Rätsel", "Puzzles", "Puzles", "Quebra-cabeças", "Bulmacalar", "Teka-teki"],
+"Best %lld": ["Rekord %lld", "Record %lld", "Récord %lld", "Recorde %lld", "Rekor %lld", "Rekor %lld"],
+"Speed %lld!": ["Tempo %lld!", "Vitesse %lld !", "¡Velocidad %lld!", "Velocidade %lld!", "Hız %lld!", "Kecepatan %lld!"],
+"New record!": ["Neuer Rekord!", "Nouveau record !", "¡Nuevo récord!", "Novo recorde!", "Yeni rekor!", "Rekor baru!"],
+"The board is full!": ["Das Brett ist voll!", "Le plateau est plein !", "¡El tablero está lleno!", "O tabuleiro está cheio!", "Tahta doldu!", "Papannya penuh!"],
+"Keep going": ["Weiterspielen", "Continuer", "Seguir jugando", "Continuar", "Devam et", "Lanjutkan"],
+"Play again": ["Nochmal spielen", "Rejouer", "Jugar otra vez", "Jogar de novo", "Tekrar oyna", "Main lagi"],
 }
 
 NL_EXTRA = {"About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}

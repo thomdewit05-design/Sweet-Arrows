@@ -35,6 +35,8 @@ public enum LossReason: Hashable, Sendable {
     case bagFull
     case outOfHearts
     case outOfTime
+    /// Endless mode: no free cell left for a new candy.
+    case boardFull
 }
 
 public enum GameStatus: Hashable, Sendable {
@@ -134,6 +136,8 @@ public struct MoveReport: Hashable, Sendable {
 /// (the app tells the game when time is up).
 public struct Game: Sendable {
     public let level: Level
+    /// Endless mode: an empty board is not a win, bounces cost no hearts, candies keep arriving.
+    public let endless: Bool
     public private(set) var candies: [Int: CandyState]
     public private(set) var bag: Bag
     public private(set) var hearts: Int
@@ -150,14 +154,15 @@ public struct Game: Sendable {
         var moves: Int
     }
 
-    public init(level: Level) {
+    public init(level: Level, endless: Bool = false) {
         self.level = level
+        self.endless = endless
         let keys = level.candies.contains { $0.has(.key) }
         candies = Dictionary(uniqueKeysWithValues: level.candies.map { ($0.id, CandyState($0, keysOnBoard: keys)) })
         bag = Bag(capacity: level.bagCapacity)
         hearts = level.hearts
         moves = 0
-        status = level.candies.isEmpty ? .won : .playing
+        status = level.candies.isEmpty && !endless ? .won : .playing
         poles = Set(level.poles)
         mirrors = Dictionary(level.mirrors.map { ($0.position, $0) }, uniquingKeysWith: { first, _ in first })
         palette = level.changerPalette
@@ -168,7 +173,9 @@ public struct Game: Sendable {
 
     /// Candies still on the board, in level order.
     public var remainingCandies: [CandyState] {
-        level.candies.compactMap { candies[$0.id] }
+        // Endless candies arrive later and are not in the level file: order them by id.
+        if endless { return candies.values.sorted { $0.id < $1.id } }
+        return level.candies.compactMap { candies[$0.id] }
     }
 
     public var canUndo: Bool { !history.isEmpty }
@@ -243,7 +250,7 @@ public struct Game: Sendable {
         }
         let trace = trace(for: state)
         if let obstacle = trace.obstacle {
-            let heartLost = !level.tutorial
+            let heartLost = !level.tutorial && !endless
             if heartLost {
                 hearts -= 1
                 if hearts <= 0 { status = .lost(.outOfHearts) }
@@ -345,6 +352,39 @@ public struct Game: Sendable {
         return report
     }
 
+    // MARK: Endless mode
+
+    /// Puts a new candy on the board. Returns nil if any of its cells is taken.
+    @discardableResult
+    public mutating func spawn(_ candy: Candy) -> CandyState? {
+        guard endless, status == .playing, candies[candy.id] == nil,
+              candy.cells.allSatisfy({ level.contains($0) && obstacle(at: $0) == nil && mirrors[$0] == nil })
+        else { return nil }
+        let state = CandyState(candy, keysOnBoard: false)
+        candies[candy.id] = state
+        _ = refreshReveals()
+        return candies[candy.id]
+    }
+
+    /// Takes a candy away without any of the game's side effects (for "what if" checks).
+    mutating func removeForPlanning(_ id: Int) {
+        candies[id] = nil
+    }
+
+    /// Ends an endless run (the board is full).
+    public mutating func endRun(_ reason: LossReason) {
+        guard status == .playing else { return }
+        status = .lost(reason)
+    }
+
+    /// Continue offer in endless mode: takes the given candies away, empties the jar and plays on.
+    public mutating func revive(removing ids: [Int]) {
+        for id in ids { candies[id] = nil }
+        bag = Bag(capacity: bag.capacity)
+        history.removeAll()
+        status = .playing
+    }
+
     // MARK: Internals
 
     private mutating func melt(around removed: CandyState) -> [Int] {
@@ -401,7 +441,7 @@ public struct Game: Sendable {
     }
 
     private mutating func updateStatus() {
-        if candies.isEmpty {
+        if candies.isEmpty, !endless {
             status = .won
         } else if bag.isFull {
             status = .lost(.bagFull)

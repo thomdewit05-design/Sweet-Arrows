@@ -105,6 +105,30 @@ struct AppTests {
         #expect(session.comboStep == 0)
     }
 
+    @Test func endlessSessionScoresAndRestarts() {
+        let session = EndlessSession(seed: 9)
+        #expect(session.game.candies.count == 8)
+        if let free = session.game.remainingCandies.first(where: { session.game.trace(for: $0).isClear }) {
+            _ = session.tap(free.id)
+            #expect(session.score > 0)
+        }
+        session.restart()
+        #expect(session.score == 0)
+        #expect(session.status == .playing)
+    }
+
+    @Test func endlessRecordIsSaved() {
+        let save = SaveService(url: nil)
+        var record = false
+        save.update { record = $0.recordEndless(score: 120, coins: 12) }
+        #expect(record)
+        #expect(save.progress.endlessBest == 120)
+        save.update { record = $0.recordEndless(score: 80, coins: 8) }
+        #expect(!record)
+        #expect(save.progress.endlessRuns == 2)
+        #expect(save.progress.coins == 20)
+    }
+
     @Test func remoteConfigKeysMatchThePlan() {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [

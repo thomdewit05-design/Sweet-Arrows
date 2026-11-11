@@ -24,6 +24,8 @@ enum Achievement: String, CaseIterable, Sendable {
 enum Leaderboard {
     /// Daily puzzle: fastest time in seconds (create as "low to high", recurring daily, in App Store Connect).
     static let dailyPuzzle = "sweetarrows.daily_time"
+    /// Endless mode: highest score (create as "high to low", all-time, in App Store Connect).
+    static let endless = "sweetarrows.endless_score"
 }
 
 @MainActor
@@ -32,6 +34,7 @@ protocol GameCenterService: AnyObject {
     func authenticate()
     func report(_ achievement: Achievement)
     func submitDailyTime(seconds: Int)
+    func submitEndlessScore(_ score: Int)
 }
 
 /// Game Center through GameKit. Everything is optional: offline or signed out, calls do nothing.
@@ -64,6 +67,11 @@ final class GameKitService: GameCenterService {
         ) { _ in }
     }
 
+    func submitEndlessScore(_ score: Int) {
+        guard isAuthenticated, score > 0 else { return }
+        GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [Leaderboard.endless]) { _ in }
+    }
+
     private static func present(_ viewController: UIViewController) {
         let root = UIApplication.shared.connectedScenes
             .compactMap { ($0 as? UIWindowScene)?.keyWindow?.rootViewController }
@@ -81,4 +89,5 @@ final class OfflineGameCenterService: GameCenterService {
     func authenticate() {}
     func report(_ achievement: Achievement) {}
     func submitDailyTime(seconds: Int) {}
+    func submitEndlessScore(_ score: Int) {}
 }

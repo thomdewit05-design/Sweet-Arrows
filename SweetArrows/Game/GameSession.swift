@@ -2,11 +2,22 @@ import Foundation
 import Observation
 import SweetArrowsCore
 
+/// What the board scene needs from a game in progress (a level or an endless run).
+@MainActor
+protocol BoardSession: AnyObject {
+    var level: Level { get }
+    var game: Game { get }
+    var status: GameStatus { get }
+    var hintedCandy: Int? { get }
+    var comboStep: Int { get }
+    func tap(_ id: Int) -> MoveReport
+}
+
 /// Bridges the pure rules (`Game`) to SwiftUI and SpriteKit for one level attempt.
 /// SwiftUI observes it for hearts/status; the scene draws from it and animates move reports.
 @MainActor
 @Observable
-final class GameSession {
+final class GameSession: BoardSession {
     let level: Level
     private(set) var game: Game
     private(set) var startedAt = Date()

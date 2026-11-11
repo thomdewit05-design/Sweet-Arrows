@@ -6,7 +6,7 @@ import UIKit
 /// Contains no game rules: everything comes from `GameSession` / `Game`.
 @MainActor
 final class GameScene: SKScene {
-    let session: GameSession
+    let session: any BoardSession
     private let haptics: HapticsService
     private let audio: AudioService
     private let colorBlind: Bool
@@ -35,7 +35,7 @@ final class GameScene: SKScene {
     private var art: CandyArt?
 
     init(
-        session: GameSession,
+        session: any BoardSession,
         haptics: HapticsService,
         audio: AudioService,
         colorBlind: Bool,
@@ -436,6 +436,55 @@ final class GameScene: SKScene {
             let nudge = SKAction.moveBy(x: vector.dx * 4, y: vector.dy * 4, duration: 0.05)
             other.run(.sequence([.wait(forDuration: 0.05 * Double(bounce.distance) + 0.07), nudge, nudge.reversed()]))
         }
+    }
+
+    // MARK: Endless mode
+
+    private var warningNode: SKNode?
+
+    /// Pulsing shadow on the cell where the next candy will land.
+    func showWarning(_ pending: EndlessGame.PendingSpawn) {
+        warningNode?.removeFromParent()
+        let shadow = SKShapeNode(path: CandyShapes.path(for: pending.candy.color.shape, size: cell * 0.8))
+        shadow.fillColor = UIColor.candy(pending.candy.color).withAlphaComponent(0.25)
+        shadow.strokeColor = UIColor.candy(pending.candy.color).withAlphaComponent(0.7)
+        shadow.lineWidth = 2
+        shadow.position = point(for: pending.candy.position)
+        shadow.zPosition = -1
+        shadow.setScale(0.6)
+        let pulse = SKAction.sequence([.scale(to: 1, duration: 0.25), .scale(to: 0.85, duration: 0.25)])
+        shadow.run(.repeatForever(pulse))
+        candyLayer.addChild(shadow)
+        warningNode = shadow
+    }
+
+    /// A new candy drops in.
+    func spawn(_ state: CandyState) {
+        warningNode?.removeFromParent()
+        warningNode = nil
+        guard cell > 0, nodes[state.id] == nil else { return }
+        let node = CandyNode(state: state, cellSize: cell, colorBlind: colorBlind, style: candyStyle, art: art)
+        node.position = center(of: state)
+        node.setScale(0.2)
+        node.alpha = 0
+        candyLayer.addChild(node)
+        nodes[state.id] = node
+        let grow = SKAction.scale(to: 1.12, duration: 0.14)
+        grow.timingMode = .easeOut
+        node.run(.sequence([.group([grow, .fadeIn(withDuration: 0.1)]), .scale(to: 1, duration: 0.08)]))
+        audio.play(.tap)
+    }
+
+    /// The board filled up: everything shakes once.
+    func boardFull() {
+        warningNode?.removeFromParent()
+        warningNode = nil
+        haptics.bonk()
+        audio.play(.lose)
+        let shake = SKAction.sequence([
+            .moveBy(x: -6, y: 0, duration: 0.05), .moveBy(x: 12, y: 0, duration: 0.1), .moveBy(x: -6, y: 0, duration: 0.05),
+        ])
+        candyLayer.run(.repeat(shake, count: 2))
     }
 
     // MARK: Celebration
