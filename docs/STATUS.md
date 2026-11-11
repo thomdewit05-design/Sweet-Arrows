@@ -164,6 +164,22 @@ afbeelding in `SweetArrows/Resources/Assets.xcassets` met precies deze namen; de
 
 De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die dus niet in de afbeelding.
 
+## Website (voorwaarden en privacybeleid)
+
+`docs/site` wordt via GitHub Pages gepubliceerd op **https://thomdewit05-design.github.io/Sweet-Arrows/**
+(keuze van de eigenaar: gratis GitHub-adres, geen eigen domein). Pagina's in het Engels en Nederlands:
+`index`, `privacy`, `terms` (+ `-nl`). De app opent de Nederlandse pagina's als de telefoon in het Nederlands staat.
+
+Zelf nog doen:
+1. GitHub → repository → Settings → Pages → Build and deployment → Source: **GitHub Actions**. Daarna
+   Actions → Website → Run workflow (of wacht op de volgende merge met een wijziging in `docs/site`).
+2. Een apart supportadres aanmaken (bijv. een nieuw Gmail-adres) en doorgeven; nu staat er nog
+   `support@sweetarrowsgame.com` op de site en in de app (`Links.supportAddress`), dat bestaat niet.
+3. In App Store Connect: Privacybeleid-URL = `…/Sweet-Arrows/privacy.html`, Support-URL = `…/Sweet-Arrows/`.
+4. `app-ads.txt`: AdMob zoekt dit bestand in de hoofdmap van je website-domein. Op een projectadres
+   (`/Sweet-Arrows/`) vindt AdMob het niet; daarvoor is later een repository `thomdewit05-design.github.io` of een
+   eigen domein nodig. Advertenties werken zonder, maar AdMob raadt het sterk aan.
+
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;
@@ -185,7 +201,7 @@ De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die
 | Crashlytics actief | 🟡 `GoogleService-Info.plist` nodig |
 | Kleurenblind-modus, geluid/muziek/trillen los | ✅ |
 | Alle teksten vertaald (min. EN en NL) | ✅ 8 talen |
-| Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site`; domein + GitHub Pages aanzetten, publisher-id invullen |
+| Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site` (EN + NL); GitHub Pages aanzetten, supportadres en publisher-id invullen |
 | Privacylabels, leeftijdsclassificatie, handelaarsstatus | ❌ jij, in App Store Connect |
 | Echte advertentie-ID's alleen in Release | ✅ via `Config/Secrets.xcconfig` |
 | Store-pagina: icoon, screenshots, video, teksten per taal | 🟡 icoon klaar; screenshots uit de UI-test als basis |

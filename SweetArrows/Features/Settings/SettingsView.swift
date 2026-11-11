@@ -71,9 +71,12 @@ struct SettingsView: View {
 /// Public pages on the game's website (docs/site, served by GitHub Pages).
 @MainActor
 enum Links {
-    static let website = URL(string: "https://sweetarrowsgame.com")!
-    static let privacy = URL(string: "https://sweetarrowsgame.com/privacy.html")!
-    static let terms = URL(string: "https://sweetarrowsgame.com/terms.html")!
+    /// GitHub Pages address of docs/site (no own domain yet).
+    static let website = URL(string: "https://thomdewit05-design.github.io/Sweet-Arrows/")!
+    /// Dutch players get the Dutch pages, everyone else the English ones.
+    private static var dutch: Bool { Locale.current.language.languageCode?.identifier == "nl" }
+    static var privacy: URL { website.appendingPathComponent(dutch ? "privacy-nl.html" : "privacy.html") }
+    static var terms: URL { website.appendingPathComponent(dutch ? "terms-nl.html" : "terms.html") }
     static let supportAddress = "support@sweetarrowsgame.com"
 
     /// A mail with app version and device already filled in.
