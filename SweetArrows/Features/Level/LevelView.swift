@@ -16,7 +16,7 @@ struct LevelView: View {
         ZStack {
             Theme.cream.ignoresSafeArea()
             if let session, let scene {
-                SpriteView(scene: scene, preferredFramesPerSecond: 60)
+                SpriteView(scene: scene, preferredFramesPerSecond: 60, debugOptions: Self.spriteDebugOptions)
                     .ignoresSafeArea()
                     .accessibilityIdentifier("board")
                 VStack(spacing: 8) {
@@ -27,6 +27,10 @@ struct LevelView: View {
                         undo: { session.undo() },
                         hint: { requestHint(session) }
                     )
+                    if let tip = TutorialTip(level: levelID, tutorial: session.level.tutorial), session.status == .playing {
+                        JellyTipView(tip: tip)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
                     Spacer()
                 }
                 .padding(.horizontal)
@@ -34,6 +38,8 @@ struct LevelView: View {
                     ResultCard(
                         session: session,
                         coins: coinsEarned,
+                        totalCoins: model.save.progress.coins,
+                        audio: model.audio,
                         adReady: model.ads.isRewardedReady,
                         hasNext: levelID < model.levels.count,
                         onNext: goToNextLevel,
@@ -62,6 +68,15 @@ struct LevelView: View {
         }
     }
 
+    /// FPS and node count on screen in Debug builds, to check the 60 fps goal on a real device.
+    private static var spriteDebugOptions: SpriteView.DebugOptions {
+        #if DEBUG
+        [.showsFPS, .showsNodeCount]
+        #else
+        []
+        #endif
+    }
+
     // MARK: Flow
 
     private func load() {
@@ -76,7 +91,9 @@ struct LevelView: View {
             session: newSession, haptics: model.haptics, audio: model.audio,
             colorBlind: model.settings.colorBlind
         )
-        newScene.topInset = 124
+        let hasTip = TutorialTip(level: levelID, tutorial: level.tutorial) != nil
+        newScene.topInset = hasTip ? 188 : 124
+        if hasTip { model.analytics.log(.tutorialStep(step: levelID)) }
         session = newSession
         scene = newScene
         model.analytics.log(.levelStart(level: levelID))
@@ -96,6 +113,7 @@ struct LevelView: View {
             ))
             model.haptics.success()
             model.audio.play(.win)
+            if levelID <= 3 { model.analytics.log(.tutorialStep(step: levelID * 10)) }
         case .lost(let reason):
             model.analytics.log(.levelFail(
                 level: levelID, reason: reason == .bagFull ? "bag_full" : "out_of_hearts", moves: session.moves
@@ -220,6 +238,8 @@ private struct HeartsView: View {
 private struct ResultCard: View {
     let session: GameSession
     let coins: Int
+    let totalCoins: Int
+    let audio: AudioService
     let adReady: Bool
     let hasNext: Bool
     let onNext: () -> Void
@@ -248,6 +268,10 @@ private struct ResultCard: View {
         .accessibilityIdentifier("resultCard")
     }
 
+    @State private var shownStars = 0
+    @State private var shownCoins = 0
+    @State private var flyingCoins = false
+
     @ViewBuilder private var won: some View {
         JellyView(size: 70)
         Text("Sweet!")
@@ -257,10 +281,30 @@ private struct ResultCard: View {
             ForEach(0..<3, id: \.self) { index in
                 Image(systemName: "star.fill")
                     .font(.system(size: 36))
-                    .foregroundStyle(index < session.stars ? Theme.gold : Theme.inkSoft.opacity(0.25))
+                    .foregroundStyle(index < shownStars ? Theme.gold : Theme.inkSoft.opacity(0.25))
+                    .scaleEffect(index < shownStars ? 1 : 0.6)
+                    .rotationEffect(.degrees(index < shownStars ? 0 : -30))
+                    .animation(.spring(response: 0.35, dampingFraction: 0.45), value: shownStars)
             }
         }
-        CoinBadge(coins: coins)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("\(session.stars) stars"))
+        ZStack {
+            CoinBadge(coins: totalCoins - coins + shownCoins)
+            // Coins fly up from the stars into the counter.
+            ForEach(0..<min(coins, 8), id: \.self) { index in
+                Circle()
+                    .fill(Theme.gold)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
+                    .frame(width: 18, height: 18)
+                    .offset(x: CGFloat(index - 4) * 9, y: flyingCoins ? 0 : -60)
+                    .opacity(flyingCoins ? 0 : 1)
+                    .animation(.easeIn(duration: 0.45).delay(Double(index) * 0.06), value: flyingCoins)
+                    .accessibilityHidden(true)
+            }
+            .opacity(shownStars >= session.stars && coins > 0 ? 1 : 0)
+        }
+        .task { await celebrate() }
         if hasNext {
             Button("Next level", action: onNext)
                 .buttonStyle(CandyButtonStyle())
@@ -269,6 +313,25 @@ private struct ResultCard: View {
         Button("Home", action: onHome)
             .font(Theme.body())
             .foregroundStyle(Theme.inkSoft)
+    }
+
+    /// Stars land one by one, then the coins count up.
+    private func celebrate() async {
+        guard session.status == .won, shownStars == 0 else { return }
+        for star in 1...max(session.stars, 1) {
+            try? await Task.sleep(for: .milliseconds(320))
+            shownStars = star
+            audio.play(.star)
+        }
+        guard coins > 0 else { return }
+        try? await Task.sleep(for: .milliseconds(200))
+        flyingCoins = true
+        let steps = min(coins, 10)
+        for step in 1...steps {
+            try? await Task.sleep(for: .milliseconds(60))
+            shownCoins = coins * step / steps
+            if step.isMultiple(of: 2) { audio.play(.coin) }
+        }
     }
 
     @ViewBuilder private var bagFull: some View {
@@ -313,5 +376,45 @@ private struct ResultCard: View {
         }
         Button("Try again", action: onRetry)
             .buttonStyle(CandyButtonStyle())
+    }
+}
+
+// MARK: - Tutorial
+
+/// Jelly's one-line tips for the first levels. No walls of text: the hand on the board does the rest.
+struct TutorialTip {
+    let text: LocalizedStringKey
+
+    init?(level: Int, tutorial: Bool) {
+        guard tutorial else { return nil }
+        switch level {
+        case 1: text = "Tap a candy: it flies off where its arrow points!"
+        case 2: text = "Something in the way? Start with the candy in front."
+        case 3: text = "Three of the same in the jar go pop!"
+        default: return nil
+        }
+    }
+}
+
+private struct JellyTipView: View {
+    let tip: TutorialTip
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            JellyView(size: 46)
+            Text(tip.text)
+                .font(Theme.body(16))
+                .foregroundStyle(Theme.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(.white)
+                        .shadow(color: Theme.ink.opacity(0.12), radius: 4, y: 2)
+                )
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
     }
 }

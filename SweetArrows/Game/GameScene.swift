@@ -23,6 +23,9 @@ final class GameScene: SKScene {
     private var cell: CGFloat = 48
     private var boardOrigin = CGPoint.zero   // bottom-left of the board
     private var needsLayout = true
+    private var launchCount = 0
+    private var tutorialHand: SKNode?
+    private var art: CandyArt?
 
     init(session: GameSession, haptics: HapticsService, audio: AudioService, colorBlind: Bool) {
         self.session = session
@@ -108,6 +111,10 @@ final class GameScene: SKScene {
             }
         }
 
+        art = CandyArt(view: view)
+        tutorialHand?.removeFromParent()
+        tutorialHand = nil
+
         bag?.removeFromParent()
         let jarWidth = min(size.width - margin * 2, 360)
         let newBag = BagNode(width: jarWidth, slotSize: min(52, (jarWidth - 24) / CGFloat(Bag.maxCapacity) * 1.25))
@@ -149,13 +156,15 @@ final class GameScene: SKScene {
         poleNodes.forEach(candyLayer.addChild)
 
         for state in session.game.remainingCandies {
-            let node = CandyNode(state: state, cellSize: cell, colorBlind: colorBlind)
+            let node = CandyNode(state: state, cellSize: cell, colorBlind: colorBlind, art: art)
             node.position = center(of: state)
             candyLayer.addChild(node)
             nodes[state.id] = node
         }
+        launchCount += 1  // cancels jar updates from animations still in flight
         bag?.show(session.game.bag)
         if let hinted = session.hintedCandy { nodes[hinted]?.highlight() }
+        updateTutorialHand()
     }
 
     private func makePole(at p: GridPoint) -> SKNode {
@@ -197,8 +206,11 @@ final class GameScene: SKScene {
 
     /// Public so UI tests and the tutorial can drive the board.
     func handleTap(on id: Int) {
+        nodes[id]?.wobble()
         let report = session.tap(id)
         animate(report)
+        updateTutorialHand()
+        if report.status == .won { celebrate() }
     }
 
     // MARK: Animation
@@ -221,6 +233,7 @@ final class GameScene: SKScene {
         }
         for (id, direction) in report.rotated { nodes[id]?.turn(to: direction, animated: true) }
         for id in report.melted { nodes[id]?.melt() }
+        if !report.melted.isEmpty { audio.play(.melt) }
         for id in report.revealed { nodes[id]?.reveal() }
     }
 
@@ -228,23 +241,40 @@ final class GameScene: SKScene {
         guard let node = nodes.removeValue(forKey: launch.candyID) else { return }
         audio.play(.squish)
         haptics.tap()
+        launchCount += 1
+        let move = LaunchedMove(
+            launch: launch, bagAfter: session.game.bag, comboStep: session.comboStep, number: launchCount
+        )
         let vector = CandyShapes.vector(for: launch.direction)
         let distance = CGFloat(launch.exitDistance) * cell + cell * 0.6
+        // Gummy wiggle, then a quick ease-out slide (150–250 ms) off the counter.
+        let wiggle = SKAction.sequence([
+            .scaleX(to: 1.15, y: 0.87, duration: 0.05),
+            .scaleX(to: 0.92, y: 1.08, duration: 0.05),
+        ])
         let slide = SKAction.moveBy(x: vector.dx * distance, y: vector.dy * distance,
-                                    duration: 0.05 * Double(launch.exitDistance) + 0.12)
-        slide.timingMode = .easeIn
-
+                                    duration: min(0.15 + 0.012 * Double(launch.exitDistance), 0.25))
+        slide.timingMode = .easeOut
         node.zPosition = 20
-        node.run(slide) { [weak self, weak node] in
+        node.run(.sequence([wiggle, .group([slide, .scale(to: 1, duration: 0.1)])])) { [weak self, weak node] in
             MainActor.assumeIsolated {
                 guard let self, let node else { return }
-                self.flyToJar(node, launch: launch)
+                self.flyToJar(node, move: move)
             }
         }
     }
 
+    /// What the jar should show once a launched candy lands.
+    private struct LaunchedMove {
+        var launch: Launch
+        var bagAfter: Bag
+        var comboStep: Int
+        var number: Int
+    }
+
     /// Second half of a launch: the candy arcs from the board edge into its jar slot.
-    private func flyToJar(_ node: CandyNode, launch: Launch) {
+    private func flyToJar(_ node: CandyNode, move: LaunchedMove) {
+        let launch = move.launch
         node.removeAllActions()
         let last = node.position
         let start = CGPoint(x: min(max(last.x, 20), size.width - 20), y: min(max(last.y, 40), size.height - 40))
@@ -265,13 +295,26 @@ final class GameScene: SKScene {
         }
         node.run(.sequence([flight, .removeFromParent()])) { [weak self] in
             MainActor.assumeIsolated {
-                guard let self else { return }
-                self.bag?.show(self.session.game.bag, popped: launch.bag.didPop, landedSlot: launch.bag.slot)
-                if launch.bag.didPop {
-                    self.audio.play(.pop)
-                    self.haptics.pop()
-                }
+                self?.land(move)
             }
+        }
+    }
+
+    private func land(_ move: LaunchedMove) {
+        audio.play(.tap)
+        // A later launch already landed or is about to: let it draw the jar.
+        guard move.number == launchCount else { return }
+        let launch = move.launch
+        if launch.bag.didPop {
+            bag?.showPop(move.bagAfter, insertion: launch.bag, color: launch.color) { [weak self] in
+                guard let self else { return }
+                self.audio.play(.pop)
+                self.audio.playCombo(move.comboStep)
+                self.haptics.pop()
+                if move.number == self.launchCount { self.bag?.show(self.session.game.bag) }
+            }
+        } else {
+            bag?.show(move.bagAfter, landedSlot: launch.bag.slot)
         }
     }
 
@@ -293,5 +336,87 @@ final class GameScene: SKScene {
             let nudge = SKAction.moveBy(x: vector.dx * 4, y: vector.dy * 4, duration: 0.05)
             other.run(.sequence([.wait(forDuration: 0.05 * Double(bounce.distance) + 0.07), nudge, nudge.reversed()]))
         }
+    }
+
+    // MARK: Celebration
+
+    /// Confetti in the candy colors, raining over the board.
+    func celebrate() {
+        let reduceMotion = UIAccessibility.isReduceMotionEnabled
+        let pieces = reduceMotion ? 16 : 70
+        for i in 0..<pieces {
+            let color = CandyColor.allCases[i % CandyColor.allCases.count]
+            let piece = SKShapeNode(rectOf: CGSize(width: CGFloat.random(in: 6...11), height: CGFloat.random(in: 10...16)),
+                                    cornerRadius: 2)
+            piece.fillColor = UIColor.candy(color)
+            piece.strokeColor = .clear
+            piece.zPosition = 50
+            piece.position = CGPoint(x: CGFloat.random(in: 0...size.width), y: size.height + CGFloat.random(in: 10...160))
+            addChild(piece)
+            let fallTime = Double.random(in: 1.4...2.4)
+            let fall = SKAction.moveBy(x: CGFloat.random(in: -60...60), y: -(size.height + 220), duration: fallTime)
+            fall.timingMode = .easeIn
+            let spin = SKAction.rotate(byAngle: CGFloat.random(in: -8...8), duration: fallTime)
+            piece.run(.sequence([
+                .wait(forDuration: Double.random(in: 0...0.5)),
+                .group([fall, spin]),
+                .removeFromParent(),
+            ]))
+        }
+    }
+
+    // MARK: Tutorial
+
+    /// On tutorial levels a pointing hand shows a safe next tap (levels 1–3).
+    private var showsTutorialHand: Bool { level.tutorial && level.id <= 3 }
+
+    private func updateTutorialHand() {
+        guard showsTutorialHand, session.status == .playing, let target = tutorialTarget(),
+              let state = session.game.candies[target]
+        else {
+            tutorialHand?.removeFromParent()
+            tutorialHand = nil
+            return
+        }
+        let hand = tutorialHand ?? makeHand()
+        if hand.parent == nil { addChild(hand) }
+        tutorialHand = hand
+        let point = center(of: state)
+        let rest = CGPoint(x: point.x + cell * 0.35, y: point.y - cell * 0.45)
+        hand.removeAllActions()
+        hand.position = rest
+        let press = SKAction.sequence([
+            .moveBy(x: -cell * 0.08, y: cell * 0.12, duration: 0.25),
+            .scale(to: 0.9, duration: 0.1),
+            .scale(to: 1, duration: 0.1),
+            .moveBy(x: cell * 0.08, y: -cell * 0.12, duration: 0.25),
+            .wait(forDuration: 0.4),
+        ])
+        hand.run(.sequence([.wait(forDuration: 0.6), .repeatForever(press)]))
+    }
+
+    /// The candy the tutorial points at: the next safe move.
+    private func tutorialTarget() -> Int? {
+        Solver(game: session.game, configuration: .hint).nextMove()
+    }
+
+    private func makeHand() -> SKNode {
+        let config = UIImage.SymbolConfiguration(pointSize: 64, weight: .regular)
+        let image = UIImage(systemName: "hand.point.up.left.fill", withConfiguration: config)?
+            .withTintColor(.white, renderingMode: .alwaysOriginal)
+        let outline = UIImage(systemName: "hand.point.up.left", withConfiguration: config)?
+            .withTintColor(UIColor(hex: 0x4A2C2A), renderingMode: .alwaysOriginal)
+        let node = SKNode()
+        node.zPosition = 40
+        for (img, z) in [(image, 0.0), (outline, 1.0)] {
+            guard let img else { continue }
+            let sprite = SKSpriteNode(texture: SKTexture(image: img))
+            let scale = cell * 0.9 / max(img.size.width, 1)
+            sprite.size = CGSize(width: img.size.width * scale, height: img.size.height * scale)
+            sprite.anchorPoint = CGPoint(x: 0.25, y: 0.9)
+            sprite.zPosition = CGFloat(z)
+            node.addChild(sprite)
+        }
+        return node
     }
 }

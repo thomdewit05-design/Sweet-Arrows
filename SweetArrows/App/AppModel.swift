@@ -64,8 +64,8 @@ final class AppModel {
             consent: PlaceholderConsentService(),
             purchases: PlaceholderPurchaseService(),
             gameCenter: PlaceholderGameCenterService(),
-            audio: PlaceholderAudioService(),
-            haptics: UIKitHapticsService()
+            audio: SoundEffectsService(),
+            haptics: CoreHapticsService()
         )
     }
 
@@ -80,7 +80,7 @@ final class AppModel {
             consent: PlaceholderConsentService(),
             purchases: PlaceholderPurchaseService(),
             gameCenter: PlaceholderGameCenterService(),
-            audio: PlaceholderAudioService(),
+            audio: SilentAudioService(),
             haptics: UIKitHapticsService()
         )
     }

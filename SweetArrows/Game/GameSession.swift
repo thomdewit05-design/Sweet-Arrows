@@ -14,6 +14,10 @@ final class GameSession {
     private(set) var boardVersion = 0
     /// Candy the hint booster points at.
     private(set) var hintedCandy: Int?
+    /// Pops in a row (for the rising xylophone tone). A bounce, or three launches
+    /// without a pop, start the run again.
+    private(set) var comboStep = 0
+    private var launchesSincePop = 0
 
     init(level: Level) {
         self.level = level
@@ -38,7 +42,21 @@ final class GameSession {
 
     func tap(_ id: Int) -> MoveReport {
         hintedCandy = nil
-        return game.tap(id)
+        let report = game.tap(id)
+        switch report.result {
+        case .launched(let launch) where launch.bag.didPop:
+            comboStep += 1
+            launchesSincePop = 0
+        case .launched:
+            launchesSincePop += 1
+            if launchesSincePop >= 3 { comboStep = 0 }
+        case .bounced:
+            comboStep = 0
+            launchesSincePop = 0
+        case .crackedCaramel, .frozen, .ignored:
+            break
+        }
+        return report
     }
 
     func undo() {
@@ -49,6 +67,8 @@ final class GameSession {
 
     func restart() {
         game = Game(level: level)
+        comboStep = 0
+        launchesSincePop = 0
         startedAt = Date()
         hintedCandy = nil
         boardVersion += 1

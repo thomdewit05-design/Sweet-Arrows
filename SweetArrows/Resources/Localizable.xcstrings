@@ -1,6 +1,9 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld": {
+      "shouldTranslate": false
+    },
     "%lld coins": {
       "localizations": {
         "nl": {
@@ -17,6 +20,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nog %lld hartjes"
+          }
+        }
+      }
+    },
+    "%lld stars": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld sterren"
           }
         }
       }
@@ -371,6 +384,16 @@
         }
       }
     },
+    "Something in the way? Start with the candy in front.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zit er iets in de weg? Begin met het snoepje vooraan."
+          }
+        }
+      }
+    },
     "Sound": {
       "localizations": {
         "nl": {
@@ -411,6 +434,16 @@
         }
       }
     },
+    "Tap a candy: it flies off where its arrow points!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op een snoepje: het schiet weg waar de pijl heen wijst!"
+          }
+        }
+      }
+    },
     "Tap, slide, pop the sweets": {
       "localizations": {
         "nl": {
@@ -437,6 +470,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "De snoeppot is vol!"
+          }
+        }
+      }
+    },
+    "Three of the same in the jar go pop!": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drie dezelfde in de pot? Plop!"
           }
         }
       }
@@ -500,9 +543,6 @@
           }
         }
       }
-    },
-    "%lld": {
-      "shouldTranslate": false
     }
   },
   "version": "1.0"

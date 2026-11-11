@@ -52,6 +52,25 @@ struct AppTests {
         #expect(session.moves == 0)
     }
 
+    @Test func comboRisesWithPopsAndResetsOnBounce() throws {
+        let level = Level(id: 99, width: 4, height: 3, candies: [
+            Candy(id: 1, color: .mint, position: GridPoint(0, 0), direction: .up),
+            Candy(id: 2, color: .mint, position: GridPoint(1, 0), direction: .up),
+            Candy(id: 3, color: .mint, position: GridPoint(2, 0), direction: .up),
+            Candy(id: 4, color: .lemon, position: GridPoint(0, 2), direction: .right),
+            Candy(id: 5, color: .lemon, position: GridPoint(3, 2), direction: .left),
+            Candy(id: 6, color: .lemon, position: GridPoint(3, 1), direction: .up),
+        ])
+        let session = GameSession(level: level)
+        _ = session.tap(1)
+        _ = session.tap(2)
+        #expect(session.comboStep == 0)
+        _ = session.tap(3)
+        #expect(session.comboStep == 1)
+        _ = session.tap(4)  // bounces into candy 5
+        #expect(session.comboStep == 0)
+    }
+
     @Test func remoteConfigKeysMatchThePlan() {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [

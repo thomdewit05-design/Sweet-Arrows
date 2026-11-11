@@ -2,70 +2,133 @@ import SpriteKit
 import SweetArrowsCore
 import UIKit
 
+/// Renders candy bodies and arrows once per (shape, color, size) and reuses the textures.
+/// Hundreds of SKShapeNodes each cost a draw call; cached sprites batch and keep 60 fps.
+@MainActor
+final class CandyArt {
+    private weak var view: SKView?
+    private var cache: [String: SKTexture] = [:]
+
+    init(view: SKView?) {
+        self.view = view
+    }
+
+    func texture(key: String, extent: CGSize, build: () -> SKNode) -> SKTexture? {
+        if let cached = cache[key] { return cached }
+        guard let view else { return nil }
+        let node = build()
+        let crop = CGRect(x: -extent.width / 2, y: -extent.height / 2, width: extent.width, height: extent.height)
+        guard let texture = view.texture(from: node, crop: crop) else { return nil }
+        cache[key] = texture
+        return texture
+    }
+}
+
 /// One candy on the board: glossy body, white arrow, and overlays for special elements.
 @MainActor
 final class CandyNode: SKNode {
     let candyID: Int
-    private let body: SKShapeNode
-    private let shine: SKShapeNode
-    private let arrow: SKShapeNode
+    private let body: SKNode
+    private let arrow: SKNode
     private var caramel: SKShapeNode?
     private var ice: SKShapeNode?
     private var wrapper: SKNode?
     private var spinnerBadge: SKShapeNode?
     private let color: CandyColor
 
-    init(state: CandyState, cellSize: CGFloat, colorBlind: Bool) {
+    init(state: CandyState, cellSize: CGFloat, colorBlind: Bool, art: CandyArt? = nil) {
         candyID = state.id
         color = state.color
         let size = cellSize * 0.86
-        let fill = UIColor.candy(state.color)
+        let bar = state.candy.bar
+        let candyColor = state.color
 
-        if let axis = state.candy.bar {
-            body = SKShapeNode(path: CandyShapes.barPath(length: cellSize * 1.86, thickness: size, axis: axis))
+        // Body (shadow + candy + shine), as a cached texture when possible.
+        let extent = bar.map { $0 == .horizontal
+            ? CGSize(width: cellSize * 2.1, height: cellSize * 1.2)
+            : CGSize(width: cellSize * 1.2, height: cellSize * 2.1)
+        } ?? CGSize(width: cellSize * 1.2, height: cellSize * 1.2)
+        let barKey = bar?.rawValue ?? "single"
+        let bodyKey = "body-\(candyColor.rawValue)-\(barKey)-\(Int(cellSize * 10))"
+        let build = { CandyNode.makeBody(color: candyColor, bar: bar, cellSize: cellSize) }
+        let bodyRoot = SKNode()
+        if let texture = art?.texture(key: bodyKey, extent: extent, build: build) {
+            bodyRoot.addChild(SKSpriteNode(texture: texture, size: extent))
         } else {
-            body = SKShapeNode(path: CandyShapes.path(for: state.color.shape, size: size))
+            bodyRoot.addChild(build())
         }
-        body.fillColor = fill
-        body.strokeColor = UIColor.white.withAlphaComponent(0.9)
-        body.lineWidth = max(2, cellSize * 0.05)
-        body.lineJoin = .round
-        body.glowWidth = 0
+        body = bodyRoot
 
-        let shineSize = size * 0.32
-        shine = SKShapeNode(ellipseOf: CGSize(width: shineSize, height: shineSize * 0.6))
-        shine.fillColor = UIColor.white.withAlphaComponent(0.45)
-        shine.strokeColor = .clear
-        shine.position = CGPoint(x: -size * 0.16, y: size * 0.2)
-        shine.zRotation = 0.5
-        shine.zPosition = 1
-
-        arrow = SKShapeNode(path: CandyShapes.arrowPath(size: size))
-        arrow.fillColor = .white
-        arrow.strokeColor = UIColor(hex: 0x4A2C2A, alpha: 0.35)
-        arrow.lineWidth = 1.2
+        let arrowExtent = CGSize(width: size * 0.5, height: size * 0.6)
+        let arrowKey = "arrow-\(Int(cellSize * 10))"
+        let buildArrow = { CandyNode.makeArrow(size: size) }
+        if let texture = art?.texture(key: arrowKey, extent: arrowExtent, build: buildArrow) {
+            arrow = SKSpriteNode(texture: texture, size: arrowExtent)
+        } else {
+            arrow = buildArrow()
+        }
         arrow.zRotation = CandyShapes.rotation(for: state.direction)
         arrow.zPosition = 3
 
         super.init()
         isUserInteractionEnabled = false
+        addChild(body)
+        addChild(arrow)
 
-        let shadow = SKShapeNode(path: body.path!)
+        if let bar { addChocolateStripes(cellSize: cellSize, axis: bar) }
+        if colorBlind { addColorBlindMark(size: size) }
+        if state.candy.has(.rotating) { addSpinnerBadge(size: size) }
+        if state.caramelIntact { addCaramel(size: size, bar: bar, cellSize: cellSize) }
+        if state.frozen { addIce(size: size, bar: bar, cellSize: cellSize) }
+        if !state.revealed { addWrapper(size: size, bar: bar, cellSize: cellSize) }
+    }
+
+    private static func makeBody(color: CandyColor, bar: Axis?, cellSize: CGFloat) -> SKNode {
+        let size = cellSize * 0.86
+        let path = bar.map { CandyShapes.barPath(length: cellSize * 1.86, thickness: size, axis: $0) }
+            ?? CandyShapes.path(for: color.shape, size: size)
+        let root = SKNode()
+
+        let shadow = SKShapeNode(path: path)
         shadow.fillColor = UIColor(hex: 0x4A2C2A, alpha: 0.18)
         shadow.strokeColor = .clear
         shadow.position = CGPoint(x: 0, y: -cellSize * 0.05)
-        shadow.zPosition = -1
-        addChild(shadow)
-        addChild(body)
-        body.addChild(shine)
-        addChild(arrow)
+        root.addChild(shadow)
 
-        if state.candy.bar != nil { addChocolateStripes(cellSize: cellSize, axis: state.candy.bar!) }
-        if colorBlind { addColorBlindMark(size: size) }
-        if state.candy.has(.rotating) { addSpinnerBadge(size: size) }
-        if state.caramelIntact { addCaramel(size: size, bar: state.candy.bar, cellSize: cellSize) }
-        if state.frozen { addIce(size: size, bar: state.candy.bar, cellSize: cellSize) }
-        if !state.revealed { addWrapper(size: size, bar: state.candy.bar, cellSize: cellSize) }
+        let candy = SKShapeNode(path: path)
+        candy.fillColor = UIColor.candy(color)
+        candy.strokeColor = UIColor.white.withAlphaComponent(0.9)
+        candy.lineWidth = max(2, cellSize * 0.05)
+        candy.lineJoin = .round
+        root.addChild(candy)
+
+        let shineSize = size * 0.32
+        let shine = SKShapeNode(ellipseOf: CGSize(width: shineSize, height: shineSize * 0.6))
+        shine.fillColor = UIColor.white.withAlphaComponent(0.45)
+        shine.strokeColor = .clear
+        shine.position = CGPoint(x: -size * 0.16, y: size * 0.2)
+        shine.zRotation = 0.5
+        root.addChild(shine)
+        return root
+    }
+
+    private static func makeArrow(size: CGFloat) -> SKNode {
+        let arrow = SKShapeNode(path: CandyShapes.arrowPath(size: size))
+        arrow.fillColor = .white
+        arrow.strokeColor = UIColor(hex: 0x4A2C2A, alpha: 0.35)
+        arrow.lineWidth = 1.2
+        return arrow
+    }
+
+    /// Gummy wobble when the candy is touched.
+    func wobble() {
+        body.removeAction(forKey: "wobble")
+        let squish = SKAction.sequence([
+            .scaleX(to: 1.12, y: 0.9, duration: 0.06),
+            .scaleX(to: 0.95, y: 1.06, duration: 0.07),
+            .scale(to: 1, duration: 0.08),
+        ])
+        body.run(squish, withKey: "wobble")
     }
 
     @available(*, unavailable)
