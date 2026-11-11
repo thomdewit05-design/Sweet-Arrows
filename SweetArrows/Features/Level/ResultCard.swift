@@ -32,7 +32,7 @@ struct ResultCard: View {
                 case .lost(.bagFull): bagFull
                 case .lost(.outOfHearts): outOfHearts
                 case .lost(.outOfTime): outOfTime
-                case .playing: EmptyView()
+                case .playing, .lost(.boardFull): EmptyView()
                 }
             }
             .padding(28)

@@ -239,6 +239,7 @@ struct LevelView: View {
             case .bagFull: "bag_full"
             case .outOfHearts: "out_of_hearts"
             case .outOfTime: "out_of_time"
+            case .boardFull: "board_full"
             }
             model.analytics.log(.levelFail(level: session.level.id, reason: reasonName, moves: session.moves))
             model.audio.play(.lose)
