@@ -76,3 +76,11 @@ jobs:
             -authenticationKeyPath ~/private_keys/AuthKey.p8 \
             -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
             -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }} | tail -n 40
+      - name: Show Apple distribution log on failure
+        if: failure()
+        run: |
+          for log in $(find "${TMPDIR:-/tmp}" -path "*xcdistributionlogs*" -name "*.log" 2>/dev/null); do
+            echo "::group::$log"
+            tail -n 80 "$log"
+            echo "::endgroup::"
+          done
