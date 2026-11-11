@@ -75,7 +75,7 @@ targets:
       properties:
         CFBundleDisplayName: Sweet Arrows
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, nl]
+        CFBundleLocalizations: [en, nl, de, fr, es, pt-BR, tr, id]
         ITSAppUsesNonExemptEncryption: false
         LSApplicationCategoryType: public.app-category.puzzle-games
         UILaunchScreen:

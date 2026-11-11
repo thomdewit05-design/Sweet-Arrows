@@ -1,5 +1,6 @@
 import SwiftUI
 import SweetArrowsCore
+import UIKit
 
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
@@ -25,6 +26,11 @@ struct SettingsView: View {
                 Button("Restore purchases") {
                     Task { await model.purchases.restorePurchases() }
                 }
+            }
+            Section("About") {
+                Link("Privacy policy", destination: Links.privacy)
+                Link("Terms of use", destination: Links.terms)
+                Link("Contact", destination: Links.supportMail(version: Self.version))
             }
             Section {
                 LabeledContent("Version", value: Self.version)
@@ -63,4 +69,25 @@ struct SettingsView: View {
 #Preview {
     NavigationStack { SettingsView() }
         .environment(AppModel.preview())
+}
+
+/// Public pages on the game's website (docs/site, served by GitHub Pages).
+enum Links {
+    static let website = URL(string: "https://sweetarrowsgame.com")!
+    static let privacy = URL(string: "https://sweetarrowsgame.com/privacy.html")!
+    static let terms = URL(string: "https://sweetarrowsgame.com/terms.html")!
+    static let supportAddress = "support@sweetarrowsgame.com"
+
+    /// A mail with app version and device already filled in.
+    static func supportMail(version: String) -> URL {
+        let device = UIDevice.current.model + " · iOS " + UIDevice.current.systemVersion
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.path = supportAddress
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: "Sweet Arrows \(version)"),
+            URLQueryItem(name: "body", value: "\n\n—\nSweet Arrows \(version)\n\(device)"),
+        ]
+        return components.url ?? URL(string: "mailto:\(supportAddress)")!
+    }
 }
