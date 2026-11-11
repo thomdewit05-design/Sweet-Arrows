@@ -199,7 +199,9 @@ final class GoogleAdService: NSObject, AdService {
 
     #if canImport(GoogleMobileAds)
     private func loadRewarded() {
-        RewardedAd.load(with: ids.rewarded, request: Request()) { [weak self] ad, _ in
+        RewardedAd.load(with: ids.rewarded, request: Request()) { [weak self] loaded, _ in
+            // Google calls this on the main thread; the ad object is only ever used there.
+            nonisolated(unsafe) let ad = loaded
             MainActor.assumeIsolated {
                 guard let self, let ad else { return }
                 ad.fullScreenContentDelegate = self
@@ -214,7 +216,9 @@ final class GoogleAdService: NSObject, AdService {
     }
 
     private func loadInterstitial() {
-        InterstitialAd.load(with: ids.interstitial, request: Request()) { [weak self] ad, _ in
+        InterstitialAd.load(with: ids.interstitial, request: Request()) { [weak self] loaded, _ in
+            // Google calls this on the main thread; the ad object is only ever used there.
+            nonisolated(unsafe) let ad = loaded
             MainActor.assumeIsolated {
                 guard let self, let ad else { return }
                 ad.fullScreenContentDelegate = self
@@ -229,7 +233,9 @@ final class GoogleAdService: NSObject, AdService {
     }
 
     private func loadAppOpen() {
-        AppOpenAd.load(with: ids.appOpen, request: Request()) { [weak self] ad, _ in
+        AppOpenAd.load(with: ids.appOpen, request: Request()) { [weak self] loaded, _ in
+            // Google calls this on the main thread; the ad object is only ever used there.
+            nonisolated(unsafe) let ad = loaded
             MainActor.assumeIsolated {
                 guard let self, let ad else { return }
                 ad.fullScreenContentDelegate = self
