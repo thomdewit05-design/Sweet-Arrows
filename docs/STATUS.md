@@ -77,8 +77,8 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 - **Tik** op een snoepje: het glijdt in de richting van zijn pijl tot de rand of een ander snoepje.
   Kan het niet bewegen, dan draait de pijl een kwartslag (met de klok mee). Elke tik doet dus iets; geen hartjes.
 - **3 of meer** van dezelfde kleur op een rij (horizontaal of verticaal) ploppen. Er valt niets; het bord is een tafel.
-- Bord van 7×8, start met 12 snoepjes. Elke 2,4 s komt er een snoepje bij (eerst 1 s een schaduw);
-  elke "snelheid" (15 snoepjes geplopt) 8% sneller, tot één per 0,7 s. Een nieuw snoepje maakt nooit zelf een rij.
+- Bord van **6×6** (keuze van de eigenaar; eerst 7×8), start met 8 snoepjes. Elke 2,4 s komt er een snoepje bij (eerst 1 s een schaduw);
+  elke "snelheid" (12 snoepjes geplopt) 8% sneller, tot één per 0,7 s. Een nieuw snoepje maakt nooit zelf een rij.
 - Eerst 3 kleuren, elke twee snelheden een kleur erbij (max. 6). Speciaal: **bom** (vanaf snelheid 2, popt 3×3),
   **steen** (vanaf 3, kan niet bewegen, breekt als ernaast iets popt), **regenboog** (vanaf 4, telt als elke kleur).
 - **Af:** geen vrij vakje voor een nieuw snoepje. Eén keer per potje doorgaan met een beloningsvideo:
@@ -86,7 +86,7 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 - **Punten:** 10 per gepopt snoepje, +20 per snoepje boven de 3 in een rij, 5 per gebroken steen, alles × combo
   (ploppen binnen 3 s na elkaar, max. ×5), +100 voor een leeg bord. Munten: score ÷ 25. Record en Game Center-ranglijst
   `sweetarrows.endless_score` zoals voorheen.
-- Simulatie (20 potjes, speler die één zet vooruit kijkt, één tik per seconde): potjes duren 4–6 minuten, snelheid 4–6.
+- Simulatie op 6×6 (20 potjes, speler die één zet vooruit kijkt, een tik per 0,8–1,2 s): potjes duren gemiddeld 3,5–4,5 minuut.
 - Eerste twee potjes: uitleg bovenin en een handje dat een snoepje aanwijst dat meteen een rij maakt.
 - **Boosters** (onder het bord; uit voorraad, voor munten of met een beloningsvideo):
   *Tip* (60) laat een snoepje knipperen dat meteen een rij maakt (je betaalt alleen als er zo'n zet is),

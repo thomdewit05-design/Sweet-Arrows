@@ -220,7 +220,7 @@ struct SlideTests {
 
     @Test func startsWithAFairBoardWithoutLines() {
         let game = SlideGame(seed: 7)
-        #expect(game.pieces.count == 12)
+        #expect(game.pieces.count == 8)
         #expect(game.matchedIDs().isEmpty)
         #expect(game.colorCount == 3)
         #expect(game.unlockedKinds.isEmpty)
