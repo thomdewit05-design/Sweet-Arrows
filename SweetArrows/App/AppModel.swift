@@ -21,7 +21,6 @@ final class AppModel {
     let analytics: AnalyticsService
     let ads: AdService
     let consent: ConsentService
-    let purchases: PurchaseService
     let gameCenter: GameCenterService
     let audio: AudioService
     let haptics: HapticsService
@@ -32,7 +31,6 @@ final class AppModel {
         analytics: AnalyticsService,
         ads: AdService,
         consent: ConsentService,
-        purchases: PurchaseService,
         gameCenter: GameCenterService,
         audio: AudioService,
         haptics: HapticsService
@@ -42,7 +40,6 @@ final class AppModel {
         self.analytics = analytics
         self.ads = ads
         self.consent = consent
-        self.purchases = purchases
         self.gameCenter = gameCenter
         self.audio = audio
         self.haptics = haptics
@@ -58,13 +55,10 @@ final class AppModel {
         let analytics = FirebaseAnalyticsService()
         let config: ConfigService = isUITest ? LocalConfigService() : FirebaseConfigService()
         let consent: ConsentService = isUITest ? PlaceholderConsentService() : GoogleConsentService()
-        let purchases: PurchaseService = isUITest
-            ? PlaceholderPurchaseService()
-            : StoreKitPurchaseService(save: save, analytics: analytics)
         let ads: AdService = isUITest
             ? PlaceholderAdService()
             : GoogleAdService(
-                consent: consent, analytics: analytics, save: save, purchases: purchases,
+                consent: consent, analytics: analytics, save: save,
                 today: { AppModel.currentDay() }
             )
         ads.updateLimits(config.values.adLimits)
@@ -75,7 +69,6 @@ final class AppModel {
             analytics: analytics,
             ads: ads,
             consent: consent,
-            purchases: purchases,
             gameCenter: isUITest ? OfflineGameCenterService() : GameKitService(),
             audio: SoundEffectsService(),
             haptics: CoreHapticsService()
@@ -90,7 +83,6 @@ final class AppModel {
             analytics: FirebaseAnalyticsService(),
             ads: PlaceholderAdService(),
             consent: PlaceholderConsentService(),
-            purchases: PlaceholderPurchaseService(),
             gameCenter: OfflineGameCenterService(),
             audio: SilentAudioService(),
             haptics: UIKitHapticsService()
@@ -112,20 +104,6 @@ final class AppModel {
         await config.refresh()
         await consent.gatherConsent()
         ads.start()
-        await purchases.refreshEntitlements()
-        grantVIPBonusIfNeeded()
-    }
-
-    /// VIP perk: three free hints a day.
-    func grantVIPBonusIfNeeded() {
-        guard purchases.isVIP else { return }
-        let day = today
-        save.update { _ = $0.grantVIPBonus(today: day) }
-    }
-
-    /// Whether the starter pack offer should be visible.
-    var showsStarterPack: Bool {
-        save.progress.showsStarterPack(afterRuns: config.values.starterPackLevel)
     }
 
     /// Reports the achievements a finished run earned (cheap; Game Center ignores repeats).

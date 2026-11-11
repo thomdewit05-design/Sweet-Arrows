@@ -15,8 +15,6 @@ struct RemoteValues: Equatable, Sendable {
     var rewardedDailyCap = 20
     var bannerEnabled = true
     var appOpenEnabled = false
-    /// Runs after which the starter pack is offered.
-    var starterPackLevel = 5
 
     /// The ad rules as `AdPolicy` uses them.
     var adLimits: AdLimits {
@@ -39,7 +37,6 @@ struct RemoteValues: Equatable, Sendable {
         case rewardedDailyCap = "rewarded_daily_cap"
         case bannerEnabled = "banner_enabled"
         case appOpenEnabled = "app_open_enabled"
-        case starterPackLevel = "starter_pack_level"
     }
 
     /// Defaults as Remote Config wants them.
@@ -51,7 +48,6 @@ struct RemoteValues: Equatable, Sendable {
             Key.rewardedDailyCap.rawValue: NSNumber(value: rewardedDailyCap),
             Key.bannerEnabled.rawValue: NSNumber(value: bannerEnabled),
             Key.appOpenEnabled.rawValue: NSNumber(value: appOpenEnabled),
-            Key.starterPackLevel.rawValue: NSNumber(value: starterPackLevel),
         ]
     }
 }
@@ -102,7 +98,6 @@ final class FirebaseConfigService: ConfigService {
         next.rewardedDailyCap = int(.rewardedDailyCap)
         next.bannerEnabled = bool(.bannerEnabled)
         next.appOpenEnabled = bool(.appOpenEnabled)
-        next.starterPackLevel = int(.starterPackLevel)
         values = next
         onChange?(next)
     }

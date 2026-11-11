@@ -45,7 +45,6 @@ targets:
       - path: SweetArrows
         excludes:
           - "App/SweetArrows.entitlements"
-          - "Resources/SweetArrows.storekit"
     dependencies:
       - package: SweetArrowsCore
       - package: GoogleMobileAds
@@ -149,7 +148,6 @@ schemes:
         SweetArrows: all
     run:
       config: Debug
-      storeKitConfiguration: SweetArrows/Resources/SweetArrows.storekit
     test:
       config: Debug
       gatherCoverageData: true

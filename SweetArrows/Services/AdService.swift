@@ -70,7 +70,6 @@ final class GoogleAdService: NSObject, AdService {
     private let consent: ConsentService
     private let analytics: AnalyticsService
     private let save: SaveService
-    private let purchases: PurchaseService
     private let today: () -> Int
     private var started = false
     private static let historyKey = "adHistory.v1"
@@ -89,14 +88,12 @@ final class GoogleAdService: NSObject, AdService {
         consent: ConsentService,
         analytics: AnalyticsService,
         save: SaveService,
-        purchases: PurchaseService,
         today: @escaping () -> Int
     ) {
         self.ids = ids
         self.consent = consent
         self.analytics = analytics
         self.save = save
-        self.purchases = purchases
         self.today = today
         var history = UserDefaults.standard.data(forKey: Self.historyKey)
             .flatMap { try? JSONDecoder().decode(AdHistory.self, from: $0) } ?? AdHistory()
@@ -106,19 +103,16 @@ final class GoogleAdService: NSObject, AdService {
         persistHistory()
     }
 
-    private var adsRemoved: Bool { purchases.hasRemovedAds || purchases.isVIP }
     /// Ads are gated on finished runs (the policy calls them levels).
     private var completedLevel: Int { save.progress.endlessRuns }
 
     var canShowBanner: Bool {
-        started && policy.canShowBanner(completedLevel: completedLevel, adsRemoved: adsRemoved)
+        started && policy.canShowBanner(completedLevel: completedLevel)
     }
 
     var bannerAdUnitID: String { ids.banner }
 
     var isRewardedReady: Bool {
-        // VIP members get rewarded boosters without watching.
-        if purchases.isVIP { return true }
         guard policy.canShowRewarded(completedLevel: completedLevel, today: today()) else { return false }
         #if canImport(GoogleMobileAds)
         return rewarded != nil
@@ -146,7 +140,6 @@ final class GoogleAdService: NSObject, AdService {
 
     func showRewarded(reason: RewardReason) async -> Bool {
         analytics.log(.adOfferAccepted(reason: reason.rawValue))
-        if purchases.isVIP { return true }
         #if canImport(GoogleMobileAds)
         guard isRewardedReady, let ad = rewarded, rewardContinuation == nil else { return false }
         rewarded = nil
@@ -176,7 +169,7 @@ final class GoogleAdService: NSObject, AdService {
     func maybeShowInterstitial(afterLevel level: Int) {
         #if canImport(GoogleMobileAds)
         guard let ad = interstitial,
-              policy.canShowInterstitial(afterLevel: level, won: lastLevelWon, adsRemoved: adsRemoved, now: Date())
+              policy.canShowInterstitial(afterLevel: level, won: lastLevelWon, now: Date())
         else { return }
         interstitial = nil
         policy.interstitialShown(at: Date())
@@ -188,7 +181,7 @@ final class GoogleAdService: NSObject, AdService {
     func maybeShowAppOpen(awaySince: Date) {
         #if canImport(GoogleMobileAds)
         guard let ad = appOpen, policy.canShowAppOpen(
-            awaySince: awaySince, now: Date(), today: today(), completedLevel: completedLevel, adsRemoved: adsRemoved
+            awaySince: awaySince, now: Date(), today: today(), completedLevel: completedLevel
         ) else { return }
         appOpen = nil
         ad.present(from: UIApplication.topViewController())

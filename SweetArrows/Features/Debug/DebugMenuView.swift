@@ -30,7 +30,6 @@ struct DebugMenuView: View {
                 Button("Daily reward available again") {
                     model.save.update { $0.dailyReward.lastClaimDay = (model.today - 1) }
                 }
-                Button("Starter pack available again") { model.save.update { $0.starterPackBought = false } }
             }
             Section {
                 let limits = model.config.values.adLimits
@@ -41,7 +40,6 @@ struct DebugMenuView: View {
                 LabeledContent("Rewarded ready", value: model.ads.isRewardedReady ? "yes" : "no")
                 LabeledContent("Banner allowed", value: model.ads.canShowBanner ? "yes" : "no")
                 LabeledContent("Consent allows ads", value: model.consent.canRequestAds ? "yes" : "no")
-                LabeledContent("Remove Ads / VIP", value: "\(model.purchases.hasRemovedAds) / \(model.purchases.isVIP)")
                 Button("Reset ad history") { UserDefaults.standard.removeObject(forKey: "adHistory.v1") }
                 Button("Show interstitial now (if allowed)") {
                     model.ads.levelFinished(won: true)

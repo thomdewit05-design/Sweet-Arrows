@@ -56,32 +56,8 @@ struct EconomyTests {
         #expect(progress.board == .mintMarble)
         #expect(progress.candyStyle == .classicCandy)
         #expect(Cosmetic.items(of: .board).count == 4)
-        progress.equip(.goldenCandy)
-        #expect(progress.candyStyle == .classicCandy)  // VIP only
-        progress.equip(.goldenCandy, isVIP: true)
-        #expect(progress.candyStyle == .goldenCandy)
+        #expect(Cosmetic.goldenCandy.price == 1500)
         #expect(Cosmetic.defaultItem(for: .candyStyle).price == 0)
-    }
-}
-
-@Suite("VIP & starter pack")
-struct VIPTests {
-    @Test func dailyHintsOncePerDay() {
-        var progress = PlayerProgress()
-        #expect(progress.grantVIPBonus(today: 4) == 3)
-        #expect(progress.grantVIPBonus(today: 4) == 0)
-        #expect(progress.grantVIPBonus(today: 5) == 3)
-        #expect(progress.boosters[.hint] == 6)
-    }
-
-    @Test func starterPackOnceAfterSomeRuns() {
-        var progress = PlayerProgress()
-        progress.endlessRuns = 4
-        #expect(!progress.showsStarterPack(afterRuns: 5))
-        progress.endlessRuns = 5
-        #expect(progress.showsStarterPack(afterRuns: 5))
-        progress.starterPackBought = true
-        #expect(!progress.showsStarterPack(afterRuns: 5))
     }
 }
 
@@ -137,14 +113,12 @@ struct ProgressSyncTests {
         tablet.endlessRuns = 20
         tablet.coins = 120
         tablet.ownedCosmetics.insert(.pastelCandy)
-        tablet.starterPackBought = true
         tablet.updatedAt = Date(timeIntervalSince1970: 2000)
 
         let merged = phone.merged(with: tablet)
         #expect(merged.endlessBest == 900)
         #expect(merged.endlessRuns == 20)
         #expect(merged.coins == 120)  // wallet from the newest copy
-        #expect(merged.starterPackBought)
         #expect(merged.ownedCosmetics.isSuperset(of: [.mintMarble, .pastelCandy]))
         #expect(merged.updatedAt == Date(timeIntervalSince1970: 2000))
         #expect(tablet.merged(with: phone) == merged)

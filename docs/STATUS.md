@@ -4,7 +4,9 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
 
 > **November 2026:** het spel is omgebouwd. Het hoofdspel is nu **Glijden & matchen** (zie hieronder).
 > De pijlpuzzels met levels, de kaart, de dagpuzzel, de levelgenerator en de solver zijn op verzoek van de
-> eigenaar verwijderd. Waar de fasentabel nog over levels spreekt, beschrijft hij hoe het eerst gebouwd was.
+> eigenaar verwijderd. Ook **alle in-app-aankopen** zijn eruit (Remove Ads, VIP, muntenpakketten, starterspakket):
+> de app verdient alleen aan advertenties. Waar de fasentabel nog over levels of aankopen spreekt, beschrijft
+> hij hoe het eerst gebouwd was.
 
 ## Fasen
 
@@ -50,14 +52,10 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
   `SweetArrows/App/` (staat in `.gitignore`). Daarmee gaan Analytics, Crashlytics en Remote Config aan.
   Maak in Remote Config de sleutels uit PLAN.md aan (behalve `level_overrides`, die bestaat niet meer).
   "Level" in de sleutelnamen betekent nu een gespeeld potje: `interstitial_min_level` (standaard 4),
-  `interstitial_level_gap` (2), `starter_pack_level` (na 5 potjes).
-- **App Store Connect – aankopen** (ID's exact zo):
-  - `com.lucthomasdewit.sweetarrows.removeads` — non-consumable, € 4,99
-  - abonnementsgroep "VIP": `…vip.weekly` (€ 3,99/week) en `…vip.monthly` (€ 9,99/maand), beide met
-    introductieaanbod 3 dagen gratis
-  - consumables `…coins.500` (€ 1,99), `…coins.1500` (€ 4,99), `…coins.4000` (€ 9,99), `…coins.10000` (€ 19,99),
-    `…starterpack` (€ 2,99)
-  - Lokaal testen kan meteen: het schema gebruikt `SweetArrows/Resources/SweetArrows.storekit`.
+  `interstitial_level_gap` (2). `starter_pack_level` is niet meer nodig.
+- **App Store Connect – aankopen**: niet nodig, de app heeft geen in-app-aankopen. Heb je daar al producten
+  aangemaakt (Remove Ads, VIP, munten, starterspakket), dan kun je die verwijderen of laten staan; dien ze niet
+  mee in ter beoordeling.
 
 ## Afwijkingen van het plan
 
@@ -102,16 +100,17 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
   Trillingen groeien mee (1–5 tikken, met een doorlopende tril bij grote zetten, een rommel bij bommen).
   Met "Beweging verminderen" aan: geen schudden en minder stukjes.
 - **Banner onder het spelbord** (keuze van de eigenaar, wijkt af van het plan "nooit tijdens het spelen"):
-  onder de boosterbalk, met ruimte ertussen; pas na 2 potjes, niet met Remove Ads/VIP.
-- **Meta:** winkel en dagbeloning na 3 potjes, starterspakket na 5, ATT-vraag na 2, advertenties na 2 potjes,
+  onder de boosterbalk, met ruimte ertussen; pas na 2 potjes.
+- **Meta:** winkel (alleen munten: boosters, toonbanken en snoepstijlen, ook "Goud" voor 1500) en dagbeloning
+  na 3 potjes, ATT-vraag na 2, advertenties na 2 potjes,
   interstitial pas vanaf potje 4, hooguit om de 2 potjes, alleen bij "Opnieuw spelen".
 
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;
   een bundle-ID kan daar niet meer veranderen). Team-ID `7BDZ6994AD`. Beide in `Config/Shared.xcconfig`.
-  De aankoop-ID's houden het voorvoegsel `com.lucthomasdewit.sweetarrows.` – die hoeven niet gelijk te zijn aan de bundle-ID.
 - Hoofdspel **Glijden & matchen**; de pijlpuzzels met levels zijn verwijderd.
+- **Geen in-app-aankopen**; alleen advertenties.
 
 ## Checklist: klaar voor lancering (uit PLAN.md)
 
@@ -123,7 +122,6 @@ De pijlpuzzels zijn daarna helemaal verwijderd.
 | UMP- en ATT-flow; advertenties pas daarna | ✅ in code; testen op toestel in de EU |
 | Advertentieregels getest | ✅ unit tests (`AdPolicyTests`) |
 | Remote Config met lokale standaardwaarden | ✅ |
-| Remove Ads, VIP, Aankopen herstellen (sandbox + TestFlight) | 🟡 lokaal testbaar met het StoreKit-bestand; producten aanmaken in App Store Connect |
 | Analytics-events in Firebase DebugView | 🟡 `GoogleService-Info.plist` nodig |
 | Crashlytics actief | 🟡 `GoogleService-Info.plist` nodig |
 | Kleurenblind-modus, geluid/muziek/trillen los | ✅ |

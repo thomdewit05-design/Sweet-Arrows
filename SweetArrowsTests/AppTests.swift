@@ -35,6 +35,17 @@ struct AppTests {
         #expect(phone.progress.endlessRuns == 2)
     }
 
+    @Test func shopSellsGoldenCandyForCoins() {
+        let save = SaveService(url: nil)
+        save.update { $0.coins = 2000 }
+        var bought = false
+        save.update { bought = $0.buy(.goldenCandy) }
+        #expect(bought)
+        save.update { $0.equip(.goldenCandy) }
+        #expect(save.progress.candyStyle == .goldenCandy)
+        #expect(save.progress.coins == 500)
+    }
+
     @Test func boostersCostCoins() {
         let save = SaveService(url: nil)
         #expect(!save.spend(.hint))
@@ -80,19 +91,12 @@ struct AppTests {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [
             "interstitial_min_level", "interstitial_level_gap", "interstitial_min_seconds",
-            "rewarded_daily_cap", "banner_enabled", "app_open_enabled", "starter_pack_level",
+            "rewarded_daily_cap", "banner_enabled", "app_open_enabled",
         ])
         let defaults = RemoteValues()
         #expect(defaults.interstitialMinLevel == 4)
         #expect(defaults.interstitialLevelGap == 2)
         #expect(defaults.adLimits.adsFromLevel == 2)
-    }
-
-    @Test func starterPackFollowsRuns() {
-        let model = AppModel.preview()
-        #expect(!model.showsStarterPack)
-        model.save.update { $0.endlessRuns = 5 }
-        #expect(model.showsStarterPack)
     }
 }
 

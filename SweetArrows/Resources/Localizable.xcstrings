@@ -142,52 +142,6 @@
         }
       }
     },
-    "1,000 coins and 3 of every booster. Only once.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1.000 munten en 3 van elke booster. Eenmalig."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1.000 Münzen und 3 von jedem Booster. Nur einmal."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 000 pièces et 3 de chaque bonus. Une seule fois."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1000 monedas y 3 de cada potenciador. Solo una vez."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1.000 moedas e 3 de cada reforço. Só uma vez."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1.000 jeton ve her güçlendiriciden 3 tane. Sadece bir kez."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1.000 koin dan 3 dari setiap booster. Hanya sekali."
-          }
-        }
-      }
-    },
     "About": {
       "localizations": {
         "nl": {
@@ -1200,48 +1154,48 @@
         }
       }
     },
-    "Golden (VIP)": {
+    "Golden": {
       "localizations": {
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Goud (VIP)"
+            "value": "Goud"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gold (VIP)"
+            "value": "Gold"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Doré (VIP)"
+            "value": "Doré"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dorado (VIP)"
+            "value": "Dorado"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dourado (VIP)"
+            "value": "Dourado"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Altın (VIP)"
+            "value": "Altın"
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Emas (VIP)"
+            "value": "Emas"
           }
         }
       }
@@ -1844,144 +1798,6 @@
         }
       }
     },
-    "No ads · 3 free hints every day · golden candy style · rewards without watching": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen advertenties · elke dag 3 gratis hints · gouden snoepstijl · beloningen zonder kijken"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Werbung · täglich 3 Gratis-Tipps · goldener Bonbon-Stil · Belohnungen ohne Video"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sans pub · 3 indices gratuits par jour · style bonbon doré · récompenses sans vidéo"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin anuncios · 3 pistas gratis al día · estilo dorado · recompensas sin ver vídeos"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sem anúncios · 3 dicas grátis por dia · estilo dourado · recompensas sem assistir"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reklamsız · her gün 3 ücretsiz ipucu · altın şeker stili · izlemeden ödüller"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tanpa iklan · 3 petunjuk gratis tiap hari · gaya permen emas · hadiah tanpa menonton"
-          }
-        }
-      }
-    },
-    "No ads, daily hints and more. 3 days free.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen advertenties, dagelijkse hints en meer. 3 dagen gratis."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Werbung, tägliche Tipps und mehr. 3 Tage gratis."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sans pub, indices quotidiens et plus. 3 jours gratuits."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin anuncios, pistas diarias y más. 3 días gratis."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sem anúncios, dicas diárias e mais. 3 dias grátis."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reklamsız, günlük ipuçları ve fazlası. 3 gün ücretsiz."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tanpa iklan, petunjuk harian, dan lainnya. Gratis 3 hari."
-          }
-        }
-      }
-    },
-    "No more interstitials, banners or app-open ads. Rewarded stays optional.": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen tussenadvertenties, banners of opstartadvertenties meer. Beloningsvideo's blijven optioneel."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Zwischenwerbung, Banner oder Start-Werbung mehr. Belohnungsvideos bleiben freiwillig."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plus de pubs interstitielles, bannières ou pubs à l'ouverture. Les vidéos récompensées restent facultatives."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin anuncios intersticiales, banners ni anuncios al abrir. Los vídeos con recompensa siguen siendo opcionales."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sem anúncios intersticiais, banners ou anúncios de abertura. Vídeos premiados continuam opcionais."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geçiş, banner veya açılış reklamı yok. Ödüllü videolar isteğe bağlı kalır."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tidak ada lagi iklan interstisial, banner, atau iklan pembuka. Video berhadiah tetap opsional."
-          }
-        }
-      }
-    },
     "Pastel": {
       "localizations": {
         "nl": {
@@ -2208,144 +2024,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pengaturan privasi"
-          }
-        }
-      }
-    },
-    "Remove": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weghalen"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Entfernen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retirer"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quitar"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remover"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaldır"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hapus"
-          }
-        }
-      }
-    },
-    "Remove Ads": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen advertenties"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Werbung entfernen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer les pubs"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quitar anuncios"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remover anúncios"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reklamları kaldır"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hapus iklan"
-          }
-        }
-      }
-    },
-    "Restore purchases": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aankopen herstellen"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Käufe wiederherstellen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurer les achats"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurar compras"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurar compras"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Satın alımları geri yükle"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pulihkan pembelian"
           }
         }
       }
@@ -2626,52 +2304,6 @@
         }
       }
     },
-    "Starter pack": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starterspakket"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starterpaket"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pack de départ"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pack de inicio"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pacote inicial"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Başlangıç paketi"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paket pemula"
-          }
-        }
-      }
-    },
     "Strawberry check": {
       "localizations": {
         "nl": {
@@ -2760,52 +2392,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pesta gula!"
-          }
-        }
-      }
-    },
-    "Sweet Arrows VIP": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sweet Arrows VIP"
           }
         }
       }
@@ -3270,52 +2856,6 @@
         }
       }
     },
-    "Without ads": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zonder advertenties"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ohne Werbung"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sans publicité"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sin anuncios"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sem anúncios"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reklamsız"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tanpa iklan"
-          }
-        }
-      }
-    },
     "Wooden counter": {
       "localizations": {
         "nl": {
@@ -3358,52 +2898,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meja kayu"
-          }
-        }
-      }
-    },
-    "You are VIP": {
-      "localizations": {
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je bent VIP"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Du bist VIP"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu es VIP"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eres VIP"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Você é VIP"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "VIP'sin"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kamu VIP"
           }
         }
       }

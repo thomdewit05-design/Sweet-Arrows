@@ -29,12 +29,9 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var ownedCosmetics: Set<Cosmetic> = [.woodCounter, .classicCandy]
     public var board: Cosmetic = .woodCounter
     public var candyStyle: Cosmetic = .classicCandy
-    public var starterPackBought = false
     /// Best score and number of runs played.
     public var endlessBest = 0
     public var endlessRuns = 0
-    /// Day number on which the VIP daily hints were last given.
-    public var vipBonusDay: Int?
     public var settings = GameSettings()
     /// When this copy last changed (used to pick a winner when iCloud copies disagree).
     public var updatedAt = Date(timeIntervalSince1970: 0)
@@ -84,24 +81,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         return true
     }
 
-    /// The starter pack is offered once, after `runs` runs.
-    public func showsStarterPack(afterRuns runs: Int) -> Bool {
-        !starterPackBought && endlessRuns >= runs
-    }
-
-    /// VIP perk: free hints once a day. Returns the number granted (0 if already given today).
-    public mutating func grantVIPBonus(today: Int, hints: Int = 3) -> Int {
-        guard vipBonusDay != today else { return 0 }
-        vipBonusDay = today
-        boosters.add(.hint, hints)
-        return hints
-    }
-
-    public mutating func equip(_ item: Cosmetic, isVIP: Bool = false) {
-        if item.vipOnly {
-            guard isVIP else { return }
-            ownedCosmetics.insert(item)
-        }
+    public mutating func equip(_ item: Cosmetic) {
         guard ownedCosmetics.contains(item) else { return }
         switch item.kind {
         case .board: board = item
@@ -119,7 +99,6 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         let newer = selfIsNewer ? self : other
         var result = newer
         result.ownedCosmetics = ownedCosmetics.union(other.ownedCosmetics)
-        result.starterPackBought = starterPackBought || other.starterPackBought
         result.endlessBest = max(endlessBest, other.endlessBest)
         result.endlessRuns = max(endlessRuns, other.endlessRuns)
         result.updatedAt = max(updatedAt, other.updatedAt)
@@ -130,7 +109,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case coins, boosters, dailyReward
-        case ownedCosmetics, board, candyStyle, settings, updatedAt, starterPackBought, vipBonusDay
+        case ownedCosmetics, board, candyStyle, settings, updatedAt
         case endlessBest, endlessRuns
     }
 
@@ -142,8 +121,6 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         ownedCosmetics = try c.decodeIfPresent(Set<Cosmetic>.self, forKey: .ownedCosmetics) ?? [.woodCounter, .classicCandy]
         board = try c.decodeIfPresent(Cosmetic.self, forKey: .board) ?? .woodCounter
         candyStyle = try c.decodeIfPresent(Cosmetic.self, forKey: .candyStyle) ?? .classicCandy
-        starterPackBought = try c.decodeIfPresent(Bool.self, forKey: .starterPackBought) ?? false
-        vipBonusDay = try c.decodeIfPresent(Int.self, forKey: .vipBonusDay)
         endlessBest = try c.decodeIfPresent(Int.self, forKey: .endlessBest) ?? 0
         endlessRuns = try c.decodeIfPresent(Int.self, forKey: .endlessRuns) ?? 0
         settings = try c.decodeIfPresent(GameSettings.self, forKey: .settings) ?? GameSettings()

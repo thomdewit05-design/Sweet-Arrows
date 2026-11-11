@@ -4,12 +4,12 @@
 Hybrid-casual puzzelgame voor iPhone. Hoofdspel "Glijden & matchen": een getikt snoepje glijdt in de richting
 van zijn pijl tot het ergens tegenaan botst; 3 of meer van dezelfde kleur op een rij ploppen. Er komen steeds
 snoepjes bij; bord vol = af (SlideGame). De oude pijlpuzzels met levels zijn op verzoek van de eigenaar verwijderd.
-Verdienmodel: rewarded ads + interstitials + Remove Ads + VIP-abonnement.
+Verdienmodel: alleen advertenties (rewarded, interstitials, banner). Geen in-app-aankopen (keuze van de eigenaar).
 Zie docs/PLAN.md voor het volledige plan, inclusief "Onderscheid van concurrenten".
 Zie docs/STATUS.md voor de stand per fase en gemaakte keuzes.
 
 ## Stack
-Swift 6, SwiftUI, SpriteKit, iOS 17+, XcodeGen, Google Mobile Ads + UMP (SPM), StoreKit 2,
+Swift 6, SwiftUI, SpriteKit, iOS 17+, XcodeGen, Google Mobile Ads + UMP (SPM),
 Firebase (Analytics, Crashlytics, Remote Config), GameKit, CloudKit, SwiftLint.
 
 ## Structuur

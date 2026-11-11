@@ -10,7 +10,6 @@ T = {
 "%lld coins": ["%lld Münzen", "%lld pièces", "%lld monedas", "%lld moedas", "%lld jeton", "%lld koin"],
 "%lld stars": ["%lld Sterne", "%lld étoiles", "%lld estrellas", "%lld estrelas", "%lld yıldız", "%lld bintang"],
 "+%lld coins": ["+%lld Münzen", "+%lld pièces", "+%lld monedas", "+%lld moedas", "+%lld jeton", "+%lld koin"],
-"1,000 coins and 3 of every booster. Only once.": ["1.000 Münzen und 3 von jedem Booster. Nur einmal.", "1 000 pièces et 3 de chaque bonus. Une seule fois.", "1000 monedas y 3 de cada potenciador. Solo una vez.", "1.000 moedas e 3 de cada reforço. Só uma vez.", "1.000 jeton ve her güçlendiriciden 3 tane. Sadece bir kez.", "1.000 koin dan 3 dari setiap booster. Hanya sekali."],
 "Ads pay for the game. iOS will now ask if apps may track you. Allowing it shows you more relevant ads; either way you can keep playing everything.": [
   "Werbung finanziert das Spiel. iOS fragt gleich, ob Apps dich tracken dürfen. Wenn du zustimmst, siehst du passendere Werbung – spielen kannst du so oder so alles.",
   "La publicité finance le jeu. iOS va te demander si les apps peuvent te suivre. Si tu acceptes, tu verras des pubs plus pertinentes ; dans tous les cas, tu peux tout jouer.",
@@ -27,6 +26,7 @@ T = {
 "Sugar rush!": ["Zuckerrausch!", "Fête sucrée !", "¡Subidón de azúcar!", "Festa do açúcar!", "Şeker şöleni!", "Pesta gula!"],
 "Board clear!": ["Brett leer!", "Plateau vide !", "¡Tablero limpio!", "Tabuleiro limpo!", "Tahta temiz!", "Papan bersih!"],
 "Combo ×%lld": ["Combo ×%lld", "Combo ×%lld", "Combo ×%lld", "Combo ×%lld", "Kombo ×%lld", "Kombo ×%lld"],
+"Golden": ["Gold", "Doré", "Dorado", "Dourado", "Altın", "Emas"],
 "Back": ["Zurück", "Retour", "Atrás", "Voltar", "Geri", "Kembali"],
 "Boosters": ["Booster", "Bonus", "Potenciadores", "Reforços", "Güçlendiriciler", "Booster"],
 "Candy styles": ["Bonbon-Stile", "Styles de bonbons", "Estilos de caramelo", "Estilos de doce", "Şeker stilleri", "Gaya permen"],
@@ -43,7 +43,6 @@ T = {
 "Day %lld": ["Tag %lld", "Jour %lld", "Día %lld", "Dia %lld", "%lld. gün", "Hari %lld"],
 "Double it": ["Verdoppeln", "Doubler", "Duplicar", "Dobrar", "İkiye katla", "Gandakan"],
 "Every color already has its own shape. Color-blind mode adds a letter to each candy.": ["Jede Farbe hat schon ihre eigene Form. Der Farbenblind-Modus fügt jedem Bonbon einen Buchstaben hinzu.", "Chaque couleur a déjà sa propre forme. Le mode daltonien ajoute une lettre sur chaque bonbon.", "Cada color ya tiene su propia forma. El modo daltónico añade una letra a cada caramelo.", "Cada cor já tem seu próprio formato. O modo daltônico adiciona uma letra a cada doce.", "Her rengin zaten kendi şekli var. Renk körü modu her şekere bir harf ekler.", "Setiap warna sudah punya bentuk sendiri. Mode buta warna menambahkan huruf pada setiap permen."],
-"Golden (VIP)": ["Gold (VIP)", "Doré (VIP)", "Dorado (VIP)", "Dourado (VIP)", "Altın (VIP)", "Emas (VIP)"],
 "Hint": ["Tipp", "Indice", "Pista", "Dica", "İpucu", "Petunjuk"],
 "Home": ["Start", "Accueil", "Inicio", "Início", "Ana sayfa", "Beranda"],
 "In stock: %lld": ["Vorrat: %lld", "En stock : %lld", "Disponibles: %lld", "Em estoque: %lld", "Stokta: %lld", "Stok: %lld"],
@@ -54,29 +53,19 @@ T = {
 "Midnight candy": ["Mitternachtsbonbon", "Bonbon de minuit", "Caramelo de medianoche", "Doce da meia-noite", "Gece yarısı şekeri", "Permen tengah malam"],
 "Mint marble": ["Minzmarmor", "Marbre menthe", "Mármol menta", "Mármore menta", "Nane mermer", "Marmer mint"],
 "Music": ["Musik", "Musique", "Música", "Música", "Müzik", "Musik"],
-"No ads · 3 free hints every day · golden candy style · rewards without watching": ["Keine Werbung · täglich 3 Gratis-Tipps · goldener Bonbon-Stil · Belohnungen ohne Video", "Sans pub · 3 indices gratuits par jour · style bonbon doré · récompenses sans vidéo", "Sin anuncios · 3 pistas gratis al día · estilo dorado · recompensas sin ver vídeos", "Sem anúncios · 3 dicas grátis por dia · estilo dourado · recompensas sem assistir", "Reklamsız · her gün 3 ücretsiz ipucu · altın şeker stili · izlemeden ödüller", "Tanpa iklan · 3 petunjuk gratis tiap hari · gaya permen emas · hadiah tanpa menonton"],
-"No ads, daily hints and more. 3 days free.": ["Keine Werbung, tägliche Tipps und mehr. 3 Tage gratis.", "Sans pub, indices quotidiens et plus. 3 jours gratuits.", "Sin anuncios, pistas diarias y más. 3 días gratis.", "Sem anúncios, dicas diárias e mais. 3 dias grátis.", "Reklamsız, günlük ipuçları ve fazlası. 3 gün ücretsiz.", "Tanpa iklan, petunjuk harian, dan lainnya. Gratis 3 hari."],
-"No more interstitials, banners or app-open ads. Rewarded stays optional.": ["Keine Zwischenwerbung, Banner oder Start-Werbung mehr. Belohnungsvideos bleiben freiwillig.", "Plus de pubs interstitielles, bannières ou pubs à l'ouverture. Les vidéos récompensées restent facultatives.", "Sin anuncios intersticiales, banners ni anuncios al abrir. Los vídeos con recompensa siguen siendo opcionales.", "Sem anúncios intersticiais, banners ou anúncios de abertura. Vídeos premiados continuam opcionais.", "Geçiş, banner veya açılış reklamı yok. Ödüllü videolar isteğe bağlı kalır.", "Tidak ada lagi iklan interstisial, banner, atau iklan pembuka. Video berhadiah tetap opsional."],
 "Pastel": ["Pastell", "Pastel", "Pastel", "Pastel", "Pastel", "Pastel"],
 "Play": ["Spielen", "Jouer", "Jugar", "Jogar", "Oyna", "Main"],
 "Privacy settings": ["Datenschutz-Einstellungen", "Paramètres de confidentialité", "Ajustes de privacidad", "Configurações de privacidade", "Gizlilik ayarları", "Pengaturan privasi"],
-"Remove": ["Entfernen", "Retirer", "Quitar", "Remover", "Kaldır", "Hapus"],
-"Remove Ads": ["Werbung entfernen", "Supprimer les pubs", "Quitar anuncios", "Remover anúncios", "Reklamları kaldır", "Hapus iklan"],
-"Restore purchases": ["Käufe wiederherstellen", "Restaurer les achats", "Restaurar compras", "Restaurar compras", "Satın alımları geri yükle", "Pulihkan pembelian"],
 "Settings": ["Einstellungen", "Réglages", "Ajustes", "Configurações", "Ayarlar", "Pengaturan"],
 "Shop": ["Shop", "Boutique", "Tienda", "Loja", "Mağaza", "Toko"],
 "Sound": ["Ton", "Son", "Sonido", "Som", "Ses", "Suara"],
 "Sparkle": ["Glitzer", "Paillettes", "Brillo", "Brilho", "Işıltı", "Kilau"],
-"Starter pack": ["Starterpaket", "Pack de départ", "Pack de inicio", "Pacote inicial", "Başlangıç paketi", "Paket pemula"],
 "Strawberry check": ["Erdbeerkaro", "Carreaux fraise", "Cuadros de fresa", "Xadrez de morango", "Çilekli kareli", "Kotak stroberi"],
-"Sweet Arrows VIP": [SAME] * 6,
 "Tap, slide, pop the sweets": [SAME] * 6,
 "Use": ["Verwenden", "Utiliser", "Usar", "Usar", "Kullan", "Pakai"],
 "Version": ["Version", "Version", "Versión", "Versão", "Sürüm", "Versi"],
 "Vibration": ["Vibration", "Vibrations", "Vibración", "Vibração", "Titreşim", "Getar"],
-"Without ads": ["Ohne Werbung", "Sans publicité", "Sin anuncios", "Sem anúncios", "Reklamsız", "Tanpa iklan"],
 "Wooden counter": ["Holztheke", "Comptoir en bois", "Mostrador de madera", "Balcão de madeira", "Ahşap tezgâh", "Meja kayu"],
-"You are VIP": ["Du bist VIP", "Tu es VIP", "Eres VIP", "Você é VIP", "VIP'sin", "Kamu VIP"],
 "About": ["Info", "À propos", "Acerca de", "Sobre", "Hakkında", "Tentang"],
 "Privacy policy": ["Datenschutzerklärung", "Politique de confidentialité", "Política de privacidad", "Política de privacidade", "Gizlilik politikası", "Kebijakan privasi"],
 "Terms of use": ["Nutzungsbedingungen", "Conditions d'utilisation", "Condiciones de uso", "Termos de uso", "Kullanım koşulları", "Ketentuan penggunaan"],
@@ -89,7 +78,7 @@ T = {
 "Play again": ["Nochmal spielen", "Rejouer", "Jugar otra vez", "Jogar de novo", "Tekrar oyna", "Main lagi"],
 }
 
-NL_EXTRA = {"Sweet!": "Lekker!", "Tasty!": "Heerlijk!", "Sugar rush!": "Suikerfeest!", "Board clear!": "Bord leeg!", "Combo ×%lld": "Combo ×%lld", "Hammer": "Hamer", "Slow down": "Slowmo", "Tap a candy to smash it": "Tik op een snoepje om het weg te slaan", "Tap a candy to slide it. Line up 3 of a color!": "Tik op een snoepje om het te laten glijden. Zet er 3 van dezelfde kleur op een rij!", "About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}
+NL_EXTRA = {"Golden": "Goud", "Sweet!": "Lekker!", "Tasty!": "Heerlijk!", "Sugar rush!": "Suikerfeest!", "Board clear!": "Bord leeg!", "Combo ×%lld": "Combo ×%lld", "Hammer": "Hamer", "Slow down": "Slowmo", "Tap a candy to smash it": "Tik op een snoepje om het weg te slaan", "Tap a candy to slide it. Line up 3 of a color!": "Tik op een snoepje om het te laten glijden. Zet er 3 van dezelfde kleur op een rij!", "About": "Over", "Privacy policy": "Privacybeleid", "Terms of use": "Gebruiksvoorwaarden", "Contact": "Contact"}
 
 TRACKING = [
     "Sweet Arrows nutzt dies, um dir passendere Werbung zu zeigen. Das Spiel bleibt so oder so voll spielbar.",
