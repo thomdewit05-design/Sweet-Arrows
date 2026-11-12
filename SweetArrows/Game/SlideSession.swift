@@ -14,14 +14,34 @@ final class SlideSession {
     @ObservationIgnored private var ticking = false
     @ObservationIgnored private var lastTick = Date()
 
-    init(seed: UInt64 = UInt64.random(in: 1...UInt64.max)) {
-        run = SlideGame(seed: seed)
+    let mode: GameMode
+
+    init(mode: GameMode = .classic, today: Int = 0, seed: UInt64 = UInt64.random(in: 1...UInt64.max)) {
+        self.mode = mode
+        run = GameMode.newGame(mode, today: today, seed: seed)
+    }
+
+    /// Continues a run that was saved when the player left or closed the app.
+    init(resuming saved: SlideGame, mode: GameMode = .classic) {
+        self.mode = mode
+        run = saved
+    }
+
+    /// The guided tutorial board: never saved and its clock never runs.
+    @ObservationIgnored var isTutorial = false
+
+    /// Writes the run to disk so it survives leaving the screen or the app being closed.
+    func save() {
+        guard !isTutorial, mode.canBeResumed else { return }
+        if run.isOver { SavedRun.clear(mode: mode) } else { SavedRun.store(run, mode: mode) }
     }
 
     var score: Int { run.score }
     var stage: Int { run.stage }
     var combo: Int { run.combo }
     var isOver: Bool { run.isOver }
+    /// Blitz: whole seconds left on the clock.
+    var secondsLeft: Int? { run.timeLeft.map { Int($0.rounded(.up)) } }
 
     func tap(_ id: Int) -> SlideGame.Report {
         startIfNeeded()
@@ -85,10 +105,33 @@ final class SlideSession {
         startIfNeeded()
     }
 
-    func restart() {
-        run = SlideGame(seed: UInt64.random(in: 1...UInt64.max))
+    func restart(today: Int = 0) {
+        run = GameMode.newGame(mode, today: today, seed: UInt64.random(in: 1...UInt64.max))
         boardVersion += 1
         lastTick = Date()
         startIfNeeded()
+    }
+}
+
+/// The one unfinished run, kept on this device (not in iCloud: it is only a few seconds of play).
+enum SavedRun {
+    private static func key(_ mode: GameMode) -> String {
+        mode == .classic ? "savedRun.v1" : "savedRun.v1.\(mode.rawValue)"
+    }
+
+    static func load(mode: GameMode = .classic, defaults: UserDefaults = .standard) -> SlideGame? {
+        guard mode.canBeResumed, let data = defaults.data(forKey: key(mode)),
+              let run = try? JSONDecoder().decode(SlideGame.self, from: data), !run.isOver
+        else { return nil }
+        return run
+    }
+
+    static func store(_ run: SlideGame, mode: GameMode = .classic, defaults: UserDefaults = .standard) {
+        guard let data = try? JSONEncoder().encode(run) else { return }
+        defaults.set(data, forKey: key(mode))
+    }
+
+    static func clear(mode: GameMode = .classic, defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: key(mode))
     }
 }

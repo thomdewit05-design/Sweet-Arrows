@@ -249,9 +249,16 @@ public struct RunOutcome: Hashable, Sendable {
     public var missionReward: Reward
     public var allMissionsDone: Bool
     public var streak: Int
+    /// The sticker this run dropped (runs of 100+ points).
+    public var sticker: StickerDrop?
+    /// Season tiers newly reached.
+    public var seasonTiers: ClosedRange<Int>?
+    /// Weekly tournament trophies newly won.
+    public var trophies: [WeeklyTournament.Trophy] = []
 
     /// All coins this run paid out.
     public var totalCoins: Int {
         coinsFromScore + missionReward.coins + levelRewards.map(\.reward.coins).reduce(0, +)
+            + (sticker?.reward.coins ?? 0) + trophies.map(\.reward.coins).reduce(0, +)
     }
 }

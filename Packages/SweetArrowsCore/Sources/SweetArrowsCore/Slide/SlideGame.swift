@@ -4,8 +4,8 @@
 /// Three or more of the same color in a row or column pop. A candy that cannot move turns its
 /// arrow a quarter clockwise instead, so a tap always does something. New candies keep arriving,
 /// faster and faster; when one has nowhere to land the run is over.
-public struct SlideGame: Sendable {
-    public struct Settings: Sendable, Hashable {
+public struct SlideGame: Sendable, Codable {
+    public struct Settings: Sendable, Hashable, Codable {
         public var width = 5
         public var height = 5
         public var startCandies = 5
@@ -22,11 +22,15 @@ public struct SlideGame: Sendable {
         public var maxColors = 4
         /// Pops within this many seconds of each other build a combo.
         public var comboWindow = 3.0
+        /// Zen: no clock; one new candy lands after every move instead.
+        public var spawnsPerMove = false
+        /// Blitz: the run ends after this many seconds.
+        public var timeLimit: Double?
 
         public init() {}
     }
 
-    public enum Kind: String, Hashable, Sendable, CaseIterable {
+    public enum Kind: String, Hashable, Sendable, CaseIterable, Codable {
         case normal
         /// Pops everything around it (3×3) when it pops.
         case bomb
@@ -36,7 +40,7 @@ public struct SlideGame: Sendable {
         case stone
     }
 
-    public struct Piece: Hashable, Sendable, Identifiable {
+    public struct Piece: Hashable, Sendable, Identifiable, Codable {
         public var id: Int
         public var color: CandyColor
         public var direction: Direction
@@ -62,9 +66,11 @@ public struct SlideGame: Sendable {
         }
     }
 
-    public enum Status: Hashable, Sendable {
+    public enum Status: String, Hashable, Sendable, Codable {
         case playing
         case boardFull
+        /// Blitz: the time ran out.
+        case timeUp
     }
 
     public enum Move: Hashable, Sendable {
@@ -85,6 +91,8 @@ public struct SlideGame: Sendable {
         /// Pops in a row (1 for the first), 0 when nothing popped.
         public var combo = 0
         public var clearedBoard = false
+        /// Zen: the candy that landed after this move.
+        public var spawned: Piece?
 
         public var didPop: Bool { !popped.isEmpty }
 
@@ -102,7 +110,7 @@ public struct SlideGame: Sendable {
     }
 
     /// A candy about to appear (shown as a shadow first).
-    public struct PendingSpawn: Hashable, Sendable {
+    public struct PendingSpawn: Hashable, Sendable, Codable {
         public var piece: Piece
         public var remaining: Double
     }
@@ -112,6 +120,8 @@ public struct SlideGame: Sendable {
         case spawned(Piece)
         case boardFull
         case stageUp(Int)
+        /// Blitz: the time ran out.
+        case timeUp
     }
 
     public static let maxComboMultiplier = 5
@@ -238,7 +248,9 @@ public struct SlideGame: Sendable {
         guard target != piece.position else {
             piece.direction = piece.direction.rotated(by: 1)
             pieces[id] = piece
-            return Report(move: .turned(id: id, to: piece.direction))
+            var turned = Report(move: .turned(id: id, to: piece.direction))
+            spawnAfterMove(into: &turned)
+            return turned
         }
         let from = piece.position
         remove(id)
@@ -246,8 +258,23 @@ public struct SlideGame: Sendable {
         place(piece)
         var report = Report(move: .slid(id: id, from: from, to: target))
         resolve(into: &report)
+        spawnAfterMove(into: &report)
         return report
     }
+
+    /// Zen: a new candy lands after every move; no free cell ends the run.
+    private mutating func spawnAfterMove(into report: inout Report) {
+        guard settings.spawnsPerMove, status == .playing else { return }
+        if let piece = makePiece() {
+            place(piece)
+            report.spawned = piece
+        } else {
+            status = .boardFull
+        }
+    }
+
+    /// Blitz: seconds left on the clock (nil without a time limit).
+    public var timeLeft: Double? { settings.timeLimit.map { max($0 - elapsed, 0) } }
 
     /// Pops every line of three or more, then bombs and stones, and scores it.
     private mutating func resolve(into report: inout Report) {
@@ -343,7 +370,14 @@ public struct SlideGame: Sendable {
         let countdown = elapsed < slowUntil ? seconds / 2 : seconds
         elapsed += seconds
         var events: [Event] = []
-        if var next = pending {
+        if let limit = settings.timeLimit, elapsed >= limit {
+            status = .timeUp
+            pending = nil
+            return [.timeUp]
+        }
+        if settings.spawnsPerMove {
+            // Zen has no clock for candies; time only drives combos and the speed banner.
+        } else if var next = pending {
             next.remaining -= countdown
             if next.remaining > 0 {
                 pending = next

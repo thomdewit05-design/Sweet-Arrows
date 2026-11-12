@@ -3,9 +3,11 @@ import SwiftUI
 import SweetArrowsCore
 
 enum Route: Hashable {
-    /// The game (slide & match).
-    case endless
+    /// The game (slide & match) in one of its modes.
+    case play(GameMode)
     case shop
+    /// Sticker album, season path and weekly tournament.
+    case prizes
     case settings
     case dailyReward
 }
@@ -94,6 +96,25 @@ final class AppModel {
     /// Today as a local calendar day number (a new day starts at the player's midnight).
     var today: Int { Self.currentDay() }
 
+    /// Routes for links like sweetarrows://play/daily (from the home screen widget) and sweetarrows://prizes.
+    static func route(for url: URL) -> Route? {
+        guard url.scheme == "sweetarrows" else { return nil }
+        switch url.host() {
+        case "play":
+            let name = url.pathComponents.dropFirst().first ?? GameMode.classic.rawValue
+            return GameMode(rawValue: name).map(Route.play)
+        case "prizes": return .prizes
+        case "shop": return .shop
+        default: return nil
+        }
+    }
+
+    /// Opens a link: back to Home first, then the screen it points to.
+    func open(_ url: URL) {
+        guard let route = Self.route(for: url) else { return }
+        path = [route]
+    }
+
     static func currentDay() -> Int {
         let parts = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         return DayNumber.from(year: parts.year ?? 2026, month: parts.month ?? 1, day: parts.day ?? 1)
@@ -122,6 +143,20 @@ final class AppModel {
         if run.bestCombo >= 5 { gameCenter.report(.combo5) }
         if run.stage + 1 >= 10 { gameCenter.report(.speed10) }
         if progress.endlessRuns >= 50 { gameCenter.report(.runs50) }
+    }
+
+    /// Turns daily reminders on (asking iOS for permission first) or off.
+    func setReminders(_ on: Bool) async {
+        var allowed = on
+        if on { allowed = await ReminderService.requestPermission() }
+        updateSettings { $0.reminders = allowed }
+        planReminders()
+    }
+
+    /// Plans the next reminders from the current streak (called when the app goes to the background).
+    func planReminders() {
+        let progress = save.progress
+        ReminderService.reschedule(enabled: progress.settings.reminders, streak: progress.streak.current(today: today))
     }
 
     func updateSettings(_ change: (inout GameSettings) -> Void) {

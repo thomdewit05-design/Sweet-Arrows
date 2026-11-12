@@ -102,6 +102,16 @@ struct AppTests {
         #expect(save.progress.streak.current == 1)
     }
 
+    @Test func widgetLinksOpenTheRightScreen() {
+        let link = { (text: String) in AppModel.route(for: URL(string: text)!) }
+        #expect(link("sweetarrows://play/daily") == .play(.daily))
+        #expect(link("sweetarrows://play/blitz") == .play(.blitz))
+        #expect(link("sweetarrows://play") == .play(.classic))
+        #expect(link("sweetarrows://prizes") == .prizes)
+        #expect(link("sweetarrows://play/unknown") == nil)
+        #expect(link("https://example.com/play/daily") == nil)
+    }
+
     @Test func remoteConfigKeysMatchThePlan() {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [

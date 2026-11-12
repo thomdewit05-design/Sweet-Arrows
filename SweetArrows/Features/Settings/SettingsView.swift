@@ -13,6 +13,15 @@ struct SettingsView: View {
                 toggle("Vibration", isOn: \.haptics)
             }
             Section {
+                Toggle("Daily reminders", isOn: Binding(
+                    get: { model.settings.reminders },
+                    set: { newValue in Task { await model.setReminders(newValue) } }
+                ))
+                .tint(Theme.heart)
+            } footer: {
+                Text("At most one a day: when your missions are ready or your streak is about to end.")
+            }
+            Section {
                 toggle("Color-blind mode", isOn: \.colorBlind)
             } footer: {
                 Text("Every color already has its own shape. Color-blind mode adds a letter to each candy.")

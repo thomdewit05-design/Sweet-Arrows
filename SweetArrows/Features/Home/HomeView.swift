@@ -5,6 +5,8 @@ struct HomeView: View {
     @Environment(AppModel.self) private var model
     @State private var showDailyReward = false
     @State private var showTrackingPrimer = false
+    @State private var askReminders = false
+    @State private var showWheel = false
 
     @State private var pulse = false
 
@@ -27,6 +29,16 @@ struct HomeView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert("Get a daily reminder?", isPresented: $askReminders) {
+            Button("Yes, please") { Task { await model.setReminders(true) } }
+            Button("Not now", role: .cancel) {}
+        } message: {
+            Text("At most one a day: when your missions are ready or your streak is about to end.")
+        }
+        .sheet(isPresented: $showWheel) {
+            LuckyWheelView()
+                .presentationDetents([.large])
+        }
         .sheet(isPresented: $showDailyReward) {
             DailyRewardView()
                 .presentationDetents([.medium, .large])
@@ -55,6 +67,11 @@ struct HomeView: View {
             // Daily reward pops up once a day, after the first runs (never at the very first start).
             } else if progress.showsMetaFeatures, progress.dailyReward.claimableStep(today: model.today) != nil {
                 showDailyReward = true
+            } else if progress.endlessRuns >= 4, !progress.settings.reminders,
+                      !UserDefaults.standard.bool(forKey: "askedReminders") {
+                // Asked once, after a few runs, when nothing else pops up.
+                UserDefaults.standard.set(true, forKey: "askedReminders")
+                askReminders = true
             }
         }
     }
@@ -92,7 +109,7 @@ struct HomeView: View {
                 .popIn(delay: 0.16)
 
             Button {
-                model.path.append(.endless)
+                model.path.append(.play(.classic))
             } label: {
                 Label("Play", systemImage: "play.fill")
                     .font(Theme.title(density == .regular ? 30 : 26))
@@ -105,6 +122,11 @@ struct HomeView: View {
             .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
             .accessibilityIdentifier("playButton")
             .popIn(delay: 0.24)
+
+            if progress.showsMetaFeatures {
+                modesRow(progress, compact: density != .regular)
+                    .popIn(delay: 0.28)
+            }
 
             if !progress.missions.missions.isEmpty {
                 missionsCard(progress.missions, compact: density != .regular)
@@ -122,14 +144,22 @@ struct HomeView: View {
     }
 
     private func metaButtons(_ progress: PlayerProgress) -> some View {
+        ViewThatFits(in: .horizontal) {
+            metaButtonRow(progress, iconOnly: false)
+            metaButtonRow(progress, iconOnly: true)
+        }
+    }
+
+    private func metaButtonRow(_ progress: PlayerProgress, iconOnly: Bool) -> some View {
         let giftReady = progress.dailyReward.claimableStep(today: model.today) != nil
-        return HStack(spacing: 12) {
+        let prizesReady = !progress.season.claimable(today: model.today).isEmpty
+        return HStack(spacing: 10) {
             Button {
                 model.path.append(.shop)
             } label: {
                 Label("Shop", systemImage: "bag.fill")
             }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97), compact: true))
             .accessibilityIdentifier("shopButton")
             Button {
                 showDailyReward = true
@@ -137,7 +167,7 @@ struct HomeView: View {
                 Label("Gift", systemImage: "gift.fill")
                     .symbolEffect(.pulse, isActive: giftReady)
             }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C), compact: true))
             .overlay(alignment: .topTrailing) {
                 if giftReady {
                     Circle().fill(Theme.heart).frame(width: 14, height: 14)
@@ -146,7 +176,61 @@ struct HomeView: View {
                 }
             }
             .accessibilityIdentifier("giftButton")
+            Button {
+                showWheel = true
+            } label: {
+                Label("Spin", systemImage: "sparkles")
+                    .symbolEffect(.pulse, isActive: progress.wheel.hasFreeSpin(today: model.today))
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xA259FF), compact: true))
+            .overlay(alignment: .topTrailing) {
+                if progress.wheel.hasFreeSpin(today: model.today) {
+                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .offset(x: 2, y: -2)
+                }
+            }
+            .accessibilityIdentifier("wheelButton")
+            Button {
+                model.path.append(.prizes)
+            } label: {
+                Label("Prizes", systemImage: "star.square.on.square.fill")
+                    .symbolEffect(.pulse, isActive: prizesReady)
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x4CC9F0), compact: true))
+            .overlay(alignment: .topTrailing) {
+                if prizesReady {
+                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .offset(x: 2, y: -2)
+                }
+            }
+            .accessibilityIdentifier("prizesButton")
         }
+        .labelStyle(MetaLabelStyle(iconOnly: iconOnly))
+    }
+
+    /// The other ways to play: today's shared board, no clock, and sixty seconds.
+    private func modesRow(_ progress: PlayerProgress, compact: Bool) -> some View {
+        let dailyBest = progress.best(for: .daily, today: model.today)
+        return HStack(spacing: 8) {
+            ModeTile(
+                icon: "calendar", title: "Daily", tint: Color(hex: 0xFF5C8A),
+                detail: dailyBest > 0 ? "\(dailyBest)" : nil, badge: dailyBest == 0, compact: compact
+            ) { model.path.append(.play(.daily)) }
+            .accessibilityIdentifier("dailyModeButton")
+            ModeTile(
+                icon: "leaf.fill", title: "Zen", tint: Color(hex: 0x3DDC97),
+                detail: progress.best(for: .zen, today: model.today).nonZeroText, compact: compact
+            ) { model.path.append(.play(.zen)) }
+            .accessibilityIdentifier("zenModeButton")
+            ModeTile(
+                icon: "bolt.fill", title: "Blitz", tint: Color(hex: 0xFF9F1C),
+                detail: progress.best(for: .blitz, today: model.today).nonZeroText, compact: compact
+            ) { model.path.append(.play(.blitz)) }
+            .accessibilityIdentifier("blitzModeButton")
+        }
+        .frame(maxWidth: 360)
     }
 
     private func topBar(_ progress: PlayerProgress) -> some View {
@@ -161,6 +245,10 @@ struct HomeView: View {
             }
             Spacer()
             CoinBadge(coins: progress.coins)
+            RoundIconButton(systemName: "trophy.fill", label: "Leaderboards") {
+                model.gameCenter.showLeaderboards()
+            }
+            .accessibilityIdentifier("leaderboardsButton")
             RoundIconButton(systemName: "gearshape.fill", label: "Settings") {
                 model.path.append(.settings)
             }
@@ -204,6 +292,75 @@ struct HomeView: View {
         }
         .candyCard(padding: compact ? 10 : 14)
         .accessibilityIdentifier("missionsCard")
+    }
+}
+
+/// Icon and title, or only the icon when the row would not fit (narrow phones, long words).
+private struct MetaLabelStyle: LabelStyle {
+    let iconOnly: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        if iconOnly {
+            // The built-in icon-only style keeps the title for VoiceOver.
+            Label { configuration.title } icon: { configuration.icon }
+                .labelStyle(.iconOnly)
+                .font(.system(size: 20, weight: .bold))
+                .frame(minWidth: 28)
+        } else {
+            HStack(spacing: 6) {
+                configuration.icon
+                configuration.title
+            }
+            .lineLimit(1)
+            .fixedSize()
+        }
+    }
+}
+
+private extension Int {
+    var nonZeroText: String? { self > 0 ? "\(self)" : nil }
+}
+
+/// One of the extra game modes on the home screen: icon, name and the best score so far.
+private struct ModeTile: View {
+    let icon: String
+    let title: LocalizedStringKey
+    let tint: Color
+    var detail: String?
+    var badge = false
+    var compact = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: compact ? 16 : 20, weight: .bold))
+                    .foregroundStyle(tint)
+                Text(title)
+                    .font(Theme.heading(compact ? 14 : 16))
+                    .foregroundStyle(Theme.ink)
+                if let detail {
+                    Label(detail, systemImage: "trophy.fill")
+                        .labelStyle(.titleAndIcon)
+                        .font(Theme.body(11))
+                        .foregroundStyle(Theme.inkSoft)
+                        .monospacedDigit()
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, compact ? 6 : 10)
+            .background(RoundedRectangle(cornerRadius: 18).fill(.white.opacity(0.9)))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(tint.opacity(0.5), lineWidth: 2))
+        }
+        .buttonStyle(SquishButtonStyle())
+        .overlay(alignment: .topTrailing) {
+            if badge {
+                Circle().fill(Theme.heart).frame(width: 12, height: 12)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
+                    .offset(x: 2, y: -2)
+            }
+        }
     }
 }
 

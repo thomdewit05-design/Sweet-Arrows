@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SweetArrowsCore
 
 /// Offered once per run when the board fills up, before anything is counted.
@@ -45,6 +46,7 @@ struct ReviveCard: View {
 /// After a run: score, XP towards the next level, level-up rewards, finished missions and coins.
 struct RunResultCard: View {
     let outcome: RunOutcome
+    var title: LocalizedStringKey = "The board is full!"
     let onAgain: () -> Void
     let onHome: () -> Void
     @State private var filled = false
@@ -56,7 +58,7 @@ struct RunResultCard: View {
             Color.black.opacity(0.35).ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 14) {
-                    Text(outcome.newRecord ? "New record!" : "The board is full!")
+                    Text(title)
                         .font(Theme.title(28))
                         .foregroundStyle(outcome.newRecord ? Theme.heart : Theme.ink)
                         .multilineTextAlignment(.center)
@@ -76,6 +78,7 @@ struct RunResultCard: View {
                             .popIn(delay: 0.9 + Double(index) * 0.15)
                             .overlay { ConfettiBurst(pieces: 18) }
                     }
+                    PrizeRows(outcome: outcome)
                     if !outcome.finishedMissions.isEmpty {
                         VStack(spacing: 8) {
                             ForEach(Array(outcome.finishedMissions.enumerated()), id: \.element.kind) { index, mission in
@@ -98,6 +101,11 @@ struct RunResultCard: View {
                         .shineSweep()
                         .accessibilityIdentifier("playAgainButton")
                         .popIn(delay: 0.4)
+                    ShareScoreButton(
+                        score: summary.score, level: outcome.levelAfter, streak: outcome.streak,
+                        newRecord: outcome.newRecord
+                    )
+                    .popIn(delay: 0.5)
                     Button("Home", action: onHome)
                         .font(Theme.body())
                         .foregroundStyle(Theme.inkSoft)
@@ -184,6 +192,63 @@ struct LevelUpRow: View {
             colors: [Color(hex: 0xA259FF), Color(hex: 0xFF5C8A)], startPoint: .leading, endPoint: .trailing
         )))
         .onAppear { withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.5)) { pop = true } }
+    }
+}
+
+/// What the run added to the album, the season path and the weekly tournament.
+private struct PrizeRows: View {
+    let outcome: RunOutcome
+
+    var body: some View {
+        VStack(spacing: 8) {
+            if let drop = outcome.sticker {
+                prizeRow(delay: 1.0) {
+                    StickerBadge(sticker: drop.sticker, size: 40)
+                } text: {
+                    if drop.completedAlbum {
+                        Text("Album complete! Huge gift!")
+                    } else if drop.completedPage != nil {
+                        Text("New sticker: page complete, gift!")
+                    } else if drop.isNew {
+                        Text("New sticker for your album!")
+                    } else {
+                        Text("Double sticker: +\(drop.reward.coins) coins")
+                    }
+                }
+            }
+            if let tiers = outcome.seasonTiers {
+                prizeRow(delay: 1.1) {
+                    Image(systemName: "flag.checkered.circle.fill")
+                        .font(.system(size: 34))
+                        .foregroundStyle(Color(hex: 0x3DDC97))
+                } text: {
+                    Text("Season tier \(tiers.upperBound) reached: collect your gift in Prizes")
+                }
+            }
+            ForEach(outcome.trophies, id: \.self) { trophy in
+                prizeRow(delay: 1.2) {
+                    TrophyIcon(trophy: trophy, size: 40)
+                } text: {
+                    Text("\(Text(trophy.name)) trophy this week!")
+                }
+            }
+        }
+    }
+
+    private func prizeRow(
+        delay: Double, @ViewBuilder icon: () -> some View, @ViewBuilder text: () -> some View
+    ) -> some View {
+        HStack(spacing: 12) {
+            icon()
+            text()
+                .font(Theme.heading(15))
+                .foregroundStyle(Theme.ink)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 18).fill(.white))
+        .popIn(delay: delay)
     }
 }
 
@@ -303,5 +368,90 @@ extension MissionKind {
         case .bigPop: Text("Pop \(target) in one line")
         case .speed: Text("Reach speed \(target)")
         }
+    }
+}
+
+// MARK: Sharing
+
+/// The picture that gets shared: score, level and streak on the candy sky.
+struct ScoreShareCard: View {
+    let score: Int
+    let level: Int
+    let streak: Int
+    let newRecord: Bool
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: 0x7FD8FF), Color(hex: 0xB9A4FF), Color(hex: 0xFFB3D1)],
+                           startPoint: .top, endPoint: .bottom)
+            VStack(spacing: 14) {
+                JellyView(size: 110)
+                Text(verbatim: "Sweet Arrows")
+                    .font(Theme.title(40))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 3)
+                if newRecord {
+                    Label("New record!", systemImage: "trophy.fill")
+                        .font(Theme.heading(22))
+                        .foregroundStyle(Theme.ink)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Theme.gold))
+                }
+                Text("\(score)")
+                    .font(Theme.title(84))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 4)
+                HStack(spacing: 18) {
+                    Label("Level \(level)", systemImage: "star.fill")
+                    if streak > 1 {
+                        Label("\(streak)", systemImage: "flame.fill")
+                    }
+                }
+                .font(Theme.heading(22))
+                .foregroundStyle(Theme.ink)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(Capsule().fill(.white.opacity(0.85)))
+                Text("Can you beat my score?")
+                    .font(Theme.heading(24))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.3), radius: 2, y: 1)
+            }
+            .padding(30)
+        }
+        .frame(width: 420, height: 560)
+    }
+}
+
+/// A "Share" button that renders the score card to an image and opens the share sheet.
+struct ShareScoreButton: View {
+    let score: Int
+    let level: Int
+    let streak: Int
+    let newRecord: Bool
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                ShareLink(
+                    item: Image(uiImage: image),
+                    message: Text("My score in Sweet Arrows: \(score) 🍬 Can you beat it?\n\(Links.website.absoluteString)"),
+                    preview: SharePreview(Text(verbatim: "Sweet Arrows"), image: Image(uiImage: image))
+                ) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(CandyButtonStyle(color: Color(hex: 0x5B6CFF)))
+                .accessibilityIdentifier("shareButton")
+            }
+        }
+        .task { render() }
+    }
+
+    @MainActor private func render() {
+        let renderer = ImageRenderer(content: ScoreShareCard(score: score, level: level, streak: streak, newRecord: newRecord))
+        renderer.scale = 3
+        image = renderer.uiImage
     }
 }

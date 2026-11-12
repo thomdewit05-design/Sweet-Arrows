@@ -13,6 +13,7 @@ enum RewardReason: String, Sendable {
     case revive
     case doubleCoins = "double_coins"
     case dailyRewardDouble = "daily_reward_double"
+    case wheel = "lucky_wheel"
 }
 
 /// All ad logic lives behind this protocol. The game calls `showRewarded(reason:)`,

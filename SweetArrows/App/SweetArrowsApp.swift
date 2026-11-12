@@ -19,6 +19,7 @@ struct SweetArrowsApp: App {
                     switch phase {
                     case .background:
                         backgroundedAt = Date()
+                        model.planReminders()
                     case .active:
                         if let away = backgroundedAt { model.ads.maybeShowAppOpen(awaySince: away) }
                         backgroundedAt = nil
@@ -40,13 +41,15 @@ struct RootView: View {
             HomeView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .endless: EndlessView()
+                    case .play(let mode): EndlessView(mode: mode)
                     case .shop: ShopView()
+                    case .prizes: PrizesView()
                     case .settings: SettingsView()
                     case .dailyReward: DailyRewardView()
                     }
                 }
         }
         .tint(Theme.heart)
+        .onOpenURL { model.open($0) }
     }
 }
