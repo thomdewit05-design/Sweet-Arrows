@@ -11,6 +11,7 @@ struct EndlessView: View {
     @State private var scene: SlideScene?
     @State private var showResult = false
     @State private var offerRevive = false
+    @State private var paused = false
     /// What the finished run earned (shown on the result card).
     @State private var outcome: RunOutcome?
     @State private var stageBanner: Int?
@@ -36,7 +37,7 @@ struct EndlessView: View {
                     .ignoresSafeArea()
                     .accessibilityIdentifier("board")
                 VStack(spacing: 8) {
-                    EndlessHUD(session: session, best: model.save.progress.endlessBest, back: leave)
+                    EndlessHUD(session: session, best: model.save.progress.endlessBest, pause: pause)
                     if model.save.progress.endlessRuns < 2, session.run.popped == 0 {
                         Text("Tap a candy to slide it. Line up 3 of a color!")
                             .font(Theme.body(16))
@@ -68,7 +69,7 @@ struct EndlessView: View {
                     BoosterBar(
                         progress: model.save.progress,
                         adReady: model.ads.isRewardedReady,
-                        enabled: !session.isOver && !showResult && !offerRevive,
+                        enabled: !session.isOver && !showResult && !offerRevive && !paused,
                         active: choosingCandy ? .hammer : nil,
                         use: useBooster
                     )
@@ -83,6 +84,10 @@ struct EndlessView: View {
                     }
                 }
                 .padding(.horizontal)
+                if paused {
+                    PauseCard(onResume: resume, onRestart: restartFromPause, onHome: leave)
+                        .transition(.scale(scale: 0.85).combined(with: .opacity))
+                }
                 if offerRevive {
                     ReviveCard(score: session.score, onRevive: revive, onDecline: finishRun)
                         .transition(.scale(scale: 0.85).combined(with: .opacity))
@@ -95,6 +100,7 @@ struct EndlessView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: showResult)
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: offerRevive)
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: paused)
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: stageBanner)
         .toolbar(.hidden, for: .navigationBar)
         .task { if session == nil { load() } }
@@ -106,13 +112,19 @@ struct EndlessView: View {
         .onChange(of: showsBanner) { _, _ in scene?.bottomInset = bottomInset }
         .onDisappear { model.audio.playMusic(.menu) }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { session?.release("background") } else { session?.hold("background") }
+            if phase == .active {
+                session?.release("background")
+            } else {
+                session?.hold("background")
+                session?.save()  // closing the app keeps the run
+            }
         }
     }
 
     private func load() {
         let progress = model.save.progress
-        let newSession = SlideSession()
+        // Continue an unfinished run if there is one.
+        let newSession = SavedRun.load().map(SlideSession.init(resuming:)) ?? SlideSession()
         let newScene = SlideScene(
             session: newSession, haptics: model.haptics, audio: model.audio,
             colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle,
@@ -162,6 +174,7 @@ struct EndlessView: View {
         guard let session, outcome == nil else { return }
         offerRevive = false
         let run = session.run
+        SavedRun.clear()
         let today = model.today
         var result: RunOutcome?
         model.save.update { result = $0.recordRun(run.summary, today: today) }
@@ -188,6 +201,7 @@ struct EndlessView: View {
     }
 
     private func playAgain() {
+        SavedRun.clear()
         showResult = false
         outcome = nil
         model.ads.maybeShowInterstitial(afterLevel: model.save.progress.endlessRuns)
@@ -258,8 +272,33 @@ struct EndlessView: View {
         scene?.onCandySelected = nil
     }
 
+    // MARK: Pause
+
+    private func pause() {
+        guard let session, !session.isOver, !paused else { return }
+        cancelHammer()
+        session.hold("pause")
+        session.save()
+        paused = true
+    }
+
+    private func resume() {
+        paused = false
+        session?.release("pause")
+    }
+
+    private func restartFromPause() {
+        paused = false
+        SavedRun.clear()
+        session?.release("pause")
+        session?.restart()
+        model.audio.playMusic(.calm)
+        model.analytics.log(.endlessStart)
+    }
+
     private func leave() {
         session?.hold("leaving")
+        session?.save()
         model.audio.playMusic(.menu)
         if !model.path.isEmpty { model.path.removeLast() }
     }
@@ -268,7 +307,7 @@ struct EndlessView: View {
 private struct EndlessHUD: View {
     let session: SlideSession
     let best: Int
-    let back: () -> Void
+    let pause: () -> Void
 
     @State private var bump = false
 
@@ -285,8 +324,8 @@ private struct EndlessHUD: View {
 
     var body: some View {
         HStack(alignment: .center) {
-            RoundIconButton(systemName: "chevron.left", label: "Back", action: back)
-                .accessibilityIdentifier("backButton")
+            RoundIconButton(systemName: "pause.fill", label: "Pause", action: pause)
+                .accessibilityIdentifier("pauseButton")
             Spacer()
             VStack(spacing: 0) {
                 Text("\(session.score)")
@@ -329,5 +368,47 @@ private struct EndlessHUD: View {
             .accessibilityLabel(Text("Speed \(session.stage + 1)!"))
         }
         .padding(.top, 4)
+    }
+}
+
+/// Paused: carry on, start over or go home (the run is kept for next time).
+private struct PauseCard: View {
+    let onResume: () -> Void
+    let onRestart: () -> Void
+    let onHome: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.35).ignoresSafeArea()
+            VStack(spacing: 16) {
+                JellyView(size: 60)
+                Text("Paused")
+                    .font(Theme.title(30))
+                    .foregroundStyle(Theme.ink)
+                Button(action: onResume) {
+                    Label("Resume", systemImage: "play.fill")
+                }
+                .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+                .accessibilityIdentifier("resumeButton")
+                Button(action: onRestart) {
+                    Label("Start over", systemImage: "arrow.counterclockwise")
+                }
+                .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
+                Button(action: onHome) {
+                    Label("Home", systemImage: "house.fill")
+                }
+                .font(Theme.body())
+                .foregroundStyle(Theme.inkSoft)
+                .accessibilityIdentifier("backButton")
+                Text("Your run is saved. Tap Play to carry on later.")
+                    .font(Theme.body(13))
+                    .foregroundStyle(Theme.inkSoft)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(28)
+            .frame(maxWidth: 320)
+            .background(RoundedRectangle(cornerRadius: 32).fill(Theme.cream))
+            .padding()
+        }
     }
 }

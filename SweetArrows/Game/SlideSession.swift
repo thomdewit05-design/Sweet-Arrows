@@ -18,6 +18,16 @@ final class SlideSession {
         run = SlideGame(seed: seed)
     }
 
+    /// Continues a run that was saved when the player left or closed the app.
+    init(resuming saved: SlideGame) {
+        run = saved
+    }
+
+    /// Writes the run to disk so it survives leaving the screen or the app being closed.
+    func save() {
+        if run.isOver { SavedRun.clear() } else { SavedRun.store(run) }
+    }
+
     var score: Int { run.score }
     var stage: Int { run.stage }
     var combo: Int { run.combo }
@@ -90,5 +100,26 @@ final class SlideSession {
         boardVersion += 1
         lastTick = Date()
         startIfNeeded()
+    }
+}
+
+/// The one unfinished run, kept on this device (not in iCloud: it is only a few seconds of play).
+enum SavedRun {
+    private static let key = "savedRun.v1"
+
+    static func load(defaults: UserDefaults = .standard) -> SlideGame? {
+        guard let data = defaults.data(forKey: key),
+              let run = try? JSONDecoder().decode(SlideGame.self, from: data), !run.isOver
+        else { return nil }
+        return run
+    }
+
+    static func store(_ run: SlideGame, defaults: UserDefaults = .standard) {
+        guard let data = try? JSONEncoder().encode(run) else { return }
+        defaults.set(data, forKey: key)
+    }
+
+    static func clear(defaults: UserDefaults = .standard) {
+        defaults.removeObject(forKey: key)
     }
 }

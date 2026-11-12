@@ -4,8 +4,8 @@
 /// Three or more of the same color in a row or column pop. A candy that cannot move turns its
 /// arrow a quarter clockwise instead, so a tap always does something. New candies keep arriving,
 /// faster and faster; when one has nowhere to land the run is over.
-public struct SlideGame: Sendable {
-    public struct Settings: Sendable, Hashable {
+public struct SlideGame: Sendable, Codable {
+    public struct Settings: Sendable, Hashable, Codable {
         public var width = 5
         public var height = 5
         public var startCandies = 5
@@ -26,7 +26,7 @@ public struct SlideGame: Sendable {
         public init() {}
     }
 
-    public enum Kind: String, Hashable, Sendable, CaseIterable {
+    public enum Kind: String, Hashable, Sendable, CaseIterable, Codable {
         case normal
         /// Pops everything around it (3×3) when it pops.
         case bomb
@@ -36,7 +36,7 @@ public struct SlideGame: Sendable {
         case stone
     }
 
-    public struct Piece: Hashable, Sendable, Identifiable {
+    public struct Piece: Hashable, Sendable, Identifiable, Codable {
         public var id: Int
         public var color: CandyColor
         public var direction: Direction
@@ -62,7 +62,7 @@ public struct SlideGame: Sendable {
         }
     }
 
-    public enum Status: Hashable, Sendable {
+    public enum Status: String, Hashable, Sendable, Codable {
         case playing
         case boardFull
     }
@@ -102,7 +102,7 @@ public struct SlideGame: Sendable {
     }
 
     /// A candy about to appear (shown as a shadow first).
-    public struct PendingSpawn: Hashable, Sendable {
+    public struct PendingSpawn: Hashable, Sendable, Codable {
         public var piece: Piece
         public var remaining: Double
     }
