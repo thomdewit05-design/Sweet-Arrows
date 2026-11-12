@@ -180,6 +180,17 @@ Zelf nog doen:
    (`/Sweet-Arrows/`) vindt AdMob het niet; daarvoor is later een repository `thomdewit05-design.github.io` of een
    eigen domein nodig. Advertenties werken zonder, maar AdMob raadt het sterk aan.
 
+## Talen
+
+19 talen (op verzoek van de eigenaar "alle grote wereldtalen"): Engels, Nederlands, Duits, Frans, Spaans,
+Portugees (Brazilië), Turks, Indonesisch, Chinees (vereenvoudigd en traditioneel), Japans, Koreaans, Russisch,
+Arabisch, Hindi, Italiaans, Pools, Vietnamees en Thais. Vertalingen staan in `Tools/Localization/translations.py`
+en `translations_world.py`; `python3 Tools/Localization/apply.py` zet ze in de String Catalogs en controleert dat
+elke vertaling dezelfde `%lld`/`%@` heeft als het Engels. Fredoka heeft geen Chinese, Japanse, Koreaanse,
+Arabische, Hindi- of Thaise tekens; iOS valt daar vanzelf terug op het systeemlettertype. Arabisch wordt door
+SwiftUI automatisch van rechts naar links gezet (het spelbord zelf niet). Laat de vertalingen bij voorkeur nog
+door moedertaalsprekers nalezen voor de lancering.
+
 ## Besluiten van de eigenaar
 
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;
@@ -200,7 +211,7 @@ Zelf nog doen:
 | Analytics-events in Firebase DebugView | 🟡 `GoogleService-Info.plist` nodig |
 | Crashlytics actief | 🟡 `GoogleService-Info.plist` nodig |
 | Kleurenblind-modus, geluid/muziek/trillen los | ✅ |
-| Alle teksten vertaald (min. EN en NL) | ✅ 8 talen |
+| Alle teksten vertaald (min. EN en NL) | ✅ 19 talen |
 | Privacybeleid, voorwaarden, `app-ads.txt` online | 🟡 klaar in `docs/site` (EN + NL); GitHub Pages aanzetten, supportadres en publisher-id invullen |
 | Privacylabels, leeftijdsclassificatie, handelaarsstatus | ❌ jij, in App Store Connect |
 | Echte advertentie-ID's alleen in Release | ✅ via `Config/Secrets.xcconfig` |
