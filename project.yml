@@ -67,7 +67,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: en
-        CFBundleLocalizations: [en, nl, de, fr, es, pt-BR, tr, id]
+        CFBundleLocalizations: [en, nl, de, fr, es, pt-BR, tr, id, zh-Hans, zh-Hant, ja, ko, ru, ar, hi, it, pl, vi, th]
         ITSAppUsesNonExemptEncryption: false
         LSApplicationCategoryType: public.app-category.puzzle-games
         UILaunchScreen:

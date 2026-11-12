@@ -62,6 +62,72 @@
             "state": "translated",
             "value": "Sweet Arrows memakai ini untuk menampilkan iklan yang lebih relevan. Game tetap bisa dimainkan sepenuhnya."
           }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows 会用它为你展示更相关的广告。无论如何，游戏都可以完整畅玩。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows 會用它為你顯示更相關的廣告。無論如何，遊戲都可以完整暢玩。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows はより関連性の高い広告を表示するために使用します。どちらを選んでもゲームはすべて遊べます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows는 더 관련성 높은 광고를 보여 주기 위해 이를 사용해요. 어느 쪽이든 게임은 모두 즐길 수 있어요."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows использует это, чтобы показывать более подходящую рекламу. Играть можно в любом случае."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يستخدم Sweet Arrows هذا لعرض إعلانات أكثر ملاءمة لك. تبقى اللعبة قابلة للعب بالكامل في كل الأحوال."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows इसका इस्तेमाल आपको ज़्यादा काम के विज्ञापन दिखाने के लिए करता है। गेम हर हाल में पूरा खेला जा सकता है।"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows lo usa per mostrarti annunci più pertinenti. Il gioco resta completamente giocabile in ogni caso."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows używa tego, by pokazywać trafniejsze reklamy. Gra pozostaje w pełni grywalna w każdym przypadku."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows dùng điều này để hiển thị quảng cáo phù hợp hơn. Dù thế nào trò chơi vẫn chơi được đầy đủ."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sweet Arrows ใช้ข้อมูลนี้เพื่อแสดงโฆษณาที่ตรงใจคุณมากขึ้น ไม่ว่าอย่างไรก็เล่นเกมได้ครบทุกอย่าง"
+          }
         }
       }
     }
