@@ -127,15 +127,25 @@ final class SlideScene: SKScene {
         feverTint.size = size
         let safeTop = view?.safeAreaInsets.top ?? 0
         let safeBottom = view?.safeAreaInsets.bottom ?? 0
-        let margin: CGFloat = 16
-        let availableWidth = size.width - margin * 2
+        // Free space between the screen edge and the marquee lights, so the board never touches the sides.
+        let sideGap = max(28, size.width * 0.07)
+        let lights: CGFloat = 10  // the bulbs sit this far outside the wooden rim
+        let availableWidth = size.width - 2 * (sideGap + lights)
         let top = size.height - safeTop - topInset
         let bottom = safeBottom + bottomInset
-        let availableHeight = max(top - bottom, 100)
+        let availableHeight = max(top - bottom - 2 * lights, 100)
 
-        cell = min(availableWidth / CGFloat(run.width), availableHeight / CGFloat(run.height), 72)
+        // The wooden rim adds a quarter cell on each side, so the board needs (cells + 0.5) cell widths.
+        cell = min(
+            availableWidth / (CGFloat(run.width) + 0.5),
+            availableHeight / (CGFloat(run.height) + 0.5),
+            64
+        )
         let boardSize = CGSize(width: cell * CGFloat(run.width), height: cell * CGFloat(run.height))
-        boardOrigin = CGPoint(x: (size.width - boardSize.width) / 2, y: bottom + (availableHeight - boardSize.height) / 2)
+        boardOrigin = CGPoint(
+            x: (size.width - boardSize.width) / 2,
+            y: bottom + lights + (availableHeight - boardSize.height) / 2
+        )
 
         let padding = cell * 0.25
         let rect = CGRect(origin: boardOrigin, size: boardSize).insetBy(dx: -padding, dy: -padding)
