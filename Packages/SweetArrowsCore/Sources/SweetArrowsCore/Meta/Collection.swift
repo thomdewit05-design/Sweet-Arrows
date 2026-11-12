@@ -73,8 +73,9 @@ public struct StickerCollection: Hashable, Codable, Sendable {
         }
         let page = StickerAlbum.page(of: sticker)
         let pageDone = isComplete(page: page)
-        var reward = pageDone ? StickerAlbum.pageReward : Reward()
-        if isComplete { reward = reward + StickerAlbum.albumReward }
+        // The last sticker of the album always completes its page too.
+        let reward = isComplete ? StickerAlbum.pageReward + StickerAlbum.albumReward
+            : (pageDone ? StickerAlbum.pageReward : Reward())
         return StickerDrop(
             sticker: sticker, isNew: true, completedPage: pageDone ? page : nil, completedAlbum: isComplete,
             reward: reward

@@ -33,7 +33,8 @@ struct GameModeTests {
         settings.startCandies = 0
         var game = SlideGame(pieces: [], settings: settings)
         var taps = 0
-        game = SlideGame(pieces: [SlideGame.Piece(id: 1, color: .mint, direction: .up, position: GridPoint(0, 0))], settings: settings)
+        let lone = SlideGame.Piece(id: 1, color: .mint, direction: .up, position: GridPoint(0, 0))
+        game = SlideGame(pieces: [lone], settings: settings)
         while !game.isOver, taps < 200 {
             if let piece = game.sortedPieces.first(where: \.canMove) { _ = game.tap(piece.id) }
             taps += 1
