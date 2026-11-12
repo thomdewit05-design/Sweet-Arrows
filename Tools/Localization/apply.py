@@ -8,9 +8,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from translations import LANGS, NL_EXTRA, T, TRACKING  # noqa: E402
 from translations_world import TRACKING_WORLD, W, WORLD_LANGS  # noqa: E402
+from translations_new import NEW  # noqa: E402
 import re  # noqa: E402
 
 PLACEHOLDER = re.compile(r"%(?:lld|@|d)")
+
+for key, row in NEW.items():
+    assert len(row) == 1 + len(LANGS) + len(WORLD_LANGS), key
+    NL_EXTRA[key] = row[0]
+    T[key] = row[1:1 + len(LANGS)]
+    W[key] = row[1 + len(LANGS):]
 
 RES = os.path.join(HERE, "..", "..", "SweetArrows", "Resources")
 

@@ -41,6 +41,9 @@ Stand van de bouw per fase uit [PLAN.md](PLAN.md), plus de keuzes die tijdens he
   - Prestaties: `sweetarrows.first_pop`, `sweetarrows.score_1000`, `sweetarrows.score_5000`,
     `sweetarrows.combo_5`, `sweetarrows.speed_10`, `sweetarrows.runs_50`.
   - Ranglijst `sweetarrows.endless_score`: altijd, "hoog naar laag", score = punten.
+  - Ranglijsten voor de spelmodi (allemaal "hoog naar laag", score = punten):
+    `sweetarrows.daily_challenge` (terugkerend, elke dag opnieuw), `sweetarrows.weekly_tournament`
+    (terugkerend, elke maandag opnieuw), `sweetarrows.zen_score` en `sweetarrows.blitz_score` (altijd).
   - De oude prestaties (werelden, sterren, dagpuzzel) en de ranglijst `sweetarrows.daily_time` zijn niet meer nodig.
 
 ## Fase 6–7: wat je zelf nog moet instellen
@@ -163,6 +166,25 @@ afbeelding in `SweetArrows/Resources/Assets.xcassets` met precies deze namen; de
 | Achtergrond | `backdrop-candyMeadow`, `backdrop-iceCreamBay`, `backdrop-chocolateRiver`, `backdrop-cottonSky`, `backdrop-starryNight` | staand, 1290×2796 |
 
 De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die dus niet in de afbeelding.
+
+## Extra's (november 2026, "voeg dat allemaal toe")
+- **Pauze** met hervatten; een onderbroken potje (Klassiek en Zen) wordt bewaard, ook als de app sluit.
+- **Recordmelding** tijdens het spel, **score delen** (kaartje als afbeelding) en een **beoordelingsvraag**
+  na een nieuw record (na 3+ potjes, hooguit elke 60 dagen; iOS beperkt het zelf ook).
+- **Herinneringen**: hooguit één per dag (dag 1, 2 en 4 na het laatste potje), pas na toestemming;
+  aan/uit in Instellingen.
+- **Gelukswiel**: elke dag 1 gratis draai en 2 extra via een rewarded ad.
+- **Interactieve uitleg** bij het allereerste potje (glijden, draaien, matchen).
+- **Spelmodi**: Dagelijkse uitdaging (zelfde bord voor iedereen per dag), Zen (geen klok, na elke zet
+  een nieuw snoepje) en Blitz (60 seconden). Doorspelen na een vol bord kan alleen in Klassiek en Zen.
+- **Ranglijsten en vrienden**: via Game Center (bekerknop op het hoofdscherm).
+- **Prijzen-scherm**: stickeralbum (24 stickers, cadeau per volle pagina), seizoenspad (4 weken,
+  20 gratis treden, gevuld met XP) en weektoernooi (bekers brons/zilver/goud/diamant voor Klassiek-scores).
+- **Widget** voor het beginscherm (klein en middel): dagelijkse uitdaging en hoeveel dagen het seizoen
+  en het weektoernooi nog lopen. De widget gebruikt alleen de datum, dus er is geen App Group nodig.
+  Tikken opent de app via `sweetarrows://play/daily` of `sweetarrows://prizes`.
+  Bij de eerste TestFlight-upload maakt Xcode de bundle-ID `<app-ID>.widget` automatisch aan.
+- Echte illustraties en een promovideo kan ik niet maken; de plekken voor eigen afbeeldingen staan hierboven.
 
 ## Website (voorwaarden en privacybeleid)
 
