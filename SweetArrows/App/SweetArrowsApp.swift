@@ -19,6 +19,7 @@ struct SweetArrowsApp: App {
                     switch phase {
                     case .background:
                         backgroundedAt = Date()
+                        model.planReminders()
                     case .active:
                         if let away = backgroundedAt { model.ads.maybeShowAppOpen(awaySince: away) }
                         backgroundedAt = nil

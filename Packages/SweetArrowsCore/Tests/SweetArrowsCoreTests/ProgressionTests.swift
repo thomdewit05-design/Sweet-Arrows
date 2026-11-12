@@ -107,6 +107,13 @@ struct ProgressionTests {
         #expect(streak.best == 3)
     }
 
+    @Test func remindersAreFewAndKind() {
+        #expect(ReminderPlan.plan(streak: 0).map(\.kind) == [.missions, .missions, .comeBack])
+        #expect(ReminderPlan.plan(streak: 5).first?.kind == .streak)
+        #expect(ReminderPlan.plan(streak: 5).map(\.day) == [1, 2, 4])
+        #expect(!GameSettings().reminders)
+    }
+
     @Test func slideGameSummary() {
         let game = SlideGame(seed: 2)
         let summary = game.summary

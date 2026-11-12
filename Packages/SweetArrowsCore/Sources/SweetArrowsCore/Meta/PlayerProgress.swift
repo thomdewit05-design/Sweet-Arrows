@@ -6,6 +6,8 @@ public struct GameSettings: Codable, Equatable, Sendable {
     public var music = true
     public var haptics = true
     public var colorBlind = false
+    /// Daily reminder notifications (off until the player says yes).
+    public var reminders = false
 
     public init() {}
 
@@ -15,9 +17,10 @@ public struct GameSettings: Codable, Equatable, Sendable {
         music = try c.decodeIfPresent(Bool.self, forKey: .music) ?? true
         haptics = try c.decodeIfPresent(Bool.self, forKey: .haptics) ?? true
         colorBlind = try c.decodeIfPresent(Bool.self, forKey: .colorBlind) ?? false
+        reminders = try c.decodeIfPresent(Bool.self, forKey: .reminders) ?? false
     }
 
-    private enum CodingKeys: String, CodingKey { case sound, music, haptics, colorBlind }
+    private enum CodingKeys: String, CodingKey { case sound, music, haptics, colorBlind, reminders }
 }
 
 /// Everything we keep about the player. Saved after every run and synced through iCloud.

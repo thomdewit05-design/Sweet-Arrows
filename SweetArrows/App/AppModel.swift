@@ -124,6 +124,20 @@ final class AppModel {
         if progress.endlessRuns >= 50 { gameCenter.report(.runs50) }
     }
 
+    /// Turns daily reminders on (asking iOS for permission first) or off.
+    func setReminders(_ on: Bool) async {
+        var allowed = on
+        if on { allowed = await ReminderService.requestPermission() }
+        updateSettings { $0.reminders = allowed }
+        planReminders()
+    }
+
+    /// Plans the next reminders from the current streak (called when the app goes to the background).
+    func planReminders() {
+        let progress = save.progress
+        ReminderService.reschedule(enabled: progress.settings.reminders, streak: progress.streak.current(today: today))
+    }
+
     func updateSettings(_ change: (inout GameSettings) -> Void) {
         save.update { change(&$0.settings) }
         applySettings()

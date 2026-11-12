@@ -5,6 +5,7 @@ struct HomeView: View {
     @Environment(AppModel.self) private var model
     @State private var showDailyReward = false
     @State private var showTrackingPrimer = false
+    @State private var askReminders = false
 
     @State private var pulse = false
 
@@ -27,6 +28,12 @@ struct HomeView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .alert("Get a daily reminder?", isPresented: $askReminders) {
+            Button("Yes, please") { Task { await model.setReminders(true) } }
+            Button("Not now", role: .cancel) {}
+        } message: {
+            Text("At most one a day: when your missions are ready or your streak is about to end.")
+        }
         .sheet(isPresented: $showDailyReward) {
             DailyRewardView()
                 .presentationDetents([.medium, .large])
@@ -55,6 +62,11 @@ struct HomeView: View {
             // Daily reward pops up once a day, after the first runs (never at the very first start).
             } else if progress.showsMetaFeatures, progress.dailyReward.claimableStep(today: model.today) != nil {
                 showDailyReward = true
+            } else if progress.endlessRuns >= 4, !progress.settings.reminders,
+                      !UserDefaults.standard.bool(forKey: "askedReminders") {
+                // Asked once, after a few runs, when nothing else pops up.
+                UserDefaults.standard.set(true, forKey: "askedReminders")
+                askReminders = true
             }
         }
     }
