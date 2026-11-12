@@ -107,6 +107,33 @@ struct ProgressionTests {
         #expect(streak.best == 3)
     }
 
+    @Test func luckyWheelSpinsOnceFreeAndTwiceByAd() {
+        var progress = PlayerProgress()
+        #expect(progress.wheel.hasFreeSpin(today: 3))
+        let first = progress.spinWheel(today: 3, viaAd: false, roll: 0)
+        #expect(first == 0)
+        #expect(progress.coins == 20)
+        #expect(progress.spinWheel(today: 3, viaAd: false, roll: 0) == nil)
+        #expect(progress.wheel.adSpinsLeft(today: 3) == 2)
+        #expect(progress.spinWheel(today: 3, viaAd: true, roll: 0.999) == 7)  // jackpot
+        #expect(progress.coins == 520)
+        #expect(progress.boosters[.hammer] == 1)
+        #expect(progress.spinWheel(today: 3, viaAd: true, roll: 0.5) != nil)
+        #expect(progress.spinWheel(today: 3, viaAd: true, roll: 0.5) == nil)
+        #expect(progress.wheel.hasFreeSpin(today: 4))
+        #expect(progress.wheel.adSpinsLeft(today: 4) == 2)
+    }
+
+    @Test func luckyWheelOddsFollowTheWeights() {
+        var counts = Array(repeating: 0, count: LuckyWheel.segments.count)
+        for i in 0..<1000 { counts[LuckyWheel.segment(for: Double(i) / 1000)] += 1 }
+        let total = LuckyWheel.segments.map(\.weight).reduce(0, +)
+        for (index, segment) in LuckyWheel.segments.enumerated() {
+            #expect(abs(counts[index] - segment.weight * 1000 / total) <= 1)
+        }
+        #expect(LuckyWheel.segments.filter(\.isJackpot).count == 1)
+    }
+
     @Test func remindersAreFewAndKind() {
         #expect(ReminderPlan.plan(streak: 0).map(\.kind) == [.missions, .missions, .comeBack])
         #expect(ReminderPlan.plan(streak: 5).first?.kind == .streak)

@@ -69,13 +69,15 @@ extension UIColor {
 struct CandyButtonStyle: ButtonStyle {
     var color: Color = Theme.heart
     var foreground: Color = .white
+    /// Smaller padding and text, for a row of several buttons.
+    var compact = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(Theme.heading())
+            .font(compact ? Theme.heading(17) : Theme.heading())
             .foregroundStyle(foreground)
-            .padding(.horizontal, 28)
-            .padding(.vertical, 14)
+            .padding(.horizontal, compact ? 14 : 28)
+            .padding(.vertical, compact ? 11 : 14)
             .frame(minWidth: 44, minHeight: 44)
             .background(
                 ZStack {

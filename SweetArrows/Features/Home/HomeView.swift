@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var showDailyReward = false
     @State private var showTrackingPrimer = false
     @State private var askReminders = false
+    @State private var showWheel = false
 
     @State private var pulse = false
 
@@ -33,6 +34,10 @@ struct HomeView: View {
             Button("Not now", role: .cancel) {}
         } message: {
             Text("At most one a day: when your missions are ready or your streak is about to end.")
+        }
+        .sheet(isPresented: $showWheel) {
+            LuckyWheelView()
+                .presentationDetents([.large])
         }
         .sheet(isPresented: $showDailyReward) {
             DailyRewardView()
@@ -135,13 +140,13 @@ struct HomeView: View {
 
     private func metaButtons(_ progress: PlayerProgress) -> some View {
         let giftReady = progress.dailyReward.claimableStep(today: model.today) != nil
-        return HStack(spacing: 12) {
+        return HStack(spacing: 10) {
             Button {
                 model.path.append(.shop)
             } label: {
                 Label("Shop", systemImage: "bag.fill")
             }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97)))
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x3DDC97), compact: true))
             .accessibilityIdentifier("shopButton")
             Button {
                 showDailyReward = true
@@ -149,7 +154,7 @@ struct HomeView: View {
                 Label("Gift", systemImage: "gift.fill")
                     .symbolEffect(.pulse, isActive: giftReady)
             }
-            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C)))
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xFF9F1C), compact: true))
             .overlay(alignment: .topTrailing) {
                 if giftReady {
                     Circle().fill(Theme.heart).frame(width: 14, height: 14)
@@ -158,6 +163,21 @@ struct HomeView: View {
                 }
             }
             .accessibilityIdentifier("giftButton")
+            Button {
+                showWheel = true
+            } label: {
+                Label("Spin", systemImage: "sparkles")
+                    .symbolEffect(.pulse, isActive: progress.wheel.hasFreeSpin(today: model.today))
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0xA259FF), compact: true))
+            .overlay(alignment: .topTrailing) {
+                if progress.wheel.hasFreeSpin(today: model.today) {
+                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .offset(x: 2, y: -2)
+                }
+            }
+            .accessibilityIdentifier("wheelButton")
         }
     }
 

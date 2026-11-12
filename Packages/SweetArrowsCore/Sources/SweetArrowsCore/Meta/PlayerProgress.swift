@@ -37,6 +37,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var xp = 0
     public var missions = DailyMissions()
     public var streak = PlayStreak()
+    public var wheel = LuckyWheel()
     /// Best score and number of runs played.
     public var endlessBest = 0
     public var endlessRuns = 0
@@ -86,6 +87,14 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
             xpForLevel: xpForLevel, levelRewards: rewards, finishedMissions: finished, missionReward: missionReward,
             allMissionsDone: missions.allDone, streak: streak.current
         )
+    }
+
+    /// Spins the lucky wheel and pays out. Returns the segment, or nil when no spin is left today.
+    @discardableResult
+    public mutating func spinWheel(today: Int, viaAd: Bool, roll: Double) -> Int? {
+        guard let index = wheel.spin(today: today, viaAd: viaAd, roll: roll) else { return nil }
+        apply(LuckyWheel.segments[index].reward)
+        return index
     }
 
     /// Today's missions, freshly made on a new day (for showing them before the first run).
@@ -152,7 +161,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case coins, boosters, dailyReward
-        case ownedCosmetics, board, candyStyle, backdrop, xp, missions, streak, settings, updatedAt
+        case ownedCosmetics, board, candyStyle, backdrop, xp, missions, streak, wheel, settings, updatedAt
         case endlessBest, endlessRuns
     }
 
@@ -169,6 +178,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         xp = try c.decodeIfPresent(Int.self, forKey: .xp) ?? 0
         missions = try c.decodeIfPresent(DailyMissions.self, forKey: .missions) ?? DailyMissions()
         streak = try c.decodeIfPresent(PlayStreak.self, forKey: .streak) ?? PlayStreak()
+        wheel = try c.decodeIfPresent(LuckyWheel.self, forKey: .wheel) ?? LuckyWheel()
         endlessBest = try c.decodeIfPresent(Int.self, forKey: .endlessBest) ?? 0
         endlessRuns = try c.decodeIfPresent(Int.self, forKey: .endlessRuns) ?? 0
         settings = try c.decodeIfPresent(GameSettings.self, forKey: .settings) ?? GameSettings()
