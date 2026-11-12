@@ -23,8 +23,12 @@ final class SlideSession {
         run = saved
     }
 
+    /// The guided tutorial board: never saved and its clock never runs.
+    @ObservationIgnored var isTutorial = false
+
     /// Writes the run to disk so it survives leaving the screen or the app being closed.
     func save() {
+        guard !isTutorial else { return }
         if run.isOver { SavedRun.clear() } else { SavedRun.store(run) }
     }
 

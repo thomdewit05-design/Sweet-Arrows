@@ -14,6 +14,8 @@ struct EndlessView: View {
     @State private var showResult = false
     @State private var offerRevive = false
     @State private var paused = false
+    /// The guided first game, while it runs.
+    @State private var tutorialStep: Tutorial.Step?
     /// The record was beaten during this run (the banner shows once).
     @State private var recordAnnounced = false
     @State private var showRecordBanner = false
@@ -43,7 +45,9 @@ struct EndlessView: View {
                     .accessibilityIdentifier("board")
                 VStack(spacing: 8) {
                     EndlessHUD(session: session, best: model.save.progress.endlessBest, pause: pause)
-                    if model.save.progress.endlessRuns < 2, session.run.popped == 0 {
+                    if let step = tutorialStep {
+                        TutorialBubble(step: step, onStart: finishTutorial)
+                    } else if model.save.progress.endlessRuns < 2, session.run.popped == 0 {
                         Text("Tap a candy to slide it. Line up 3 of a color!")
                             .font(Theme.body(16))
                             .foregroundStyle(Theme.ink)
@@ -85,7 +89,7 @@ struct EndlessView: View {
                     BoosterBar(
                         progress: model.save.progress,
                         adReady: model.ads.isRewardedReady,
-                        enabled: !session.isOver && !showResult && !offerRevive && !paused,
+                        enabled: !session.isOver && !showResult && !offerRevive && !paused && tutorialStep == nil,
                         active: choosingCandy ? .hammer : nil,
                         use: useBooster
                     )
@@ -119,6 +123,7 @@ struct EndlessView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: paused)
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: showRecordBanner)
         .onChange(of: session?.score) { _, score in checkRecord(score ?? 0) }
+        .onChange(of: session?.run.moves) { _, _ in advanceTutorial() }
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: stageBanner)
         .toolbar(.hidden, for: .navigationBar)
         .task { if session == nil { load() } }
@@ -141,8 +146,19 @@ struct EndlessView: View {
 
     private func load() {
         let progress = model.save.progress
-        // Continue an unfinished run if there is one.
-        let newSession = SavedRun.load().map(SlideSession.init(resuming:)) ?? SlideSession()
+        // The very first game is the guided tutorial; otherwise continue an unfinished run if there is one.
+        let saved = SavedRun.load()
+        let needsTutorial = saved == nil && progress.endlessRuns == 0
+            && !UserDefaults.standard.bool(forKey: Tutorial.doneKey)
+            && !ProcessInfo.processInfo.arguments.contains("-uiTesting")  // UI tests go straight to a run
+        let newSession: SlideSession
+        if needsTutorial {
+            newSession = SlideSession(resuming: Tutorial.board())
+            newSession.isTutorial = true
+            newSession.hold("tutorial")
+        } else {
+            newSession = saved.map(SlideSession.init(resuming:)) ?? SlideSession()
+        }
         let newScene = SlideScene(
             session: newSession, haptics: model.haptics, audio: model.audio,
             colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle,
@@ -150,7 +166,11 @@ struct EndlessView: View {
         )
         newScene.topInset = 132
         newScene.bottomInset = bottomInset
-        newScene.showsTutorialHand = progress.endlessRuns < 2
+        newScene.showsTutorialHand = progress.endlessRuns < 2 && !needsTutorial
+        if needsTutorial {
+            tutorialStep = .slide
+            newScene.guideTarget = Tutorial.target(for: .slide)
+        }
         newSession.onEvent = { [weak newScene] event in
             switch event {
             case .warn(let pending): newScene?.showWarning(pending)
@@ -161,8 +181,9 @@ struct EndlessView: View {
         }
         session = newSession
         scene = newScene
-        model.analytics.log(.endlessStart)
         model.audio.playMusic(.calm)
+        guard !needsTutorial else { return }
+        model.analytics.log(.endlessStart)
         newSession.start()
     }
 
@@ -322,10 +343,34 @@ struct EndlessView: View {
         }
     }
 
+    // MARK: Tutorial
+
+    /// After each tap in the tutorial, move on to the next step (once the animation has played).
+    private func advanceTutorial() {
+        guard tutorialStep != nil, let session else { return }
+        let step = Tutorial.step(of: session.run)
+        scene?.guideTarget = nil
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(700))
+            guard tutorialStep != nil else { return }
+            tutorialStep = step
+            scene?.guideTarget = Tutorial.target(for: step)
+        }
+    }
+
+    /// The tutorial is done: start the real first run.
+    private func finishTutorial() {
+        UserDefaults.standard.set(true, forKey: Tutorial.doneKey)
+        tutorialStep = nil
+        session = nil
+        scene = nil
+        load()
+    }
+
     // MARK: Pause
 
     private func pause() {
-        guard let session, !session.isOver, !paused else { return }
+        guard let session, !session.isOver, !paused, tutorialStep == nil else { return }
         cancelHammer()
         session.hold("pause")
         session.save()
@@ -461,5 +506,41 @@ private struct PauseCard: View {
             .background(RoundedRectangle(cornerRadius: 32).fill(Theme.cream))
             .padding()
         }
+    }
+}
+
+/// The speech bubble of the guided tutorial, one line per step, and the start button at the end.
+private struct TutorialBubble: View {
+    let step: Tutorial.Step
+    let onStart: () -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Group {
+                switch step {
+                case .slide: Text("Tap the candy: it slides where its arrow points.")
+                case .turn: Text("Stuck? Tap it to turn its arrow.")
+                case .match: Text("Now slide it: line up 3 of a color!")
+                case .finished: Text("Great! New candies keep coming. Don't let the board fill up!")
+                }
+            }
+            .font(Theme.heading(17))
+            .foregroundStyle(Theme.ink)
+            .multilineTextAlignment(.center)
+            if step == .finished {
+                Button("Let's go!", action: onStart)
+                    .buttonStyle(CandyButtonStyle())
+                    .shineSweep(every: 2)
+                    .accessibilityIdentifier("startAfterTutorial")
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 20).fill(.white.opacity(0.95)).shadow(color: Theme.ink.opacity(0.15), radius: 6, y: 3)
+        )
+        .id(step)
+        .transition(.scale.combined(with: .opacity))
+        .accessibilityIdentifier("tutorialBubble")
     }
 }

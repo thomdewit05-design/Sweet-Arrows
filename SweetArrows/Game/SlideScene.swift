@@ -248,6 +248,8 @@ final class SlideScene: SKScene {
               let p = gridPoint(at: touch.location(in: self)),
               let piece = run.piece(at: p)
         else { return }
+        // During the guided tutorial only the candy the hand points at can be tapped.
+        if let guide = guideTarget, piece.id != guide { return }
         if let select = onCandySelected {
             onCandySelected = nil
             select(piece.id)
@@ -493,8 +495,12 @@ final class SlideScene: SKScene {
     /// Until the first pop of a player's first runs, a hand points at a candy whose slide makes a line.
     var showsTutorialHand = false { didSet { updateTutorialHand() } }
 
+    /// Guided tutorial: the one candy to tap next (the hand points at it, other taps are ignored).
+    var guideTarget: Int? { didSet { updateTutorialHand() } }
+
     private func updateTutorialHand() {
-        guard showsTutorialHand, run.popped == 0, !run.isOver, let target = tutorialTarget(),
+        guard showsTutorialHand || guideTarget != nil, guideTarget != nil || run.popped == 0, !run.isOver,
+              let target = guideTarget ?? tutorialTarget(),
               let node = nodes[target]
         else {
             tutorialHand?.removeFromParent()
