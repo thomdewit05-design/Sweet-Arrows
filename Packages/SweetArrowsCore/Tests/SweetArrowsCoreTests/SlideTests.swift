@@ -256,7 +256,7 @@ struct SlideTests {
                 case .spawned: spawned += 1
                 case .warn: warned += 1
                 case .boardFull: full = true
-                case .stageUp: break
+                case .stageUp, .timeUp: break
                 }
             }
             #expect(game.matchedIDs().isEmpty)

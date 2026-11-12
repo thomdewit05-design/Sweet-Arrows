@@ -109,7 +109,7 @@ struct HomeView: View {
                 .popIn(delay: 0.16)
 
             Button {
-                model.path.append(.endless)
+                model.path.append(.play(.classic))
             } label: {
                 Label("Play", systemImage: "play.fill")
                     .font(Theme.title(density == .regular ? 30 : 26))
@@ -122,6 +122,11 @@ struct HomeView: View {
             .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: pulse)
             .accessibilityIdentifier("playButton")
             .popIn(delay: 0.24)
+
+            if progress.showsMetaFeatures {
+                modesRow(progress, compact: density != .regular)
+                    .popIn(delay: 0.28)
+            }
 
             if !progress.missions.missions.isEmpty {
                 missionsCard(progress.missions, compact: density != .regular)
@@ -181,6 +186,29 @@ struct HomeView: View {
         }
     }
 
+    /// The other ways to play: today's shared board, no clock, and sixty seconds.
+    private func modesRow(_ progress: PlayerProgress, compact: Bool) -> some View {
+        let dailyBest = progress.best(for: .daily, today: model.today)
+        return HStack(spacing: 8) {
+            ModeTile(
+                icon: "calendar", title: "Daily", tint: Color(hex: 0xFF5C8A),
+                detail: dailyBest > 0 ? "\(dailyBest)" : nil, badge: dailyBest == 0, compact: compact
+            ) { model.path.append(.play(.daily)) }
+            .accessibilityIdentifier("dailyModeButton")
+            ModeTile(
+                icon: "leaf.fill", title: "Zen", tint: Color(hex: 0x3DDC97),
+                detail: progress.best(for: .zen, today: model.today).nonZeroText, compact: compact
+            ) { model.path.append(.play(.zen)) }
+            .accessibilityIdentifier("zenModeButton")
+            ModeTile(
+                icon: "bolt.fill", title: "Blitz", tint: Color(hex: 0xFF9F1C),
+                detail: progress.best(for: .blitz, today: model.today).nonZeroText, compact: compact
+            ) { model.path.append(.play(.blitz)) }
+            .accessibilityIdentifier("blitzModeButton")
+        }
+        .frame(maxWidth: 360)
+    }
+
     private func topBar(_ progress: PlayerProgress) -> some View {
         HStack(spacing: 10) {
             LevelBadge(level: progress.level, size: 46)
@@ -193,6 +221,10 @@ struct HomeView: View {
             }
             Spacer()
             CoinBadge(coins: progress.coins)
+            RoundIconButton(systemName: "trophy.fill", label: "Leaderboards") {
+                model.gameCenter.showLeaderboards()
+            }
+            .accessibilityIdentifier("leaderboardsButton")
             RoundIconButton(systemName: "gearshape.fill", label: "Settings") {
                 model.path.append(.settings)
             }
@@ -236,6 +268,53 @@ struct HomeView: View {
         }
         .candyCard(padding: compact ? 10 : 14)
         .accessibilityIdentifier("missionsCard")
+    }
+}
+
+private extension Int {
+    var nonZeroText: String? { self > 0 ? "\(self)" : nil }
+}
+
+/// One of the extra game modes on the home screen: icon, name and the best score so far.
+private struct ModeTile: View {
+    let icon: String
+    let title: LocalizedStringKey
+    let tint: Color
+    var detail: String?
+    var badge = false
+    var compact = false
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 2) {
+                Image(systemName: icon)
+                    .font(.system(size: compact ? 16 : 20, weight: .bold))
+                    .foregroundStyle(tint)
+                Text(title)
+                    .font(Theme.heading(compact ? 14 : 16))
+                    .foregroundStyle(Theme.ink)
+                if let detail {
+                    Label(detail, systemImage: "trophy.fill")
+                        .labelStyle(.titleAndIcon)
+                        .font(Theme.body(11))
+                        .foregroundStyle(Theme.inkSoft)
+                        .monospacedDigit()
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, compact ? 6 : 10)
+            .background(RoundedRectangle(cornerRadius: 18).fill(.white.opacity(0.9)))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(tint.opacity(0.5), lineWidth: 2))
+        }
+        .buttonStyle(SquishButtonStyle())
+        .overlay(alignment: .topTrailing) {
+            if badge {
+                Circle().fill(Theme.heart).frame(width: 12, height: 12)
+                    .overlay(Circle().stroke(.white, lineWidth: 2))
+                    .offset(x: 2, y: -2)
+            }
+        }
     }
 }
 

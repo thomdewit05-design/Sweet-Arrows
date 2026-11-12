@@ -46,6 +46,7 @@ struct ReviveCard: View {
 /// After a run: score, XP towards the next level, level-up rewards, finished missions and coins.
 struct RunResultCard: View {
     let outcome: RunOutcome
+    var title: LocalizedStringKey = "The board is full!"
     let onAgain: () -> Void
     let onHome: () -> Void
     @State private var filled = false
@@ -57,7 +58,7 @@ struct RunResultCard: View {
             Color.black.opacity(0.35).ignoresSafeArea()
             ScrollView {
                 VStack(spacing: 14) {
-                    Text(outcome.newRecord ? "New record!" : "The board is full!")
+                    Text(title)
                         .font(Theme.title(28))
                         .foregroundStyle(outcome.newRecord ? Theme.heart : Theme.ink)
                         .multilineTextAlignment(.center)

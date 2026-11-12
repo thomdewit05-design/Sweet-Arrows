@@ -41,7 +41,7 @@ struct RootView: View {
             HomeView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .endless: EndlessView()
+                    case .play(let mode): EndlessView(mode: mode)
                     case .shop: ShopView()
                     case .settings: SettingsView()
                     case .dailyReward: DailyRewardView()

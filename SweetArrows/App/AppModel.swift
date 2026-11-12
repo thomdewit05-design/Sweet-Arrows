@@ -3,8 +3,8 @@ import SwiftUI
 import SweetArrowsCore
 
 enum Route: Hashable {
-    /// The game (slide & match).
-    case endless
+    /// The game (slide & match) in one of its modes.
+    case play(GameMode)
     case shop
     case settings
     case dailyReward

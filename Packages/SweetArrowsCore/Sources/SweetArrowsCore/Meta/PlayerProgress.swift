@@ -38,6 +38,9 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
     public var missions = DailyMissions()
     public var streak = PlayStreak()
     public var wheel = LuckyWheel()
+    /// Best scores in Zen and Blitz (Classic keeps endlessBest).
+    public var modeBests: [GameMode: Int] = [:]
+    public var dailyChallenge = DailyChallengeState()
     /// Best score and number of runs played.
     public var endlessBest = 0
     public var endlessRuns = 0
@@ -58,11 +61,15 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     /// Records a finished run: best score, coins, streak, daily missions and XP with level rewards.
     @discardableResult
-    public mutating func recordRun(_ run: RunSummary, today: Int) -> RunOutcome {
-        let previousBest = endlessBest
+    public mutating func recordRun(_ run: RunSummary, today: Int, mode: GameMode = .classic) -> RunOutcome {
+        let previousBest = best(for: mode, today: today)
         let levelBefore = level
         endlessRuns += 1
-        endlessBest = max(endlessBest, run.score)
+        switch mode {
+        case .classic: endlessBest = max(endlessBest, run.score)
+        case .daily: _ = dailyChallenge.record(score: run.score, today: today)
+        case .zen, .blitz: modeBests[mode] = max(modeBests[mode] ?? 0, run.score)
+        }
         coins += run.coins
         streak.played(today: today)
 
@@ -87,6 +94,15 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
             xpForLevel: xpForLevel, levelRewards: rewards, finishedMissions: finished, missionReward: missionReward,
             allMissionsDone: missions.allDone, streak: streak.current
         )
+    }
+
+    /// The best score to beat in a mode (today's best for the daily challenge).
+    public func best(for mode: GameMode, today: Int) -> Int {
+        switch mode {
+        case .classic: endlessBest
+        case .daily: dailyChallenge.best(today: today)
+        case .zen, .blitz: modeBests[mode] ?? 0
+        }
     }
 
     /// Spins the lucky wheel and pays out. Returns the segment, or nil when no spin is left today.
@@ -150,6 +166,7 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         var result = newer
         result.ownedCosmetics = ownedCosmetics.union(other.ownedCosmetics)
         result.xp = max(xp, other.xp)
+        result.modeBests = modeBests.merging(other.modeBests) { max($0, $1) }
         result.streak.best = max(streak.best, other.streak.best)
         result.endlessBest = max(endlessBest, other.endlessBest)
         result.endlessRuns = max(endlessRuns, other.endlessRuns)
@@ -161,7 +178,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case coins, boosters, dailyReward
-        case ownedCosmetics, board, candyStyle, backdrop, xp, missions, streak, wheel, settings, updatedAt
+        case ownedCosmetics, board, candyStyle, backdrop, xp, missions, streak, wheel, modeBests, dailyChallenge
+        case settings, updatedAt
         case endlessBest, endlessRuns
     }
 
@@ -179,6 +197,8 @@ public struct PlayerProgress: Codable, Equatable, Sendable {
         missions = try c.decodeIfPresent(DailyMissions.self, forKey: .missions) ?? DailyMissions()
         streak = try c.decodeIfPresent(PlayStreak.self, forKey: .streak) ?? PlayStreak()
         wheel = try c.decodeIfPresent(LuckyWheel.self, forKey: .wheel) ?? LuckyWheel()
+        modeBests = try c.decodeIfPresent([GameMode: Int].self, forKey: .modeBests) ?? [:]
+        dailyChallenge = try c.decodeIfPresent(DailyChallengeState.self, forKey: .dailyChallenge) ?? DailyChallengeState()
         endlessBest = try c.decodeIfPresent(Int.self, forKey: .endlessBest) ?? 0
         endlessRuns = try c.decodeIfPresent(Int.self, forKey: .endlessRuns) ?? 0
         settings = try c.decodeIfPresent(GameSettings.self, forKey: .settings) ?? GameSettings()

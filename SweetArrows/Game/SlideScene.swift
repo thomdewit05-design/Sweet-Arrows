@@ -268,6 +268,7 @@ final class SlideScene: SKScene {
     // MARK: Animation
 
     private func animate(_ report: SlideGame.Report) {
+        defer { spawnAfterMove(report) }
         switch report.move {
         case .slid(let id, let from, let to):
             guard let node = nodes[id] else { return }
@@ -452,6 +453,18 @@ final class SlideScene: SKScene {
         grow.timingMode = .easeOut
         node.run(.sequence([.group([grow, .fadeIn(withDuration: 0.1)]), .scale(to: 1, duration: 0.08)]))
         audio.play(.tap)
+    }
+
+    /// Zen: a new candy comes after each move, once the slide has landed.
+    private func spawnAfterMove(_ report: SlideGame.Report) {
+        guard let piece = report.spawned else { return }
+        candyLayer.run(.wait(forDuration: 0.25)) { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.spawn(piece)
+                if self.session.isOver { self.boardFull() }
+            }
+        }
     }
 
     func boardFull() {
