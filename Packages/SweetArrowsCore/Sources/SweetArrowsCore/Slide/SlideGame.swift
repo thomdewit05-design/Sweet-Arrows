@@ -525,3 +525,50 @@ public struct SlideGame: Sendable, Codable {
         return trial.matchedIDs().contains(piece.id)
     }
 }
+
+// MARK: Showcase
+
+public extension SlideGame {
+    /// The candy that, tapped, finishes the showcase move.
+    static let showcaseMover = 99
+
+    /// A lively board in the middle of a good run, for App Store screenshots: score and speed well
+    /// under way, a combo of four still live and one tap away from a line of five strawberries.
+    static func showcase() -> SlideGame {
+        typealias P = Piece
+        let s = CandyColor.strawberry, l = CandyColor.lemon, m = CandyColor.mint, g = CandyColor.grape
+        var game = SlideGame(pieces: [
+            P(id: 1, color: g, direction: .down, position: GridPoint(0, 0)),
+            P(id: 2, color: l, direction: .right, position: GridPoint(1, 0)),
+            P(id: 3, color: m, direction: .left, position: GridPoint(2, 0)),
+            P(id: 4, color: g, direction: .down, kind: .rainbow, position: GridPoint(3, 0)),
+            P(id: 5, color: l, direction: .down, position: GridPoint(4, 0)),
+            P(id: 6, color: m, direction: .right, position: GridPoint(0, 1)),
+            P(id: 7, color: g, direction: .up, position: GridPoint(1, 1)),
+            P(id: showcaseMover, color: s, direction: .down, position: GridPoint(2, 1)),
+            P(id: 8, color: l, direction: .left, position: GridPoint(3, 1)),
+            P(id: 9, color: m, direction: .up, position: GridPoint(4, 1)),
+            P(id: 10, color: m, direction: .up, kind: .stone, position: GridPoint(0, 2)),
+            P(id: 11, color: l, direction: .down, kind: .bomb, position: GridPoint(1, 2)),
+            P(id: 12, color: m, direction: .right, position: GridPoint(3, 2)),
+            P(id: 13, color: g, direction: .down, position: GridPoint(4, 2)),
+            P(id: 14, color: l, direction: .left, position: GridPoint(0, 3)),
+            P(id: 15, color: m, direction: .up, position: GridPoint(1, 3)),
+            P(id: 16, color: g, direction: .up, position: GridPoint(3, 3)),
+            P(id: 17, color: l, direction: .left, position: GridPoint(4, 3)),
+            P(id: 18, color: s, direction: .up, position: GridPoint(0, 4)),
+            P(id: 19, color: s, direction: .right, position: GridPoint(1, 4)),
+            P(id: 20, color: s, direction: .left, position: GridPoint(3, 4)),
+            P(id: 21, color: s, direction: .up, position: GridPoint(4, 4)),
+        ])
+        game.score = 3140
+        game.popped = 52
+        game.moves = 61
+        game.elapsed = 184
+        game.combo = 4
+        game.bestCombo = 4
+        game.lastPopAt = 183
+        game.announcedStage = game.stage
+        return game
+    }
+}

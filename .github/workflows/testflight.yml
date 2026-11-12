@@ -56,6 +56,14 @@ jobs:
           fi
       - name: Generate project
         run: xcodegen generate
+      - name: Revoke development certificates from earlier builds
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography \
+            || python3 -m pip install --quiet pyjwt cryptography
+          python3 Tools/CI/revoke_ci_certificates.py
       - name: Archive
         run: |
           set -o pipefail

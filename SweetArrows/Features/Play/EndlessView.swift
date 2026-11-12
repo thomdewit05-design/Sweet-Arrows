@@ -173,6 +173,10 @@ struct EndlessView: View {
             newSession = SlideSession(resuming: Tutorial.board())
             newSession.isTutorial = true
             newSession.hold("tutorial")
+        } else if Demo.isOn, mode == .classic {
+            newSession = SlideSession(resuming: SlideGame.showcase())
+            newSession.isTutorial = true  // never saved
+            newSession.hold("demo")  // a still board with the combo kept live
         } else {
             newSession = saved.map { SlideSession(resuming: $0, mode: mode) }
                 ?? SlideSession(mode: mode, today: model.today)
@@ -200,9 +204,32 @@ struct EndlessView: View {
         session = newSession
         scene = newScene
         model.audio.playMusic(music(stage: newSession.stage))
+        if Demo.isOn, mode == .classic {
+            playDemo()
+            return
+        }
         guard !needsTutorial else { return }
         model.analytics.log(.endlessStart)
         newSession.start()
+    }
+
+    /// Screenshot demo: the showcase move (a line of five in a combo), or straight to a record result.
+    private func playDemo() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
+            guard Demo.showsResult else {
+                scene?.handleTap(on: SlideGame.showcaseMover)
+                return
+            }
+            let today = model.today
+            var result: RunOutcome?
+            model.save.update {
+                result = $0.recordRun(Demo.resultRun, today: today, stickerRoll: Demo.resultStickerRoll)
+            }
+            outcome = result
+            scene?.celebrate()
+            showResult = true
+        }
     }
 
     private func showStage(_ stage: Int) {

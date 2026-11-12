@@ -155,16 +155,32 @@ struct RewardLabel: View {
     var body: some View {
         HStack(spacing: 8) {
             if reward.coins > 0 {
-                Label("\(reward.coins)", systemImage: "circle.fill")
-                    .foregroundStyle(Theme.ink)
+                HStack(spacing: 4) {
+                    // The same gold coin as the coin badge.
+                    Circle()
+                        .fill(Theme.gold)
+                        .frame(width: big ? 18 : 16, height: big ? 18 : 16)
+                        .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                    Text("\(reward.coins)")
+                        .foregroundStyle(Theme.ink)
+                }
             }
             ForEach(Booster.allCases.filter { (reward.boosters[$0] ?? 0) > 0 }, id: \.self) { booster in
-                Label("\(reward.boosters[booster] ?? 0)", systemImage: booster.icon)
-                    .foregroundStyle(Theme.heart)
+                HStack(spacing: 2) {
+                    Image(systemName: booster.icon)
+                        .font(.system(size: big ? 14 : 12, weight: .bold))
+                    Text("\(reward.boosters[booster] ?? 0)")
+                }
+                .foregroundStyle(Theme.heart)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(booster.localizedName))
+                .accessibilityValue(Text("\(reward.boosters[booster] ?? 0)"))
             }
         }
         .font(Theme.heading(big ? 17 : 15))
         .monospacedDigit()
+        .lineLimit(1)
+        .fixedSize()
     }
 }
 
@@ -344,10 +360,12 @@ private struct TournamentView: View {
             .candyCard()
             .popIn()
             ForEach(WeeklyTournament.Trophy.allCases.reversed(), id: \.self) { trophy in
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     TrophyIcon(trophy: trophy, won: won.contains(trophy), size: 44)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(trophy.name)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                             .font(Theme.heading(17))
                             .foregroundStyle(Theme.ink)
                         Text("\(trophy.score) points")
