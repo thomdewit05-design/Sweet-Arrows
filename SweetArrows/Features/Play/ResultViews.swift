@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import SweetArrowsCore
 
 /// Offered once per run when the board fills up, before anything is counted.
@@ -98,6 +99,11 @@ struct RunResultCard: View {
                         .shineSweep()
                         .accessibilityIdentifier("playAgainButton")
                         .popIn(delay: 0.4)
+                    ShareScoreButton(
+                        score: summary.score, level: outcome.levelAfter, streak: outcome.streak,
+                        newRecord: outcome.newRecord
+                    )
+                    .popIn(delay: 0.5)
                     Button("Home", action: onHome)
                         .font(Theme.body())
                         .foregroundStyle(Theme.inkSoft)
@@ -303,5 +309,90 @@ extension MissionKind {
         case .bigPop: Text("Pop \(target) in one line")
         case .speed: Text("Reach speed \(target)")
         }
+    }
+}
+
+// MARK: Sharing
+
+/// The picture that gets shared: score, level and streak on the candy sky.
+struct ScoreShareCard: View {
+    let score: Int
+    let level: Int
+    let streak: Int
+    let newRecord: Bool
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: 0x7FD8FF), Color(hex: 0xB9A4FF), Color(hex: 0xFFB3D1)],
+                           startPoint: .top, endPoint: .bottom)
+            VStack(spacing: 14) {
+                JellyView(size: 110)
+                Text(verbatim: "Sweet Arrows")
+                    .font(Theme.title(40))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 3)
+                if newRecord {
+                    Label("New record!", systemImage: "trophy.fill")
+                        .font(Theme.heading(22))
+                        .foregroundStyle(Theme.ink)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Theme.gold))
+                }
+                Text("\(score)")
+                    .font(Theme.title(84))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.35), radius: 0, x: 0, y: 4)
+                HStack(spacing: 18) {
+                    Label("Level \(level)", systemImage: "star.fill")
+                    if streak > 1 {
+                        Label("\(streak)", systemImage: "flame.fill")
+                    }
+                }
+                .font(Theme.heading(22))
+                .foregroundStyle(Theme.ink)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(Capsule().fill(.white.opacity(0.85)))
+                Text("Can you beat my score?")
+                    .font(Theme.heading(24))
+                    .foregroundStyle(.white)
+                    .shadow(color: Theme.ink.opacity(0.3), radius: 2, y: 1)
+            }
+            .padding(30)
+        }
+        .frame(width: 420, height: 560)
+    }
+}
+
+/// A "Share" button that renders the score card to an image and opens the share sheet.
+struct ShareScoreButton: View {
+    let score: Int
+    let level: Int
+    let streak: Int
+    let newRecord: Bool
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                ShareLink(
+                    item: Image(uiImage: image),
+                    message: Text("My score in Sweet Arrows: \(score) 🍬 Can you beat it?\n\(Links.website.absoluteString)"),
+                    preview: SharePreview(Text(verbatim: "Sweet Arrows"), image: Image(uiImage: image))
+                ) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(CandyButtonStyle(color: Color(hex: 0x5B6CFF)))
+                .accessibilityIdentifier("shareButton")
+            }
+        }
+        .task { render() }
+    }
+
+    @MainActor private func render() {
+        let renderer = ImageRenderer(content: ScoreShareCard(score: score, level: level, streak: streak, newRecord: newRecord))
+        renderer.scale = 3
+        image = renderer.uiImage
     }
 }

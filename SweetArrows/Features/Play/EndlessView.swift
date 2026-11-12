@@ -1,4 +1,5 @@
 import SpriteKit
+import StoreKit
 import SwiftUI
 import SweetArrowsCore
 
@@ -7,6 +8,7 @@ import SweetArrowsCore
 struct EndlessView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.requestReview) private var requestReview
     @State private var session: SlideSession?
     @State private var scene: SlideScene?
     @State private var showResult = false
@@ -199,6 +201,7 @@ struct EndlessView: View {
         model.reportAchievements(after: run)
         model.analytics.log(.endlessOver(score: run.score, seconds: Int(run.elapsed), stage: run.stage))
         model.ads.levelFinished(won: true)
+        if result?.newRecord == true { askForReviewIfDue() }
         if result?.newRecord == true || result?.levelRewards.isEmpty == false {
             scene?.celebrate()
             model.haptics.success()
@@ -290,6 +293,19 @@ struct EndlessView: View {
     }
 
     // MARK: Record
+
+    /// A happy moment (a new record) is the right time to ask for stars: after a few runs, at most every 60 days
+    /// (iOS itself also limits how often the dialog really appears).
+    private func askForReviewIfDue() {
+        let key = "lastReviewRequest"
+        let last = UserDefaults.standard.object(forKey: key) as? Date ?? .distantPast
+        guard model.save.progress.endlessRuns >= 3, Date().timeIntervalSince(last) > 60 * 24 * 3600 else { return }
+        UserDefaults.standard.set(Date(), forKey: key)
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2))
+            requestReview()
+        }
+    }
 
     /// The moment the score passes the best ever: banner, confetti and a happy buzz (once per run).
     private func checkRecord(_ score: Int) {
