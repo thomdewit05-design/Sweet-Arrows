@@ -12,6 +12,9 @@ struct EndlessView: View {
     @State private var showResult = false
     @State private var offerRevive = false
     @State private var paused = false
+    /// The record was beaten during this run (the banner shows once).
+    @State private var recordAnnounced = false
+    @State private var showRecordBanner = false
     /// What the finished run earned (shown on the result card).
     @State private var outcome: RunOutcome?
     @State private var stageBanner: Int?
@@ -47,6 +50,17 @@ struct EndlessView: View {
                             .padding(.vertical, 8)
                             .background(Capsule().fill(.white.opacity(0.85)))
                             .accessibilityIdentifier("slideHelp")
+                    }
+                    if showRecordBanner {
+                        Label("New record!", systemImage: "trophy.fill")
+                            .font(Theme.heading())
+                            .foregroundStyle(Theme.ink)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(Theme.gold))
+                            .shadow(color: Theme.gold.opacity(0.6), radius: 10)
+                            .transition(.scale.combined(with: .opacity))
+                            .accessibilityIdentifier("recordBanner")
                     }
                     if let stage = stageBanner {
                         Text("Speed \(stage + 1)!")
@@ -101,6 +115,8 @@ struct EndlessView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: showResult)
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: offerRevive)
         .animation(.spring(response: 0.35, dampingFraction: 0.75), value: paused)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: showRecordBanner)
+        .onChange(of: session?.score) { _, score in checkRecord(score ?? 0) }
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: stageBanner)
         .toolbar(.hidden, for: .navigationBar)
         .task { if session == nil { load() } }
@@ -202,6 +218,7 @@ struct EndlessView: View {
 
     private func playAgain() {
         SavedRun.clear()
+        recordAnnounced = false
         showResult = false
         outcome = nil
         model.ads.maybeShowInterstitial(afterLevel: model.save.progress.endlessRuns)
@@ -272,6 +289,23 @@ struct EndlessView: View {
         scene?.onCandySelected = nil
     }
 
+    // MARK: Record
+
+    /// The moment the score passes the best ever: banner, confetti and a happy buzz (once per run).
+    private func checkRecord(_ score: Int) {
+        let best = model.save.progress.endlessBest
+        guard !recordAnnounced, best > 0, score > best else { return }
+        recordAnnounced = true
+        showRecordBanner = true
+        scene?.celebrate()
+        model.haptics.success()
+        model.audio.play(.star)
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.2))
+            showRecordBanner = false
+        }
+    }
+
     // MARK: Pause
 
     private func pause() {
@@ -289,6 +323,7 @@ struct EndlessView: View {
 
     private func restartFromPause() {
         paused = false
+        recordAnnounced = false
         SavedRun.clear()
         session?.release("pause")
         session?.restart()
