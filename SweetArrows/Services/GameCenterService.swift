@@ -19,6 +19,8 @@ enum Leaderboard {
     static let daily = "sweetarrows.daily_challenge"
     static let zen = "sweetarrows.zen_score"
     static let blitz = "sweetarrows.blitz_score"
+    /// The weekly tournament: a recurring leaderboard that resets every Monday.
+    static let weekly = "sweetarrows.weekly_tournament"
 
     static func id(for mode: GameMode) -> String {
         switch mode {
@@ -65,9 +67,9 @@ final class GameKitService: GameCenterService {
 
     func submit(score: Int, mode: GameMode) {
         guard isAuthenticated, score > 0 else { return }
-        GKLeaderboard.submitScore(
-            score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [Leaderboard.id(for: mode)]
-        ) { _ in }
+        // Classic runs also count for the weekly tournament.
+        let boards = mode == .classic ? [Leaderboard.id(for: mode), Leaderboard.weekly] : [Leaderboard.id(for: mode)]
+        GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: boards) { _ in }
     }
 
     func showLeaderboards() {

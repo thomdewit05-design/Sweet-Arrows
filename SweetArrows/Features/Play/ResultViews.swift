@@ -78,6 +78,7 @@ struct RunResultCard: View {
                             .popIn(delay: 0.9 + Double(index) * 0.15)
                             .overlay { ConfettiBurst(pieces: 18) }
                     }
+                    PrizeRows(outcome: outcome)
                     if !outcome.finishedMissions.isEmpty {
                         VStack(spacing: 8) {
                             ForEach(Array(outcome.finishedMissions.enumerated()), id: \.element.kind) { index, mission in
@@ -191,6 +192,63 @@ struct LevelUpRow: View {
             colors: [Color(hex: 0xA259FF), Color(hex: 0xFF5C8A)], startPoint: .leading, endPoint: .trailing
         )))
         .onAppear { withAnimation(.spring(response: 0.4, dampingFraction: 0.5).delay(0.5)) { pop = true } }
+    }
+}
+
+/// What the run added to the album, the season path and the weekly tournament.
+private struct PrizeRows: View {
+    let outcome: RunOutcome
+
+    var body: some View {
+        VStack(spacing: 8) {
+            if let drop = outcome.sticker {
+                prizeRow(delay: 1.0) {
+                    StickerBadge(sticker: drop.sticker, size: 40)
+                } text: {
+                    if drop.completedAlbum {
+                        Text("Album complete! Huge gift!")
+                    } else if drop.completedPage != nil {
+                        Text("New sticker: page complete, gift!")
+                    } else if drop.isNew {
+                        Text("New sticker for your album!")
+                    } else {
+                        Text("Double sticker: +\(drop.reward.coins) coins")
+                    }
+                }
+            }
+            if let tiers = outcome.seasonTiers {
+                prizeRow(delay: 1.1) {
+                    Image(systemName: "flag.checkered.circle.fill")
+                        .font(.system(size: 34))
+                        .foregroundStyle(Color(hex: 0x3DDC97))
+                } text: {
+                    Text("Season tier \(tiers.upperBound) reached: collect your gift in Prizes")
+                }
+            }
+            ForEach(outcome.trophies, id: \.self) { trophy in
+                prizeRow(delay: 1.2) {
+                    TrophyIcon(trophy: trophy, size: 40)
+                } text: {
+                    Text("\(Text(trophy.name)) trophy this week!")
+                }
+            }
+        }
+    }
+
+    private func prizeRow(
+        delay: Double, @ViewBuilder icon: () -> some View, @ViewBuilder text: () -> some View
+    ) -> some View {
+        HStack(spacing: 12) {
+            icon()
+            text()
+                .font(Theme.heading(15))
+                .foregroundStyle(Theme.ink)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 18).fill(.white))
+        .popIn(delay: delay)
     }
 }
 

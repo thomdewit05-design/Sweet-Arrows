@@ -144,7 +144,15 @@ struct HomeView: View {
     }
 
     private func metaButtons(_ progress: PlayerProgress) -> some View {
+        ViewThatFits(in: .horizontal) {
+            metaButtonRow(progress, iconOnly: false)
+            metaButtonRow(progress, iconOnly: true)
+        }
+    }
+
+    private func metaButtonRow(_ progress: PlayerProgress, iconOnly: Bool) -> some View {
         let giftReady = progress.dailyReward.claimableStep(today: model.today) != nil
+        let prizesReady = !progress.season.claimable(today: model.today).isEmpty
         return HStack(spacing: 10) {
             Button {
                 model.path.append(.shop)
@@ -183,7 +191,23 @@ struct HomeView: View {
                 }
             }
             .accessibilityIdentifier("wheelButton")
+            Button {
+                model.path.append(.prizes)
+            } label: {
+                Label("Prizes", systemImage: "star.square.on.square.fill")
+                    .symbolEffect(.pulse, isActive: prizesReady)
+            }
+            .buttonStyle(CandyButtonStyle(color: Color(hex: 0x4CC9F0), compact: true))
+            .overlay(alignment: .topTrailing) {
+                if prizesReady {
+                    Circle().fill(Theme.heart).frame(width: 14, height: 14)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                        .offset(x: 2, y: -2)
+                }
+            }
+            .accessibilityIdentifier("prizesButton")
         }
+        .labelStyle(MetaLabelStyle(iconOnly: iconOnly))
     }
 
     /// The other ways to play: today's shared board, no clock, and sixty seconds.
@@ -268,6 +292,28 @@ struct HomeView: View {
         }
         .candyCard(padding: compact ? 10 : 14)
         .accessibilityIdentifier("missionsCard")
+    }
+}
+
+/// Icon and title, or only the icon when the row would not fit (narrow phones, long words).
+private struct MetaLabelStyle: LabelStyle {
+    let iconOnly: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        if iconOnly {
+            // The built-in icon-only style keeps the title for VoiceOver.
+            Label { configuration.title } icon: { configuration.icon }
+                .labelStyle(.iconOnly)
+                .font(.system(size: 20, weight: .bold))
+                .frame(minWidth: 28)
+        } else {
+            HStack(spacing: 6) {
+                configuration.icon
+                configuration.title
+            }
+            .lineLimit(1)
+            .fixedSize()
+        }
     }
 }
 

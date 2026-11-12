@@ -6,6 +6,8 @@ enum Route: Hashable {
     /// The game (slide & match) in one of its modes.
     case play(GameMode)
     case shop
+    /// Sticker album, season path and weekly tournament.
+    case prizes
     case settings
     case dailyReward
 }

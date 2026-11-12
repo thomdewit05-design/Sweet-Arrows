@@ -43,6 +43,7 @@ struct RootView: View {
                     switch route {
                     case .play(let mode): EndlessView(mode: mode)
                     case .shop: ShopView()
+                    case .prizes: PrizesView()
                     case .settings: SettingsView()
                     case .dailyReward: DailyRewardView()
                     }
