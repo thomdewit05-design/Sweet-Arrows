@@ -59,6 +59,7 @@ targets:
         product: FirebaseRemoteConfig
       # Needed by Google Mobile Ads when linked with -ObjC.
       - sdk: JavaScriptCore.framework
+      - target: SweetArrowsWidget
     info:
       path: SweetArrows/App/Info.plist
       properties:
@@ -83,6 +84,9 @@ targets:
         SAAdUnitInterstitial: $(AD_UNIT_INTERSTITIAL)
         SAAdUnitBanner: $(AD_UNIT_BANNER)
         SAAdUnitAppOpen: $(AD_UNIT_APP_OPEN)
+        CFBundleURLTypes:
+          - CFBundleURLName: sweetarrows
+            CFBundleURLSchemes: [sweetarrows]
         NSUserTrackingUsageDescription: "Sweet Arrows uses this to show you more relevant ads. The game stays fully playable either way."
         SKAdNetworkItems:
           - SKAdNetworkIdentifier: cstr6suwn9.skadnetwork
@@ -121,6 +125,34 @@ targets:
           else
             echo "warning: SwiftLint is not installed (brew install swiftlint)"
           fi
+
+  # Home screen widget. It reads nothing from the app (no App Group): everything follows from the date.
+  SweetArrowsWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: SweetArrowsWidget
+      - path: SweetArrows/Resources/Localizable.xcstrings
+    dependencies:
+      - package: SweetArrowsCore
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    info:
+      path: SweetArrowsWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Sweet Arrows
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, nl, de, fr, es, pt-BR, tr, id, zh-Hans, zh-Hant, ja, ko, ru, ar, hi, it, pl, vi, th]
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(SWEETARROWS_BUNDLE_ID).widget
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS: ["$(inherited)", "@executable_path/Frameworks", "@executable_path/../../Frameworks"]
 
   SweetArrowsTests:
     type: bundle.unit-test

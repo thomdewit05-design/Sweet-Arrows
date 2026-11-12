@@ -2,6 +2,7 @@ included:
   - SweetArrows
   - SweetArrowsTests
   - SweetArrowsUITests
+  - SweetArrowsWidget
   - Packages/SweetArrowsCore/Sources
   - Packages/SweetArrowsCore/Tests
 excluded:

@@ -50,5 +50,6 @@ struct RootView: View {
                 }
         }
         .tint(Theme.heart)
+        .onOpenURL { model.open($0) }
     }
 }

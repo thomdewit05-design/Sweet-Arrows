@@ -96,6 +96,25 @@ final class AppModel {
     /// Today as a local calendar day number (a new day starts at the player's midnight).
     var today: Int { Self.currentDay() }
 
+    /// Routes for links like sweetarrows://play/daily (from the home screen widget) and sweetarrows://prizes.
+    static func route(for url: URL) -> Route? {
+        guard url.scheme == "sweetarrows" else { return nil }
+        switch url.host() {
+        case "play":
+            let name = url.pathComponents.dropFirst().first ?? GameMode.classic.rawValue
+            return GameMode(rawValue: name).map(Route.play)
+        case "prizes": return .prizes
+        case "shop": return .shop
+        default: return nil
+        }
+    }
+
+    /// Opens a link: back to Home first, then the screen it points to.
+    func open(_ url: URL) {
+        guard let route = Self.route(for: url) else { return }
+        path = [route]
+    }
+
     static func currentDay() -> Int {
         let parts = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         return DayNumber.from(year: parts.year ?? 2026, month: parts.month ?? 1, day: parts.day ?? 1)
