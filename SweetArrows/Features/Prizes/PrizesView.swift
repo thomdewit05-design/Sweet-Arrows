@@ -155,8 +155,15 @@ struct RewardLabel: View {
     var body: some View {
         HStack(spacing: 8) {
             if reward.coins > 0 {
-                Label("\(reward.coins)", systemImage: "circle.fill")
-                    .foregroundStyle(Theme.ink)
+                HStack(spacing: 4) {
+                    // The same gold coin as the coin badge.
+                    Circle()
+                        .fill(Theme.gold)
+                        .frame(width: big ? 18 : 16, height: big ? 18 : 16)
+                        .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                    Text("\(reward.coins)")
+                        .foregroundStyle(Theme.ink)
+                }
             }
             ForEach(Booster.allCases.filter { (reward.boosters[$0] ?? 0) > 0 }, id: \.self) { booster in
                 Label("\(reward.boosters[booster] ?? 0)", systemImage: booster.icon)
