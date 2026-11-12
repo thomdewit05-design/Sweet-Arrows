@@ -20,35 +20,31 @@ W, H = 1320, 2868
 
 # Order in the App Store, raw file name, background colors, headline and line below, per language.
 SHOTS = [
-    ("1-game", "1-game-c", (0xFF5C8A, 0xA259FF), {
+    ("1-game", "1-game-00", (0xFF5C8A, 0xA259FF), {
         "nl": ("Tik. Glijd. Plop!", "Zet 3 snoepjes van een kleur op een rij"),
         "en": ("Tap. Slide. Pop!", "Line up 3 candies of a color"),
     }),
-    ("2-combo", "1-game-e", (0xFF9F1C, 0xFF5C8A), {
-        "nl": ("Combo's vol suiker", "Hoe sneller je bent, hoe meer punten"),
-        "en": ("Sugar-rush combos", "The quicker you are, the more you score"),
-    }),
-    ("3-home", "2-home", (0x4CC9F0, 0x5B6CFF), {
+    ("2-home", "2-home", (0x4CC9F0, 0x5B6CFF), {
         "nl": ("Elke dag nieuwe opdrachten", "Stijg in level en houd je reeks vast"),
         "en": ("New missions every day", "Level up and keep your streak going"),
     }),
-    ("4-result", "3-result", (0xA259FF, 0x5B6CFF), {
+    ("3-result", "3-result", (0xA259FF, 0x5B6CFF), {
         "nl": ("Verbreek je record", "Versla jezelf en je vrienden"),
         "en": ("Beat your record", "Challenge yourself and your friends"),
     }),
-    ("5-season", "4-season", (0x3DDC97, 0x1FA2A8), {
+    ("4-season", "4-season", (0x3DDC97, 0x1FA2A8), {
         "nl": ("Gratis seizoensbeloningen", "Elk potje brengt je verder"),
         "en": ("Free season rewards", "Every run takes you further"),
     }),
-    ("6-album", "5-album", (0xFF5C8A, 0xFF9F1C), {
+    ("5-album", "5-album", (0xFF5C8A, 0xFF9F1C), {
         "nl": ("Verzamel alle stickers", "Een volle pagina geeft een cadeau"),
         "en": ("Collect every sticker", "A full page earns a gift"),
     }),
-    ("7-wheel", "6-wheel", (0xFFC93C, 0xFF7A3D), {
+    ("6-wheel", "6-wheel", (0xFFC93C, 0xFF7A3D), {
         "nl": ("Draai elke dag aan het rad", "Munten, boosters en een jackpot"),
         "en": ("Spin the wheel every day", "Coins, boosters and a jackpot"),
     }),
-    ("8-tournament", "7-tournament", (0x5B6CFF, 0xA259FF), {
+    ("7-tournament", "7-tournament", (0x5B6CFF, 0xA259FF), {
         "nl": ("Elke week een toernooi", "Win brons, zilver, goud en diamant"),
         "en": ("A tournament every week", "Win bronze, silver, gold and diamond"),
     }),
