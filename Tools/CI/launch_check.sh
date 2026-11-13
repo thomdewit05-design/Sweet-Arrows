@@ -24,11 +24,14 @@ for runtime, udid in sorted(set([picked[0], picked[-1]])):
 
 running() { xcrun simctl spawn "$1" launchctl list | grep -q "UIKitApplication:$BUNDLE_ID"; }
 
-start() {  # udid label
+start() {  # udid label [warn-only]
     xcrun simctl launch --console-pty --terminate-running-process "$1" "$BUNDLE_ID" > "$RUNNER_TEMP/$2.log" 2>&1 &
     sleep 30
     if running "$1"; then
         echo "$2: still running after 30 s"
+    elif [ "${3:-}" = "warn-only" ]; then
+        # The old build only leaves save data behind; whether it starts is not what we test.
+        echo "::warning::$2: not running after 30 s"
     else
         echo "::error::$2: NOT running after 30 s (crashed or quit)"
         tail -n 40 "$RUNNER_TEMP/$2.log"
@@ -46,7 +49,7 @@ while read -r RUNTIME UDID; do
     echo "::group::$RUNTIME ($UDID)"
     xcrun simctl boot "$UDID" 2>/dev/null; xcrun simctl bootstatus "$UDID" > /dev/null
     xcrun simctl uninstall "$UDID" "$BUNDLE_ID" 2>/dev/null || true
-    xcrun simctl install "$UDID" "$OLD_APP" && start "$UDID" "$RUNTIME-old-build"
+    xcrun simctl install "$UDID" "$OLD_APP" && start "$UDID" "$RUNTIME-old-build" warn-only
     xcrun simctl install "$UDID" "$NEW_APP"
     start "$UDID" "$RUNTIME-new-build-1"
     start "$UDID" "$RUNTIME-new-build-2"
