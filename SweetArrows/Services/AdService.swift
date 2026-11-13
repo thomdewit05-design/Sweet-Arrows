@@ -210,6 +210,7 @@ final class GoogleAdService: NSObject, AdService {
             // The ad object is only ever used on the main thread.
             nonisolated(unsafe) let ad = loaded
             onMain {
+                LaunchGuard.step(ad == nil ? "rewarded ad: none" : "rewarded ad loaded")
                 guard let ad else { return }
                 ad.fullScreenContentDelegate = self
                 ad.paidEventHandler = { @Sendable value in

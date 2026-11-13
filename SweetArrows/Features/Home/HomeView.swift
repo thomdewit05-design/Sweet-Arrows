@@ -55,6 +55,7 @@ struct HomeView: View {
             .interactiveDismissDisabled()
         }
         .onAppear {
+            LaunchGuard.step("home")
             pulse = true
             let today = model.today
             if model.save.progress.missions.day != today {
