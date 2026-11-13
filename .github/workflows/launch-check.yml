@@ -1,0 +1,64 @@
+name: Launch check
+
+# Builds the Release app (with the real ad ids) for the simulator, installs it over build 13 (so earlier
+# save data is there, like on a phone) on the oldest and newest iOS simulator, starts it and shows whether
+# it stays up, with the crash report if not. Also prints crash reports TestFlight testers shared.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/launch-check.yml
+      - Tools/CI/crash_reports.py
+      - Tools/CI/launch_check.sh
+
+jobs:
+  launch:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      BUNDLE_ID: com.lucthomasdewit.sweetarrows.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Select newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Write secrets
+        env:
+          SECRETS_XCCONFIG: ${{ secrets.SECRETS_XCCONFIG }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          printf '%s\n' "$SECRETS_XCCONFIG" | tr -d '\r' | grep -v '^[[:space:]]*```' \
+            | sed -e 's/[[:space:]]*$//' > Config/Secrets.xcconfig
+          mkdir -p ~/private_keys
+          printf '%s\n' "$ASC_KEY_P8" > ~/private_keys/AuthKey.p8
+      - name: Crash reports shared from TestFlight
+        continue-on-error: true
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography \
+            || python3 -m pip install --quiet pyjwt cryptography
+          python3 Tools/CI/crash_reports.py
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build Release for the simulator (this version and build 13)
+        run: |
+          set -o pipefail
+          git worktree add "$RUNNER_TEMP/old" a69ebf5
+          cp Config/Secrets.xcconfig "$RUNNER_TEMP/old/Config/"
+          for DIR in "$PWD" "$RUNNER_TEMP/old"; do
+            (cd "$DIR" && xcodegen generate > /dev/null && xcodebuild build -project SweetArrows.xcodeproj \
+              -scheme SweetArrows -configuration Release -destination 'generic/platform=iOS Simulator' \
+              -derivedDataPath build -skipPackagePluginValidation -skipMacroValidation CODE_SIGNING_ALLOWED=NO \
+              | grep -E "error:|\*\* BUILD" || true)
+          done
+          ls build/Build/Products/Release-iphonesimulator/SweetArrows.app/Info.plist \
+            "$RUNNER_TEMP/old/build/Build/Products/Release-iphonesimulator/SweetArrows.app/Info.plist"
+      - name: Install over build 13 and start
+        run: |
+          Tools/CI/launch_check.sh "$RUNNER_TEMP/old/build/Build/Products/Release-iphonesimulator/SweetArrows.app" \
+            build/Build/Products/Release-iphonesimulator/SweetArrows.app

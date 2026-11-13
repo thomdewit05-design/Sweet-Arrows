@@ -49,10 +49,11 @@ final class GameKitService: GameCenterService {
     private var reported = Set<Achievement>()
 
     func authenticate() {
-        GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
-            MainActor.assumeIsolated {
-                self?.isAuthenticated = GKLocalPlayer.local.isAuthenticated
-                if let viewController { Self.present(viewController) }
+        GKLocalPlayer.local.authenticateHandler = { @Sendable viewController, _ in
+            nonisolated(unsafe) let viewController = viewController
+            onMain {
+                self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
+                if let viewController { GameKitService.present(viewController) }
             }
         }
     }
@@ -107,6 +108,7 @@ private final class LeaderboardCloser: NSObject, GKGameCenterControllerDelegate 
     @MainActor static let shared = LeaderboardCloser()
 
     nonisolated func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
-        MainActor.assumeIsolated { gameCenterViewController.dismiss(animated: true) }
+        nonisolated(unsafe) let controller = gameCenterViewController
+        onMain { controller.dismiss(animated: true) }
     }
 }
