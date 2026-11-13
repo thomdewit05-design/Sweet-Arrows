@@ -48,10 +48,20 @@ struct AdUnitIDs: Sendable {
         appOpen: "ca-app-pub-3940256099942544/5575463023"
     )
 
+    /// `ca-app-pub-<16 digits>~<10 digits>`: anything else makes the Google SDK stop the app.
+    static func isValidAppID(_ id: String) -> Bool {
+        id.wholeMatch(of: #/ca-app-pub-\d{16}~\d{10}/#) != nil
+    }
+
+    static func isValidUnitID(_ id: String) -> Bool {
+        id.wholeMatch(of: #/ca-app-pub-\d{16}/\d{10}/#) != nil
+    }
+
     static func fromInfoPlist(_ bundle: Bundle = .main) -> AdUnitIDs {
         func value(_ key: String, _ fallback: String) -> String {
-            let raw = bundle.object(forInfoDictionaryKey: key) as? String ?? ""
-            return raw.hasPrefix("ca-app-pub-") ? raw : fallback
+            let raw = (bundle.object(forInfoDictionaryKey: key) as? String ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return isValidUnitID(raw) ? raw : fallback
         }
         return AdUnitIDs(
             rewarded: value("SAAdUnitRewarded", test.rewarded),
@@ -128,6 +138,9 @@ final class GoogleAdService: NSObject, AdService {
 
     func start() {
         guard !started, consent.canRequestAds else { return }
+        // A broken app id would make the SDK stop the app: play on without ads instead.
+        guard AdUnitIDs.isValidAppID(Bundle.main.object(forInfoDictionaryKey: "GADApplicationIdentifier") as? String ?? "")
+        else { return }
         started = true
         #if canImport(GoogleMobileAds)
         MobileAds.shared.start(completionHandler: nil)

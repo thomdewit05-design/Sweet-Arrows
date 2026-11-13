@@ -112,6 +112,15 @@ struct AppTests {
         #expect(link("https://example.com/play/daily") == nil)
     }
 
+    @Test func adIDsAreCheckedStrictly() {
+        #expect(AdUnitIDs.isValidAppID("ca-app-pub-3940256099942544~1458002511"))
+        #expect(!AdUnitIDs.isValidAppID("ca-app-pub-3940256099942544~1458002511\r"))
+        #expect(!AdUnitIDs.isValidAppID("ca-app-pub-3940256099942544/1458002511"))
+        #expect(AdUnitIDs.isValidUnitID(AdUnitIDs.test.banner))
+        #expect(!AdUnitIDs.isValidUnitID("ca-app-pub-3940256099942544/2435281174 "))
+        #expect(AdUnitIDs.fromInfoPlist(Bundle(for: FakeCloud.self)).banner == AdUnitIDs.test.banner)
+    }
+
     @Test func remoteConfigKeysMatchThePlan() {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [

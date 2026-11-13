@@ -33,7 +33,13 @@ jobs:
           ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
           DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
         run: |
-          printf '%s\n' "$SECRETS_XCCONFIG" > Config/Secrets.xcconfig
+          # A secret saved from a Windows PC can carry invisible \r line endings; in an ad id they make
+          # Google's SDK stop the app at launch. Strip them (and stray spaces or ``` lines) first.
+          printf '%s\n' "$SECRETS_XCCONFIG" > "$RUNNER_TEMP/secrets.raw"
+          CR=$(tr -cd '\r' < "$RUNNER_TEMP/secrets.raw" | wc -c | tr -d ' ')
+          tr -d '\r' < "$RUNNER_TEMP/secrets.raw" | grep -v '^[[:space:]]*```' \
+            | sed -e 's/[[:space:]]*$//' > Config/Secrets.xcconfig
+          echo "Secrets.xcconfig: removed $CR Windows line ending(s)"
           # The team id also lives in Config/Shared.xcconfig; the secret only overrides it.
           if [ -n "$DEVELOPMENT_TEAM" ]; then
             echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" >> Config/Secrets.xcconfig
@@ -75,6 +81,25 @@ jobs:
             -authenticationKeyPath ~/private_keys/AuthKey.p8 \
             -authenticationKeyID ${{ secrets.ASC_KEY_ID }} \
             -authenticationKeyIssuerID ${{ secrets.ASC_ISSUER_ID }} | tail -n 40
+      - name: Check the ad ids in the built app
+        run: |
+          PLIST=build/SweetArrows.xcarchive/Products/Applications/SweetArrows.app/Info.plist
+          APP_ID=$(/usr/libexec/PlistBuddy -c "Print :GADApplicationIdentifier" "$PLIST")
+          if ! [[ "$APP_ID" =~ ^ca-app-pub-[0-9]{16}~[0-9]{10}$ ]]; then
+            echo "::error::GADApplicationIdentifier is not a valid AdMob app id; the app would crash at launch. Check SECRETS_XCCONFIG."
+            exit 1
+          fi
+          for KEY in SAAdUnitRewarded SAAdUnitInterstitial SAAdUnitBanner SAAdUnitAppOpen; do
+            VALUE=$(/usr/libexec/PlistBuddy -c "Print :$KEY" "$PLIST")
+            if ! [[ "$VALUE" =~ ^ca-app-pub-[0-9]{16}/[0-9]{10}$ ]]; then
+              echo "::error::$KEY is not a valid AdMob ad unit id. Check SECRETS_XCCONFIG."
+              exit 1
+            fi
+          done
+          case "$APP_ID" in
+            ca-app-pub-3940256099942544*) echo "::warning::This build uses Google's TEST ad ids." ;;
+            *) echo "Real AdMob ids, all valid." ;;
+          esac
       - name: Upload to TestFlight
         run: |
           set -o pipefail
