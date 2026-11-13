@@ -11,9 +11,16 @@ struct SweetArrowsApp: App {
             RootView()
                 .environment(model)
                 .task {
+                    LaunchGuard.step("first screen")
                     model.analytics.log(.sessionStart)
+                    LaunchGuard.step("game center")
                     model.gameCenter.authenticate()
                     await model.startConsentAndAds()
+                }
+                .task {
+                    // Staying up for 20 s counts as a good start (see LaunchGuard).
+                    try? await Task.sleep(for: .seconds(20))
+                    LaunchGuard.settled()
                 }
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {

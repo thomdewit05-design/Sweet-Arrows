@@ -15460,6 +15460,118 @@
         }
       }
     },
+    "Start-up check": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startcontrole"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startprüfung"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrôle du démarrage"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobación de inicio"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificação de início"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlangıç kontrolü"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pemeriksaan awal"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启动检查"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動檢查"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "起動チェック"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "시작 점검"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка запуска"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فحص التشغيل"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्टार्ट-अप जाँच"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controllo di avvio"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontrola uruchamiania"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kiểm tra khởi động"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ตรวจสอบการเริ่มต้น"
+          }
+        }
+      }
+    },
     "Sticker %lld": {
       "localizations": {
         "nl": {
@@ -16800,6 +16912,230 @@
           "stringUnit": {
             "state": "translated",
             "value": "ข้อกำหนดการใช้งาน"
+          }
+        }
+      }
+    },
+    "The app closed during an earlier start. These were its last steps.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De app sloot tijdens een eerdere start. Dit waren de laatste stappen."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die App wurde bei einem früheren Start beendet. Das waren die letzten Schritte."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'app s'est fermée lors d'un démarrage précédent. Voici ses dernières étapes."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La app se cerró en un inicio anterior. Estos fueron sus últimos pasos."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O app fechou durante uma inicialização anterior. Estes foram os últimos passos."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygulama önceki bir açılışta kapandı. Son adımları bunlardı."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplikasi tertutup saat dibuka sebelumnya. Ini langkah terakhirnya."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用在之前一次启动时关闭了。以下是最后的步骤。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "應用程式在之前一次啟動時關閉了。以下是最後的步驟。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以前の起動中にアプリが終了しました。最後のステップは次のとおりです。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 실행 중에 앱이 종료되었습니다. 마지막 단계는 다음과 같습니다."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложение закрылось при одном из прошлых запусков. Вот его последние шаги."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُغلق التطبيق أثناء تشغيل سابق. هذه كانت خطواته الأخيرة."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पिछली बार शुरू होते समय ऐप बंद हो गया। ये उसके आखिरी कदम थे।"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'app si è chiusa durante un avvio precedente. Questi sono stati gli ultimi passaggi."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplikacja zamknęła się przy wcześniejszym uruchomieniu. Oto jej ostatnie kroki."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ứng dụng đã đóng trong một lần khởi động trước. Đây là các bước cuối cùng."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "แอปปิดไประหว่างการเริ่มต้นครั้งก่อน นี่คือขั้นตอนสุดท้าย"
+          }
+        }
+      }
+    },
+    "The app closed during an earlier start. Until the next update it starts without ads, Game Center and iCloud.": {
+      "localizations": {
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De app sloot tijdens een eerdere start. Tot de volgende update start hij zonder advertenties, Game Center en iCloud."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die App wurde bei einem früheren Start beendet. Bis zum nächsten Update startet sie ohne Werbung, Game Center und iCloud."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'app s'est fermée lors d'un démarrage précédent. Jusqu'à la prochaine mise à jour, elle démarre sans publicités, Game Center ni iCloud."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La app se cerró en un inicio anterior. Hasta la próxima actualización se inicia sin anuncios, Game Center ni iCloud."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O app fechou durante uma inicialização anterior. Até a próxima atualização, ele inicia sem anúncios, Game Center e iCloud."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygulama önceki bir açılışta kapandı. Bir sonraki güncellemeye kadar reklam, Game Center ve iCloud olmadan açılır."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplikasi tertutup saat dibuka sebelumnya. Sampai pembaruan berikutnya, aplikasi dibuka tanpa iklan, Game Center, dan iCloud."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用在之前一次启动时关闭了。在下次更新前，它将在没有广告、Game Center 和 iCloud 的情况下启动。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "應用程式在之前一次啟動時關閉了。在下次更新前，它將在沒有廣告、Game Center 和 iCloud 的情況下啟動。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以前の起動中にアプリが終了しました。次のアップデートまで、広告・Game Center・iCloudなしで起動します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 실행 중에 앱이 종료되었습니다. 다음 업데이트까지 광고, Game Center, iCloud 없이 실행됩니다."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложение закрылось при одном из прошлых запусков. До следующего обновления оно запускается без рекламы, Game Center и iCloud."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أُغلق التطبيق أثناء تشغيل سابق. حتى التحديث القادم سيعمل دون إعلانات وGame Center وiCloud."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पिछली बार शुरू होते समय ऐप बंद हो गया। अगले अपडेट तक यह विज्ञापनों, Game Center और iCloud के बिना शुरू होगा।"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'app si è chiusa durante un avvio precedente. Fino al prossimo aggiornamento si avvia senza pubblicità, Game Center e iCloud."
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aplikacja zamknęła się przy wcześniejszym uruchomieniu. Do następnej aktualizacji uruchamia się bez reklam, Game Center i iCloud."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ứng dụng đã đóng trong một lần khởi động trước. Cho đến bản cập nhật tiếp theo, ứng dụng khởi động mà không có quảng cáo, Game Center và iCloud."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "แอปปิดไประหว่างการเริ่มต้นครั้งก่อน จนกว่าจะอัปเดตครั้งถัดไป แอปจะเริ่มโดยไม่มีโฆษณา Game Center และ iCloud"
           }
         }
       }

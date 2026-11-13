@@ -38,6 +38,21 @@ struct SettingsView: View {
                 Link("Terms of use", destination: Links.terms)
                 Link("Contact", destination: Links.supportMail(version: Self.version))
             }
+            if let steps = LaunchGuard.crashedSteps {
+                Section {
+                    Text(verbatim: steps)
+                        .font(.footnote.monospaced())
+                        .textSelection(.enabled)
+                } header: {
+                    Text("Start-up check")
+                } footer: {
+                    if LaunchGuard.isSafeMode {
+                        Text("The app closed during an earlier start. Until the next update it starts without ads, Game Center and iCloud.")
+                    } else {
+                        Text("The app closed during an earlier start. These were its last steps.")
+                    }
+                }
+            }
             Section {
                 LabeledContent("Version", value: Self.version)
                 #if DEBUG

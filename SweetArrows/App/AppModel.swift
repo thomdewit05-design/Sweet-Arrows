@@ -50,14 +50,18 @@ final class AppModel {
 
     /// The real app.
     static func live() -> AppModel {
+        LaunchGuard.begin()
         let isUITest = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+        // Safe mode (after a crashed start): no consent form, ads, Game Center or iCloud sync.
+        let safe = LaunchGuard.isSafeMode
         let save = isUITest
             ? SaveService(url: nil)
-            : SaveService(url: SaveService.defaultURL, cloud: NSUbiquitousKeyValueStore.default)
+            : SaveService(url: SaveService.defaultURL, cloud: safe ? nil : NSUbiquitousKeyValueStore.default)
+        LaunchGuard.step("progress loaded")
         let analytics = FirebaseAnalyticsService()
-        let config: ConfigService = isUITest ? LocalConfigService() : FirebaseConfigService()
-        let consent: ConsentService = isUITest ? PlaceholderConsentService() : GoogleConsentService()
-        let ads: AdService = isUITest
+        let config: ConfigService = isUITest || safe ? LocalConfigService() : FirebaseConfigService()
+        let consent: ConsentService = isUITest || safe ? PlaceholderConsentService() : GoogleConsentService()
+        let ads: AdService = isUITest || safe
             ? PlaceholderAdService()
             : GoogleAdService(
                 consent: consent, analytics: analytics, save: save,
@@ -77,7 +81,7 @@ final class AppModel {
             analytics: analytics,
             ads: ads,
             consent: consent,
-            gameCenter: isUITest ? OfflineGameCenterService() : GameKitService(),
+            gameCenter: isUITest || safe ? OfflineGameCenterService() : GameKitService(),
             audio: SoundEffectsService(),
             haptics: CoreHapticsService()
         )
@@ -128,10 +132,14 @@ final class AppModel {
 
     /// First start: GDPR consent (UMP), then the ad SDK. ATT is asked later, after a few runs.
     func startConsentAndAds() async {
+        LaunchGuard.step("remote config")
         await config.refresh()
+        LaunchGuard.step("consent")
         await consent.gatherConsent()
+        LaunchGuard.step("ads start")
         ads.start()
         adsStarted = true
+        LaunchGuard.step("ads started")
     }
 
     /// Set once consent is done and the ad SDK runs, so screens can show the banner right away.
