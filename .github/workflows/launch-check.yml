@@ -1,0 +1,97 @@
+name: Launch check
+
+# Builds the Release app (with the real ad ids) for the simulator, starts it twice and shows
+# whether it stays up, with the crash report if not. Also prints crash reports TestFlight testers shared.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/launch-check.yml
+      - Tools/CI/crash_reports.py
+
+jobs:
+  launch:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      BUNDLE_ID: com.lucthomasdewit.sweetarrows.com
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -n 1)"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Write secrets
+        env:
+          SECRETS_XCCONFIG: ${{ secrets.SECRETS_XCCONFIG }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          printf '%s\n' "$SECRETS_XCCONFIG" | tr -d '\r' | grep -v '^[[:space:]]*```' \
+            | sed -e 's/[[:space:]]*$//' > Config/Secrets.xcconfig
+          mkdir -p ~/private_keys
+          printf '%s\n' "$ASC_KEY_P8" > ~/private_keys/AuthKey.p8
+      - name: Crash reports shared from TestFlight
+        continue-on-error: true
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography \
+            || python3 -m pip install --quiet pyjwt cryptography
+          python3 Tools/CI/crash_reports.py
+      - name: Generate project
+        run: xcodegen generate
+      - name: Pick a simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(p) for p in k.split("iOS-")[-1].split("-")])
+          for runtime in reversed(ios):
+              phones = [d for d in devices[runtime] if d["name"].startswith("iPhone")]
+              if phones:
+                  print(phones[0]["udid"]); break
+          ')
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID"
+      - name: Build Release for the simulator
+        run: |
+          set -o pipefail
+          xcodebuild build -project SweetArrows.xcodeproj -scheme SweetArrows -configuration Release \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build \
+            -skipPackagePluginValidation -skipMacroValidation CODE_SIGNING_ALLOWED=NO \
+            | grep -E "error:|\*\* BUILD" || true
+          ls build/Build/Products/Release-iphonesimulator/SweetArrows.app/Info.plist
+      - name: Start the app twice
+        run: |
+          UDID=${{ steps.sim.outputs.udid }}
+          APP=build/Build/Products/Release-iphonesimulator/SweetArrows.app
+          /usr/libexec/PlistBuddy -c "Print :GADApplicationIdentifier" "$APP/Info.plist" | sed 's/[0-9]\{6\}~/######~/'
+          xcrun simctl install "$UDID" "$APP"
+          STATUS=0
+          for RUN in 1 2; do
+            echo "::group::Launch $RUN"
+            xcrun simctl launch --console-pty --terminate-running-process "$UDID" "$BUNDLE_ID" > "launch-$RUN.log" 2>&1 &
+            sleep 30
+            if xcrun simctl spawn "$UDID" launchctl list | grep -q "UIKitApplication:$BUNDLE_ID"; then
+              echo "Launch $RUN: the app is still running after 30 s."
+            else
+              echo "::error::Launch $RUN: the app is NOT running after 30 s (crashed or quit)."
+              STATUS=1
+            fi
+            tail -n 60 "launch-$RUN.log"
+            xcrun simctl spawn "$UDID" log show --last 2m --style compact \
+              --predicate 'process == "SweetArrows" AND (messageType == error OR messageType == fault OR eventMessage CONTAINS[c] "exception" OR eventMessage CONTAINS[c] "fatal")' \
+              | tail -n 80 || true
+            echo "::endgroup::"
+            xcrun simctl terminate "$UDID" "$BUNDLE_ID" || true
+            sleep 3
+          done
+          for REPORT in $(ls -t ~/Library/Logs/DiagnosticReports/SweetArrows* 2>/dev/null | head -n 2); do
+            echo "::group::Crash report $REPORT"
+            head -n 150 "$REPORT"
+            echo "::endgroup::"
+          done
+          exit $STATUS
