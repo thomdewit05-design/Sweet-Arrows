@@ -161,8 +161,8 @@ final class GoogleAdService: NSObject, AdService {
         pendingReason = reason
         return await withCheckedContinuation { continuation in
             rewardContinuation = continuation
-            ad.present(from: UIApplication.topViewController()) { [weak self] in
-                MainActor.assumeIsolated { self?.rewardEarned = true }
+            ad.present(from: UIApplication.topViewController()) { @Sendable in
+                onMain { self.rewardEarned = true }
             }
         }
         #else
@@ -206,16 +206,16 @@ final class GoogleAdService: NSObject, AdService {
 
     #if canImport(GoogleMobileAds)
     private func loadRewarded() {
-        RewardedAd.load(with: ids.rewarded, request: Request()) { [weak self] loaded, _ in
-            // Google calls this on the main thread; the ad object is only ever used there.
+        RewardedAd.load(with: ids.rewarded, request: Request()) { @Sendable loaded, _ in
+            // The ad object is only ever used on the main thread.
             nonisolated(unsafe) let ad = loaded
-            MainActor.assumeIsolated {
-                guard let self, let ad else { return }
+            onMain {
+                guard let ad else { return }
                 ad.fullScreenContentDelegate = self
-                ad.paidEventHandler = { [weak self] value in
+                ad.paidEventHandler = { @Sendable value in
                     let amount = value.value.doubleValue
                     let currency = value.currencyCode
-                    MainActor.assumeIsolated { self?.logImpression(format: "rewarded", value: amount, currency: currency) }
+                    onMain { self.logImpression(format: "rewarded", value: amount, currency: currency) }
                 }
                 self.rewarded = ad
             }
@@ -223,16 +223,16 @@ final class GoogleAdService: NSObject, AdService {
     }
 
     private func loadInterstitial() {
-        InterstitialAd.load(with: ids.interstitial, request: Request()) { [weak self] loaded, _ in
-            // Google calls this on the main thread; the ad object is only ever used there.
+        InterstitialAd.load(with: ids.interstitial, request: Request()) { @Sendable loaded, _ in
+            // The ad object is only ever used on the main thread.
             nonisolated(unsafe) let ad = loaded
-            MainActor.assumeIsolated {
-                guard let self, let ad else { return }
+            onMain {
+                guard let ad else { return }
                 ad.fullScreenContentDelegate = self
-                ad.paidEventHandler = { [weak self] value in
+                ad.paidEventHandler = { @Sendable value in
                     let amount = value.value.doubleValue
                     let currency = value.currencyCode
-                    MainActor.assumeIsolated { self?.logImpression(format: "interstitial", value: amount, currency: currency) }
+                    onMain { self.logImpression(format: "interstitial", value: amount, currency: currency) }
                 }
                 self.interstitial = ad
             }
@@ -240,11 +240,11 @@ final class GoogleAdService: NSObject, AdService {
     }
 
     private func loadAppOpen() {
-        AppOpenAd.load(with: ids.appOpen, request: Request()) { [weak self] loaded, _ in
-            // Google calls this on the main thread; the ad object is only ever used there.
+        AppOpenAd.load(with: ids.appOpen, request: Request()) { @Sendable loaded, _ in
+            // The ad object is only ever used on the main thread.
             nonisolated(unsafe) let ad = loaded
-            MainActor.assumeIsolated {
-                guard let self, let ad else { return }
+            onMain {
+                guard let ad else { return }
                 ad.fullScreenContentDelegate = self
                 self.appOpen = ad
             }
@@ -282,11 +282,11 @@ final class GoogleAdService: NSObject, AdService {
 #if canImport(GoogleMobileAds)
 extension GoogleAdService: FullScreenContentDelegate {
     nonisolated func adDidDismissFullScreenContent(_ ad: any FullScreenPresentingAd) {
-        MainActor.assumeIsolated { fullScreenAdClosed() }
+        onMain { self.fullScreenAdClosed() }
     }
 
     nonisolated func ad(_ ad: any FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: any Error) {
-        MainActor.assumeIsolated { fullScreenAdClosed() }
+        onMain { self.fullScreenAdClosed() }
     }
 }
 #endif
