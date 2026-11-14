@@ -14,6 +14,12 @@ name: TestFlight
 
 on:
   workflow_dispatch:
+    inputs:
+      ads:
+        description: "Which ad ids to build with"
+        type: choice
+        options: [real, test]
+        default: real
 
 jobs:
   upload:
@@ -40,6 +46,11 @@ jobs:
           tr -d '\r' < "$RUNNER_TEMP/secrets.raw" | grep -v '^[[:space:]]*```' \
             | sed -e 's/[[:space:]]*$//' > Config/Secrets.xcconfig
           echo "Secrets.xcconfig: removed $CR Windows line ending(s)"
+          if [ "${{ inputs.ads }}" = "test" ]; then
+            # Google's test ads (from Config/Release.xcconfig) instead of the real ids.
+            sed -i '' -e '/^GAD_APPLICATION_ID/d' -e '/^AD_UNIT_/d' Config/Secrets.xcconfig
+            echo "Building with Google's TEST ad ids."
+          fi
           # The team id also lives in Config/Shared.xcconfig; the secret only overrides it.
           if [ -n "$DEVELOPMENT_TEAM" ]; then
             echo "DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM" >> Config/Secrets.xcconfig

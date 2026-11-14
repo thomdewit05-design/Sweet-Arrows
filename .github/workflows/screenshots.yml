@@ -4,12 +4,8 @@ name: App Store screenshots
 # account, and commits the raw PNGs to docs/appstore/raw on the branch it ran on.
 # Tools/AppStore/frame_screenshots.py then adds the headlines.
 on:
+  # Needs the demo mode and ScreenshotTests, which are not in the build-13 app the project went back to.
   workflow_dispatch:
-  push:
-    paths:
-      - .github/workflows/screenshots.yml
-      - SweetArrowsUITests/ScreenshotTests.swift
-      - SweetArrows/App/Demo.swift
 
 permissions:
   contents: write

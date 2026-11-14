@@ -11,22 +11,14 @@ struct SweetArrowsApp: App {
             RootView()
                 .environment(model)
                 .task {
-                    LaunchGuard.step("first screen")
                     model.analytics.log(.sessionStart)
-                    LaunchGuard.step("game center")
                     model.gameCenter.authenticate()
                     await model.startConsentAndAds()
-                }
-                .task {
-                    // Staying up for 20 s counts as a good start (see LaunchGuard).
-                    try? await Task.sleep(for: .seconds(20))
-                    LaunchGuard.settled()
                 }
                 .onChange(of: scenePhase) { _, phase in
                     switch phase {
                     case .background:
                         backgroundedAt = Date()
-                        model.planReminders()
                     case .active:
                         if let away = backgroundedAt { model.ads.maybeShowAppOpen(awaySince: away) }
                         backgroundedAt = nil
@@ -48,15 +40,13 @@ struct RootView: View {
             HomeView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .play(let mode): EndlessView(mode: mode)
+                    case .endless: EndlessView()
                     case .shop: ShopView()
-                    case .prizes: PrizesView()
                     case .settings: SettingsView()
                     case .dailyReward: DailyRewardView()
                     }
                 }
         }
         .tint(Theme.heart)
-        .onOpenURL { model.open($0) }
     }
 }

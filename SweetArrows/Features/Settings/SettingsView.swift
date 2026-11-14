@@ -13,15 +13,6 @@ struct SettingsView: View {
                 toggle("Vibration", isOn: \.haptics)
             }
             Section {
-                Toggle("Daily reminders", isOn: Binding(
-                    get: { model.settings.reminders },
-                    set: { newValue in Task { await model.setReminders(newValue) } }
-                ))
-                .tint(Theme.heart)
-            } footer: {
-                Text("At most one a day: when your missions are ready or your streak is about to end.")
-            }
-            Section {
                 toggle("Color-blind mode", isOn: \.colorBlind)
             } footer: {
                 Text("Every color already has its own shape. Color-blind mode adds a letter to each candy.")
@@ -37,21 +28,6 @@ struct SettingsView: View {
                 Link("Privacy policy", destination: Links.privacy)
                 Link("Terms of use", destination: Links.terms)
                 Link("Contact", destination: Links.supportMail(version: Self.version))
-            }
-            if let steps = LaunchGuard.crashedSteps {
-                Section {
-                    Text(verbatim: steps)
-                        .font(.footnote.monospaced())
-                        .textSelection(.enabled)
-                } header: {
-                    Text("Start-up check")
-                } footer: {
-                    if LaunchGuard.isSafeMode {
-                        Text("The app closed during an earlier start. Until the next update it starts without ads, Game Center and iCloud.")
-                    } else {
-                        Text("The app closed during an earlier start. These were its last steps.")
-                    }
-                }
             }
             Section {
                 LabeledContent("Version", value: Self.version)

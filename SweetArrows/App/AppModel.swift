@@ -3,11 +3,9 @@ import SwiftUI
 import SweetArrowsCore
 
 enum Route: Hashable {
-    /// The game (slide & match) in one of its modes.
-    case play(GameMode)
+    /// The game (slide & match).
+    case endless
     case shop
-    /// Sticker album, season path and weekly tournament.
-    case prizes
     case settings
     case dailyReward
 }
@@ -50,18 +48,14 @@ final class AppModel {
 
     /// The real app.
     static func live() -> AppModel {
-        LaunchGuard.begin()
         let isUITest = ProcessInfo.processInfo.arguments.contains("-uiTesting")
-        // Safe mode (after a crashed start): no consent form, ads, Game Center or iCloud sync.
-        let safe = LaunchGuard.isSafeMode
         let save = isUITest
             ? SaveService(url: nil)
-            : SaveService(url: SaveService.defaultURL, cloud: safe ? nil : NSUbiquitousKeyValueStore.default)
-        LaunchGuard.step("progress loaded")
+            : SaveService(url: SaveService.defaultURL, cloud: NSUbiquitousKeyValueStore.default)
         let analytics = FirebaseAnalyticsService()
-        let config: ConfigService = isUITest || safe ? LocalConfigService() : FirebaseConfigService()
-        let consent: ConsentService = isUITest || safe ? PlaceholderConsentService() : GoogleConsentService()
-        let ads: AdService = isUITest || safe
+        let config: ConfigService = isUITest ? LocalConfigService() : FirebaseConfigService()
+        let consent: ConsentService = isUITest ? PlaceholderConsentService() : GoogleConsentService()
+        let ads: AdService = isUITest
             ? PlaceholderAdService()
             : GoogleAdService(
                 consent: consent, analytics: analytics, save: save,
@@ -69,19 +63,13 @@ final class AppModel {
             )
         ads.updateLimits(config.values.adLimits)
         config.onChange = { [weak ads] values in ads?.updateLimits(values.adLimits) }
-        if Demo.isOn {
-            let today = currentDay()
-            save.update { Demo.fill(&$0, today: today) }
-            UserDefaults.standard.set(true, forKey: "askedReminders")
-            UserDefaults.standard.set(true, forKey: Tutorial.doneKey)
-        }
         return AppModel(
             save: save,
             config: config,
             analytics: analytics,
             ads: ads,
             consent: consent,
-            gameCenter: isUITest || safe ? OfflineGameCenterService() : GameKitService(),
+            gameCenter: isUITest ? OfflineGameCenterService() : GameKitService(),
             audio: SoundEffectsService(),
             haptics: CoreHapticsService()
         )
@@ -106,25 +94,6 @@ final class AppModel {
     /// Today as a local calendar day number (a new day starts at the player's midnight).
     var today: Int { Self.currentDay() }
 
-    /// Routes for links like sweetarrows://play/daily (from the home screen widget) and sweetarrows://prizes.
-    static func route(for url: URL) -> Route? {
-        guard url.scheme == "sweetarrows" else { return nil }
-        switch url.host() {
-        case "play":
-            let name = url.pathComponents.dropFirst().first ?? GameMode.classic.rawValue
-            return GameMode(rawValue: name).map(Route.play)
-        case "prizes": return .prizes
-        case "shop": return .shop
-        default: return nil
-        }
-    }
-
-    /// Opens a link: back to Home first, then the screen it points to.
-    func open(_ url: URL) {
-        guard let route = Self.route(for: url) else { return }
-        path = [route]
-    }
-
     static func currentDay() -> Int {
         let parts = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         return DayNumber.from(year: parts.year ?? 2026, month: parts.month ?? 1, day: parts.day ?? 1)
@@ -132,14 +101,10 @@ final class AppModel {
 
     /// First start: GDPR consent (UMP), then the ad SDK. ATT is asked later, after a few runs.
     func startConsentAndAds() async {
-        LaunchGuard.step("remote config")
         await config.refresh()
-        LaunchGuard.step("consent")
         await consent.gatherConsent()
-        LaunchGuard.step("ads start")
         ads.start()
         adsStarted = true
-        LaunchGuard.step("ads started")
     }
 
     /// Set once consent is done and the ad SDK runs, so screens can show the banner right away.
@@ -157,20 +122,6 @@ final class AppModel {
         if run.bestCombo >= 5 { gameCenter.report(.combo5) }
         if run.stage + 1 >= 10 { gameCenter.report(.speed10) }
         if progress.endlessRuns >= 50 { gameCenter.report(.runs50) }
-    }
-
-    /// Turns daily reminders on (asking iOS for permission first) or off.
-    func setReminders(_ on: Bool) async {
-        var allowed = on
-        if on { allowed = await ReminderService.requestPermission() }
-        updateSettings { $0.reminders = allowed }
-        planReminders()
-    }
-
-    /// Plans the next reminders from the current streak (called when the app goes to the background).
-    func planReminders() {
-        let progress = save.progress
-        ReminderService.reschedule(enabled: progress.settings.reminders, streak: progress.streak.current(today: today))
     }
 
     func updateSettings(_ change: (inout GameSettings) -> Void) {

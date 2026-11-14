@@ -1,5 +1,4 @@
 import GameKit
-import SweetArrowsCore
 import UIKit
 
 /// Game Center achievements. The ids must also be created in App Store Connect (see docs/STATUS.md).
@@ -15,21 +14,6 @@ enum Achievement: String, CaseIterable, Sendable {
 enum Leaderboard {
     /// Highest score (create as "high to low", all-time, in App Store Connect).
     static let endless = "sweetarrows.endless_score"
-    /// The daily challenge: create as a recurring leaderboard that resets every day.
-    static let daily = "sweetarrows.daily_challenge"
-    static let zen = "sweetarrows.zen_score"
-    static let blitz = "sweetarrows.blitz_score"
-    /// The weekly tournament: a recurring leaderboard that resets every Monday.
-    static let weekly = "sweetarrows.weekly_tournament"
-
-    static func id(for mode: GameMode) -> String {
-        switch mode {
-        case .classic: endless
-        case .daily: daily
-        case .zen: zen
-        case .blitz: blitz
-        }
-    }
 }
 
 @MainActor
@@ -37,9 +21,7 @@ protocol GameCenterService: AnyObject {
     var isAuthenticated: Bool { get }
     func authenticate()
     func report(_ achievement: Achievement)
-    func submit(score: Int, mode: GameMode)
-    /// Opens the Game Center leaderboards (scores of friends and everyone).
-    func showLeaderboards()
+    func submitEndlessScore(_ score: Int)
 }
 
 /// Game Center through GameKit. Everything is optional: offline or signed out, calls do nothing.
@@ -49,11 +31,10 @@ final class GameKitService: GameCenterService {
     private var reported = Set<Achievement>()
 
     func authenticate() {
-        GKLocalPlayer.local.authenticateHandler = { @Sendable viewController, _ in
-            nonisolated(unsafe) let viewController = viewController
-            onMain {
-                self.isAuthenticated = GKLocalPlayer.local.isAuthenticated
-                if let viewController { GameKitService.present(viewController) }
+        GKLocalPlayer.local.authenticateHandler = { [weak self] viewController, _ in
+            MainActor.assumeIsolated {
+                self?.isAuthenticated = GKLocalPlayer.local.isAuthenticated
+                if let viewController { Self.present(viewController) }
             }
         }
     }
@@ -66,21 +47,9 @@ final class GameKitService: GameCenterService {
         GKAchievement.report([entry]) { _ in }
     }
 
-    func submit(score: Int, mode: GameMode) {
+    func submitEndlessScore(_ score: Int) {
         guard isAuthenticated, score > 0 else { return }
-        // Classic runs also count for the weekly tournament.
-        let boards = mode == .classic ? [Leaderboard.id(for: mode), Leaderboard.weekly] : [Leaderboard.id(for: mode)]
-        GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: boards) { _ in }
-    }
-
-    func showLeaderboards() {
-        guard isAuthenticated else {
-            authenticate()
-            return
-        }
-        let viewController = GKGameCenterViewController(state: .leaderboards)
-        viewController.gameCenterDelegate = LeaderboardCloser.shared
-        Self.present(viewController)
+        GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [Leaderboard.endless]) { _ in }
     }
 
     private static func present(_ viewController: UIViewController) {
@@ -99,16 +68,5 @@ final class OfflineGameCenterService: GameCenterService {
     let isAuthenticated = false
     func authenticate() {}
     func report(_ achievement: Achievement) {}
-    func submit(score: Int, mode: GameMode) {}
-    func showLeaderboards() {}
-}
-
-/// Closes the Game Center screen when the player taps Done.
-private final class LeaderboardCloser: NSObject, GKGameCenterControllerDelegate {
-    @MainActor static let shared = LeaderboardCloser()
-
-    nonisolated func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
-        nonisolated(unsafe) let controller = gameCenterViewController
-        onMain { controller.dismiss(animated: true) }
-    }
+    func submitEndlessScore(_ score: Int) {}
 }

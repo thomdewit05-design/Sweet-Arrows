@@ -102,25 +102,6 @@ struct AppTests {
         #expect(save.progress.streak.current == 1)
     }
 
-    @Test func widgetLinksOpenTheRightScreen() {
-        let link = { (text: String) in AppModel.route(for: URL(string: text)!) }
-        #expect(link("sweetarrows://play/daily") == .play(.daily))
-        #expect(link("sweetarrows://play/blitz") == .play(.blitz))
-        #expect(link("sweetarrows://play") == .play(.classic))
-        #expect(link("sweetarrows://prizes") == .prizes)
-        #expect(link("sweetarrows://play/unknown") == nil)
-        #expect(link("https://example.com/play/daily") == nil)
-    }
-
-    @Test func adIDsAreCheckedStrictly() {
-        #expect(AdUnitIDs.isValidAppID("ca-app-pub-3940256099942544~1458002511"))
-        #expect(!AdUnitIDs.isValidAppID("ca-app-pub-3940256099942544~1458002511\r"))
-        #expect(!AdUnitIDs.isValidAppID("ca-app-pub-3940256099942544/1458002511"))
-        #expect(AdUnitIDs.isValidUnitID(AdUnitIDs.test.banner))
-        #expect(!AdUnitIDs.isValidUnitID("ca-app-pub-3940256099942544/2435281174 "))
-        #expect(AdUnitIDs.fromInfoPlist(Bundle(for: FakeCloud.self)).banner == AdUnitIDs.test.banner)
-    }
-
     @Test func remoteConfigKeysMatchThePlan() {
         let keys = Set(RemoteValues.Key.allCases.map(\.rawValue))
         #expect(keys == [

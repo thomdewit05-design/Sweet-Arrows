@@ -167,6 +167,22 @@ afbeelding in `SweetArrows/Resources/Assets.xcassets` met precies deze namen; de
 
 De witte pijl wordt altijd door de app over het snoepje heen getekend; teken die dus niet in de afbeelding.
 
+## Terug naar build 13 (14 november 2026)
+Builds 16 t/m 19 crashten bij het opstarten op de iPhone van de eigenaar. In de simulator gebeurde dat niet,
+ook niet met de echte advertentie-ID's of bovenop de opgeslagen gegevens van build 13. Er is geen crashrapport
+gedeeld. Op verzoek van de eigenaar is de **app zelf teruggezet naar build 13** (commit a69ebf5): code, spelregels,
+tests en `project.yml`. De extra's hieronder (spelmodi, Prijzen, widget, gelukswiel, uitleg, pauze enz.) zitten
+dus niet meer in de app; ze staan nog in de git-geschiedenis (PR #9 t/m #12) en kunnen stap voor stap terugkomen.
+
+Wat wel is gebleven, want het raakt de app niet: de TestFlight-workflow (opruimen van certificaten, controle van
+de advertentie-ID's, keuze `ads: real|test`), de workflows "Launch check" en "Crash reports", `Tools/CI`,
+de App Store-teksten en -screenshots (`docs/appstore`, let op: die tonen nog de extra's) en `app-ads.txt`.
+
+Aanpak om de oorzaak te vinden, telkens één ding tegelijk:
+1. Build 13-code met test-advertenties (precies zoals build 13).
+2. Dezelfde code met de echte advertentie-ID's.
+3. Daarna de extra's per onderdeel terug, met na elke stap een TestFlight-build.
+
 ## Extra's (november 2026, "voeg dat allemaal toe")
 - **Pauze** met hervatten; een onderbroken potje (Klassiek en Zen) wordt bewaard, ook als de app sluit.
 - **Recordmelding** tijdens het spel, **score delen** (kaartje als afbeelding) en een **beoordelingsvraag**
