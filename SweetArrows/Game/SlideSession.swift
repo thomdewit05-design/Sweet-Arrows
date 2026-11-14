@@ -18,6 +18,11 @@ final class SlideSession {
         run = SlideGame(seed: seed)
     }
 
+    /// Starts from a prepared board (the screenshot demo).
+    init(game: SlideGame) {
+        run = game
+    }
+
     var score: Int { run.score }
     var stage: Int { run.stage }
     var combo: Int { run.combo }

@@ -112,7 +112,8 @@ struct EndlessView: View {
 
     private func load() {
         let progress = model.save.progress
-        let newSession = SlideSession()
+        let newSession = Demo.isOn ? SlideSession(game: SlideGame.showcase()) : SlideSession()
+        if Demo.isOn { newSession.hold("demo") }  // a still board with the combo kept live
         let newScene = SlideScene(
             session: newSession, haptics: model.haptics, audio: model.audio,
             colorBlind: progress.settings.colorBlind, boardStyle: progress.board, candyStyle: progress.candyStyle,
@@ -133,7 +134,28 @@ struct EndlessView: View {
         scene = newScene
         model.analytics.log(.endlessStart)
         model.audio.playMusic(.calm)
+        if Demo.isOn {
+            playDemo()
+            return
+        }
         newSession.start()
+    }
+
+    /// Screenshot demo: the showcase move (a line of five in a combo), or straight to a record result.
+    private func playDemo() {
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
+            guard Demo.showsResult else {
+                scene?.handleTap(on: SlideGame.showcaseMover)
+                return
+            }
+            let today = model.today
+            var result: RunOutcome?
+            model.save.update { result = $0.recordRun(Demo.resultRun, today: today) }
+            outcome = result
+            scene?.celebrate()
+            showResult = true
+        }
     }
 
     private func showStage(_ stage: Int) {
