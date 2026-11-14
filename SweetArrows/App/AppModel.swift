@@ -44,6 +44,8 @@ final class AppModel {
         self.audio = audio
         self.haptics = haptics
         applySettings()
+        // A full-screen ad can leave the app's sound off: turn it back on when the ad closes.
+        ads.onAdClosed = { [weak self] in self?.audio.resume() }
     }
 
     /// The real app.

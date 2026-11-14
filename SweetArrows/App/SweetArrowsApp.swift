@@ -11,6 +11,7 @@ struct SweetArrowsApp: App {
             RootView()
                 .environment(model)
                 .task {
+                    model.audio.resume()  // the app is on screen now, so iOS lets the music start
                     model.analytics.log(.sessionStart)
                     model.gameCenter.authenticate()
                     await model.startConsentAndAds()
@@ -20,6 +21,7 @@ struct SweetArrowsApp: App {
                     case .background:
                         backgroundedAt = Date()
                     case .active:
+                        model.audio.resume()
                         if let away = backgroundedAt { model.ads.maybeShowAppOpen(awaySince: away) }
                         backgroundedAt = nil
                     default:

@@ -30,6 +30,8 @@ protocol AdService: AnyObject {
     func levelFinished(won: Bool)
     func maybeShowInterstitial(afterLevel level: Int)
     func maybeShowAppOpen(awaySince: Date)
+    /// Called when a full-screen ad has closed (the app uses it to turn its sound back on).
+    var onAdClosed: (() -> Void)? { get set }
 }
 
 /// Ad unit ids from Info.plist (filled from the xcconfig: Google's test ids in Debug,
@@ -242,7 +244,10 @@ final class GoogleAdService: NSObject, AdService {
         analytics.log(.adImpression(format: format, network: "admob", value: value, currency: currency))
     }
 
+    var onAdClosed: (() -> Void)?
+
     fileprivate func fullScreenAdClosed() {
+        onAdClosed?()
         if let continuation = rewardContinuation {
             rewardContinuation = nil
             if rewardEarned {
@@ -281,6 +286,7 @@ extension GoogleAdService: FullScreenContentDelegate {
 /// so the continue/booster flows can be tried without the ad SDK.
 @MainActor
 final class PlaceholderAdService: AdService {
+    var onAdClosed: (() -> Void)?
     var isRewardedReady: Bool {
         #if DEBUG
         true
