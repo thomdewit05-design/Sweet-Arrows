@@ -53,11 +53,12 @@ final class ScreenshotTests: XCTestCase {
 
         play.tap()
         XCTAssertTrue(app.descendants(matching: .any)["score"].waitForExistence(timeout: 10))
-        // The showcase move happens 3 s after the board appears; catch the celebration at many moments.
-        usleep(2_400_000)
-        for frame in 0..<20 {
+        sleep(2)
+        // In the demo the showcase move happens on this tap; catch the celebration right after it.
+        app.descendants(matching: .any)["board"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        for frame in 0..<12 {
+            usleep(150_000)
             save("\(language)-1-game-\(String(format: "%02d", frame))")
-            usleep(100_000)
         }
         app.terminate()
     }

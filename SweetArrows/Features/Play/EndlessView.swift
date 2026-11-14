@@ -141,14 +141,17 @@ struct EndlessView: View {
         newSession.start()
     }
 
-    /// Screenshot demo: the showcase move (a line of five in a combo), or straight to a record result.
+    /// Screenshot demo: the showcase move (a line of five in a combo) on the test's tap, so the
+    /// screenshots are taken right after it; or straight to a record result.
     private func playDemo() {
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(Demo.showsResult ? 1.5 : 3))
-            guard Demo.showsResult else {
-                scene?.handleTap(on: SlideGame.showcaseMover)
-                return
+        guard Demo.showsResult else {
+            if let current = scene {
+                current.onAnyTap = { [weak current] in current?.handleTap(on: SlideGame.showcaseMover) }
             }
+            return
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(1.5))
             let today = model.today
             var result: RunOutcome?
             model.save.update { result = $0.recordRun(Demo.resultRun, today: today) }
