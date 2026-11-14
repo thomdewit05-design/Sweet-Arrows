@@ -3,6 +3,7 @@
 
 Input:  docs/appstore/raw/<lang>-<n>-<name>.png  (from the "App Store screenshots" workflow)
 Output: docs/appstore/<lang>/<n>-<name>.png, 1320 x 2868 (6.9-inch iPhone, accepted for all iPhones)
+        docs/appstore/<lang>-6.3/<n>-<name>.png, 1206 x 2622 (the 6.1/6.3-inch slot)
 
 Run: python3 Tools/AppStore/frame_screenshots.py
 """
@@ -17,10 +18,11 @@ RAW = os.path.join(ROOT, "docs", "appstore", "raw")
 OUT = os.path.join(ROOT, "docs", "appstore")
 FONTS = os.path.join(ROOT, "SweetArrows", "Resources", "Fonts")
 W, H = 1320, 2868
+SMALL = (1206, 2622)  # iPhone 6.1"/6.3"
 
 # Order in the App Store, raw file name, background colors, headline and line below, per language.
 SHOTS = [
-    ("1-game", "1-game-00", (0xFF5C8A, 0xA259FF), {
+    ("1-game", "1-game-01", (0xFF5C8A, 0xA259FF), {
         "nl": ("Tik. Glijd. Plop!", "Zet 3 snoepjes van een kleur op een rij"),
         "en": ("Tap. Slide. Pop!", "Line up 3 candies of a color"),
     }),
@@ -29,24 +31,16 @@ SHOTS = [
         "en": ("New missions every day", "Level up and keep your streak going"),
     }),
     ("3-result", "3-result", (0xA259FF, 0x5B6CFF), {
-        "nl": ("Verbreek je record", "Versla jezelf en je vrienden"),
-        "en": ("Beat your record", "Challenge yourself and your friends"),
+        "nl": ("Verbreek je record", "Hoe sneller het gaat, hoe meer punten"),
+        "en": ("Beat your record", "The faster it gets, the more you score"),
     }),
-    ("4-season", "4-season", (0x3DDC97, 0x1FA2A8), {
-        "nl": ("Gratis seizoensbeloningen", "Elk potje brengt je verder"),
-        "en": ("Free season rewards", "Every run takes you further"),
+    ("4-shop", "4-shop", (0x3DDC97, 0x1FA2A8), {
+        "nl": ("Nieuwe looks voor je snoep", "Verdien munten en kies je stijl"),
+        "en": ("New looks for your candy", "Earn coins and pick your style"),
     }),
-    ("5-album", "5-album", (0xFF5C8A, 0xFF9F1C), {
-        "nl": ("Verzamel alle stickers", "Een volle pagina geeft een cadeau"),
-        "en": ("Collect every sticker", "A full page earns a gift"),
-    }),
-    ("6-wheel", "6-wheel", (0xFFC93C, 0xFF7A3D), {
-        "nl": ("Draai elke dag aan het rad", "Munten, boosters en een jackpot"),
-        "en": ("Spin the wheel every day", "Coins, boosters and a jackpot"),
-    }),
-    ("7-tournament", "7-tournament", (0x5B6CFF, 0xA259FF), {
-        "nl": ("Elke week een toernooi", "Win brons, zilver, goud en diamant"),
-        "en": ("A tournament every week", "Win bronze, silver, gold and diamond"),
+    ("5-gift", "5-gift", (0xFFC93C, 0xFF7A3D), {
+        "nl": ("Elke dag een cadeau", "Speel vaker op rij voor grotere cadeaus"),
+        "en": ("A gift every day", "Play days in a row for bigger gifts"),
     }),
 ]
 
@@ -163,7 +157,12 @@ def main():
             image = sprinkles(gradient(*colors), seed=index)
             text_block(image, *texts[lang])
             phone(image, Image.open(source))
-            image.convert("RGB").save(os.path.join(OUT, lang, f"{name}.png"), optimize=True)
+            image = image.convert("RGB")
+            image.save(os.path.join(OUT, lang, f"{name}.png"), optimize=True)
+            # The same picture for the iPhone 6.1"/6.3" slot (App Store Connect takes 1206 x 2622 there).
+            small_dir = os.path.join(OUT, f"{lang}-6.3")
+            os.makedirs(small_dir, exist_ok=True)
+            image.resize(SMALL, Image.LANCZOS).save(os.path.join(small_dir, f"{name}.png"), optimize=True)
             made += 1
     print(f"made {made} screenshots")
 

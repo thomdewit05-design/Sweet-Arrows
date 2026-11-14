@@ -236,6 +236,26 @@ struct StatChip: View {
     }
 }
 
+/// An amount of coins: the gold coin and the number (prices, rewards).
+struct CoinLabel: View {
+    let amount: Int
+    var size: CGFloat = 15
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(Theme.gold)
+                .frame(width: size, height: size)
+                .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                .shadow(color: Theme.ink.opacity(0.25), radius: 1, y: 1)
+            Text("\(amount)")
+                .monospacedDigit()
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("\(amount) coins"))
+    }
+}
+
 struct CoinBadge: View {
     let coins: Int
     /// Count up from zero when it appears (result cards).

@@ -65,6 +65,10 @@ final class AppModel {
             )
         ads.updateLimits(config.values.adLimits)
         config.onChange = { [weak ads] values in ads?.updateLimits(values.adLimits) }
+        if Demo.isOn {
+            let today = currentDay()
+            save.update { Demo.fill(&$0, today: today) }
+        }
         return AppModel(
             save: save,
             config: config,

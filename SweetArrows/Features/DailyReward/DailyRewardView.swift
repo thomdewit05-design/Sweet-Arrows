@@ -102,8 +102,7 @@ private struct RewardTile: View {
                 .font(Theme.body(12))
                 .foregroundStyle(isToday ? .white : Theme.inkSoft)
             if reward.coins > 0 {
-                Label("\(reward.coins)", systemImage: "circle.fill")
-                    .labelStyle(.titleAndIcon)
+                CoinLabel(amount: reward.coins, size: 14)
                     .font(Theme.heading(15))
                     .foregroundStyle(isToday ? .white : Theme.ink)
             }

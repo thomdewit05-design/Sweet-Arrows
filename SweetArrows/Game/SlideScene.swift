@@ -23,6 +23,8 @@ final class SlideScene: SKScene {
 
     /// When set, the next tap on a candy is handed here instead of playing it (hammer booster).
     var onCandySelected: ((Int) -> Void)?
+    /// Screenshot demo only: the next tap anywhere on the scene goes here instead.
+    var onAnyTap: (() -> Void)?
 
     /// Everything that shakes together: counter, candies and effects.
     private let boardRoot = SKNode()
@@ -244,6 +246,11 @@ final class SlideScene: SKScene {
     // MARK: Input
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let anyTap = onAnyTap {
+            onAnyTap = nil
+            anyTap()
+            return
+        }
         guard let touch = touches.first, !run.isOver,
               let p = gridPoint(at: touch.location(in: self)),
               let piece = run.piece(at: p)
