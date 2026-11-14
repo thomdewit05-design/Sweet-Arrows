@@ -34,6 +34,9 @@ protocol AudioService: AnyObject {
     func playCombo(_ step: Int)
     /// Crossfades to another background track (does nothing if it is already playing).
     func playMusic(_ track: MusicTrack)
+    /// Turns the sound back on after something took it away: the app becoming active (also the very
+    /// first time), a call or Siri, a full-screen ad.
+    func resume()
 }
 
 /// Plays preloaded effects through AVAudioPlayer. Uses the ambient session, so the
@@ -56,6 +59,8 @@ final class SoundEffectsService: AudioService {
     private var players: [String: [AVAudioPlayer]] = [:]
     private var nextVoice: [String: Int] = [:]
 
+    private var observers: [NSObjectProtocol] = []
+
     init(bundle: Bundle = .main) {
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
         let names = SoundEffect.allCases.map(\.rawValue) + (1...Self.comboCount).map { "combo\($0)" }
@@ -73,6 +78,26 @@ final class SoundEffectsService: AudioService {
             player.prepareToPlay()
             tracks[track] = player
         }
+        // The music starts in resume(), once the app is active: iOS can refuse to play sound while the
+        // app is still launching, and nothing would try again.
+        let center = NotificationCenter.default
+        observers.append(center.addObserver(
+            forName: AVAudioSession.interruptionNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            guard raw.flatMap(AVAudioSession.InterruptionType.init(rawValue:)) == .ended else { return }
+            MainActor.assumeIsolated { self?.resume() }
+        })
+        observers.append(center.addObserver(
+            forName: AVAudioSession.mediaServicesWereResetNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.resume() }
+        })
+    }
+
+    func resume() {
+        try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
         updateMusic()
     }
 
@@ -134,4 +159,5 @@ final class SilentAudioService: AudioService {
     func play(_ effect: SoundEffect) {}
     func playCombo(_ step: Int) {}
     func playMusic(_ track: MusicTrack) {}
+    func resume() {}
 }

@@ -17,8 +17,6 @@ final class SweetArrowsUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["score"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Hint"].exists)
         XCTAssertTrue(app.buttons["Hammer"].exists)
-        app.buttons["pauseButton"].tap()
-        XCTAssertTrue(app.buttons["resumeButton"].waitForExistence(timeout: 3))
         app.buttons["backButton"].tap()
         XCTAssertTrue(play.waitForExistence(timeout: 5))
     }
@@ -35,8 +33,6 @@ final class SweetArrowsUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["score"].waitForExistence(timeout: 5))
         sleep(4)
         attach(app, "2-endless")
-        app.buttons["pauseButton"].tap()
-        XCTAssertTrue(app.buttons["resumeButton"].waitForExistence(timeout: 3))
         app.buttons["backButton"].tap()
     }
 

@@ -1,4 +1,3 @@
-import Foundation
 import Testing
 @testable import SweetArrowsCore
 
@@ -219,23 +218,6 @@ struct SlideTests {
         #expect(!slowed.isSlowedDown)
     }
 
-    @Test func aRunCanBeSavedAndResumedExactly() throws {
-        var game = SlideGame(seed: 11)
-        for _ in 0..<20 { _ = game.advance(by: 0.5) }
-        if let piece = game.sortedPieces.first(where: \.canMove) { _ = game.tap(piece.id) }
-        let data = try JSONEncoder().encode(game)
-        var restored = try JSONDecoder().decode(SlideGame.self, from: data)
-        #expect(restored.pieces == game.pieces)
-        #expect(restored.score == game.score)
-        #expect(restored.elapsed == game.elapsed)
-        #expect(restored.pending == game.pending)
-        // Same future: the random generator and timers come back too.
-        for _ in 0..<40 {
-            #expect(restored.advance(by: 0.5) == game.advance(by: 0.5))
-        }
-        #expect(restored.pieces == game.pieces)
-    }
-
     @Test func startsWithAFairBoardWithoutLines() {
         let game = SlideGame(seed: 7)
         #expect(game.pieces.count == 5)
@@ -256,7 +238,7 @@ struct SlideTests {
                 case .spawned: spawned += 1
                 case .warn: warned += 1
                 case .boardFull: full = true
-                case .stageUp, .timeUp: break
+                case .stageUp: break
                 }
             }
             #expect(game.matchedIDs().isEmpty)

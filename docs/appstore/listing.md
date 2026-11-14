@@ -1,6 +1,6 @@
 # App Store-teksten — Sweet Arrows
 
-Klaar om in App Store Connect te plakken (App Store → je app → versie 1.0 → per taal).
+Klaar om in App Store Connect te plakken. Deze teksten passen bij de app zoals hij nu is (build 13, zonder spelmodi, Prijzen of widget) (App Store → je app → versie 1.0 → per taal).
 Maak eerst **Nederlands** en **Engels (VS)** aan; de andere talen vallen terug op Engels.
 De lengtes zijn gecontroleerd (`python3 Tools/AppStore/check_listing.py`).
 
@@ -43,7 +43,7 @@ Tik, glijd en plop de snoepjes
 
 **Promotietekst** (max. 170, kun je altijd aanpassen zonder nieuwe versie)
 ```
-Nieuw: dagelijkse uitdaging, Zen en Blitz, een stickeralbum, een gratis seizoenspad en elke week een toernooi. Hoe hoog kom jij?
+Tik een snoepje, zie het glijden en laat rijen van 3 of meer ploppen. Elke dag nieuwe opdrachten, levels om te halen en zoete combo's. Hoe lang houd jij het bord leeg?
 ```
 
 **Beschrijving** (max. 4000)
@@ -59,39 +59,25 @@ ZO SPEEL JE
 • Snel achter elkaar ploppen geeft combo's en een suikerfeest aan effecten
 • Bommen, regenboogsnoepjes en stenen maken elk potje anders
 
-SPEELSTANDEN
-• Klassiek: eindeloos en steeds sneller
-• Dagelijkse uitdaging: elke dag hetzelfde bord voor iedereen
-• Zen: geen klok, na elke zet een nieuw snoepje
-• Blitz: 60 seconden, zoveel punten als je kunt
-
 ELKE DAG IETS TE DOEN
 • Drie dagopdrachten met een bonuscadeau
-• Een dagelijks cadeau en een gratis draai aan het gelukswiel
+• Een dagelijks cadeau dat groter wordt als je meer dagen op rij speelt
 • Houd je reeks vast en stijg in level voor munten en nieuwe achtergronden
-
-VERZAMELEN EN WINNEN
-• Stickeralbum met 24 stickers: een volle pagina geeft een cadeau
-• Gratis seizoenspad met 20 beloningen, elke vier weken opnieuw
-• Weektoernooi met bekers in brons, zilver, goud en diamant
-• Ranglijsten en prestaties via Game Center: daag je vrienden uit
 
 EN VERDER
 • Boosters: hint, hamer en slowmo
-• Munten verdienen door te spelen, uitgeven in de winkel aan nieuwe looks
-• Pauzeren wanneer je wilt: je potje blijft bewaard
-• Widget voor je beginscherm
+• Munten verdienen door te spelen, uitgeven aan nieuwe snoepstijlen, borden en achtergronden
+• Ranglijst en prestaties via Game Center
+• Muziek die vrolijker wordt naarmate het spel sneller gaat
 • Kleurenblindstand, en geluid, muziek en trillingen apart aan of uit
 • In 19 talen
 
 Sweet Arrows is gratis en bevat advertenties. Er zijn geen in-app-aankopen: alles verdien je door te spelen.
-
-Vragen of ideeën? Je vindt ons via de website in de app.
 ```
 
 **Trefwoorden** (max. 100, komma's zonder spaties; woorden uit naam en subtitel hoeven er niet in)
 ```
-puzzel,snoep,match 3,drie op een rij,pijlen,glijden,casual,denkspel,combo,brein,offline,record,zen
+puzzel,snoep,match 3,drie op een rij,pijlen,glijden,casual,denkspel,combo,brein,offline,record
 ```
 
 **Nieuw in deze versie**
@@ -115,7 +101,7 @@ Tap, slide & pop the sweets
 
 **Promotional text** (max 170)
 ```
-New: a daily challenge, Zen and Blitz modes, a sticker album, a free season path and a tournament every week. How high can you go?
+Tap a candy, watch it slide and pop lines of 3 or more. New missions every day, levels to climb and sweet combos. How long can you keep the board clear?
 ```
 
 **Description** (max 4000)
@@ -131,39 +117,25 @@ HOW TO PLAY
 • Pop quickly in a row for combos and a sugar rush of effects
 • Bombs, rainbow candies and stones make every run different
 
-GAME MODES
-• Classic: endless and ever faster
-• Daily challenge: the same board for everyone, every day
-• Zen: no clock, a new candy after every move
-• Blitz: 60 seconds, as many points as you can
-
 SOMETHING NEW EVERY DAY
 • Three daily missions with a bonus gift
-• A daily gift and a free spin of the lucky wheel
+• A daily gift that grows the more days in a row you play
 • Keep your streak going and level up for coins and new backdrops
-
-COLLECT AND WIN
-• A sticker album with 24 stickers: a full page earns a gift
-• A free season path with 20 rewards, new every four weeks
-• A weekly tournament with bronze, silver, gold and diamond trophies
-• Leaderboards and achievements with Game Center: challenge your friends
 
 AND MORE
 • Boosters: hint, hammer and slow motion
-• Earn coins by playing, spend them on new looks in the shop
-• Pause whenever you like: your run is saved
-• A home screen widget
+• Earn coins by playing and spend them on new candy styles, boards and backdrops
+• Leaderboard and achievements with Game Center
+• Music that gets livelier as the game speeds up
 • Color-blind mode, and sound, music and vibration each on or off
 • In 19 languages
 
 Sweet Arrows is free and contains ads. There are no in-app purchases: you earn everything by playing.
-
-Questions or ideas? Find us through the website in the app.
 ```
 
 **Keywords** (max 100)
 ```
-puzzle,candy,match 3,three in a row,arrows,slide,casual,brain,combo,logic,offline,relaxing,zen,sweet
+puzzle,candy,match 3,three in a row,arrows,slide,casual,brain,combo,logic,offline,relaxing,sweet
 ```
 
 **What's New**

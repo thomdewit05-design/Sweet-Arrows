@@ -4,8 +4,8 @@
 /// Three or more of the same color in a row or column pop. A candy that cannot move turns its
 /// arrow a quarter clockwise instead, so a tap always does something. New candies keep arriving,
 /// faster and faster; when one has nowhere to land the run is over.
-public struct SlideGame: Sendable, Codable {
-    public struct Settings: Sendable, Hashable, Codable {
+public struct SlideGame: Sendable {
+    public struct Settings: Sendable, Hashable {
         public var width = 5
         public var height = 5
         public var startCandies = 5
@@ -22,15 +22,11 @@ public struct SlideGame: Sendable, Codable {
         public var maxColors = 4
         /// Pops within this many seconds of each other build a combo.
         public var comboWindow = 3.0
-        /// Zen: no clock; one new candy lands after every move instead.
-        public var spawnsPerMove = false
-        /// Blitz: the run ends after this many seconds.
-        public var timeLimit: Double?
 
         public init() {}
     }
 
-    public enum Kind: String, Hashable, Sendable, CaseIterable, Codable {
+    public enum Kind: String, Hashable, Sendable, CaseIterable {
         case normal
         /// Pops everything around it (3×3) when it pops.
         case bomb
@@ -40,7 +36,7 @@ public struct SlideGame: Sendable, Codable {
         case stone
     }
 
-    public struct Piece: Hashable, Sendable, Identifiable, Codable {
+    public struct Piece: Hashable, Sendable, Identifiable {
         public var id: Int
         public var color: CandyColor
         public var direction: Direction
@@ -66,11 +62,9 @@ public struct SlideGame: Sendable, Codable {
         }
     }
 
-    public enum Status: String, Hashable, Sendable, Codable {
+    public enum Status: Hashable, Sendable {
         case playing
         case boardFull
-        /// Blitz: the time ran out.
-        case timeUp
     }
 
     public enum Move: Hashable, Sendable {
@@ -91,8 +85,6 @@ public struct SlideGame: Sendable, Codable {
         /// Pops in a row (1 for the first), 0 when nothing popped.
         public var combo = 0
         public var clearedBoard = false
-        /// Zen: the candy that landed after this move.
-        public var spawned: Piece?
 
         public var didPop: Bool { !popped.isEmpty }
 
@@ -110,7 +102,7 @@ public struct SlideGame: Sendable, Codable {
     }
 
     /// A candy about to appear (shown as a shadow first).
-    public struct PendingSpawn: Hashable, Sendable, Codable {
+    public struct PendingSpawn: Hashable, Sendable {
         public var piece: Piece
         public var remaining: Double
     }
@@ -120,8 +112,6 @@ public struct SlideGame: Sendable, Codable {
         case spawned(Piece)
         case boardFull
         case stageUp(Int)
-        /// Blitz: the time ran out.
-        case timeUp
     }
 
     public static let maxComboMultiplier = 5
@@ -248,9 +238,7 @@ public struct SlideGame: Sendable, Codable {
         guard target != piece.position else {
             piece.direction = piece.direction.rotated(by: 1)
             pieces[id] = piece
-            var turned = Report(move: .turned(id: id, to: piece.direction))
-            spawnAfterMove(into: &turned)
-            return turned
+            return Report(move: .turned(id: id, to: piece.direction))
         }
         let from = piece.position
         remove(id)
@@ -258,23 +246,8 @@ public struct SlideGame: Sendable, Codable {
         place(piece)
         var report = Report(move: .slid(id: id, from: from, to: target))
         resolve(into: &report)
-        spawnAfterMove(into: &report)
         return report
     }
-
-    /// Zen: a new candy lands after every move; no free cell ends the run.
-    private mutating func spawnAfterMove(into report: inout Report) {
-        guard settings.spawnsPerMove, status == .playing else { return }
-        if let piece = makePiece() {
-            place(piece)
-            report.spawned = piece
-        } else {
-            status = .boardFull
-        }
-    }
-
-    /// Blitz: seconds left on the clock (nil without a time limit).
-    public var timeLeft: Double? { settings.timeLimit.map { max($0 - elapsed, 0) } }
 
     /// Pops every line of three or more, then bombs and stones, and scores it.
     private mutating func resolve(into report: inout Report) {
@@ -370,14 +343,7 @@ public struct SlideGame: Sendable, Codable {
         let countdown = elapsed < slowUntil ? seconds / 2 : seconds
         elapsed += seconds
         var events: [Event] = []
-        if let limit = settings.timeLimit, elapsed >= limit {
-            status = .timeUp
-            pending = nil
-            return [.timeUp]
-        }
-        if settings.spawnsPerMove {
-            // Zen has no clock for candies; time only drives combos and the speed banner.
-        } else if var next = pending {
+        if var next = pending {
             next.remaining -= countdown
             if next.remaining > 0 {
                 pending = next
@@ -523,52 +489,5 @@ public struct SlideGame: Sendable, Codable {
         var trial = self
         trial.place(piece)
         return trial.matchedIDs().contains(piece.id)
-    }
-}
-
-// MARK: Showcase
-
-public extension SlideGame {
-    /// The candy that, tapped, finishes the showcase move.
-    static let showcaseMover = 99
-
-    /// A lively board in the middle of a good run, for App Store screenshots: score and speed well
-    /// under way, a combo of four still live and one tap away from a line of five strawberries.
-    static func showcase() -> SlideGame {
-        typealias P = Piece
-        let s = CandyColor.strawberry, l = CandyColor.lemon, m = CandyColor.mint, g = CandyColor.grape
-        var game = SlideGame(pieces: [
-            P(id: 1, color: g, direction: .down, position: GridPoint(0, 0)),
-            P(id: 2, color: l, direction: .right, position: GridPoint(1, 0)),
-            P(id: 3, color: m, direction: .left, position: GridPoint(2, 0)),
-            P(id: 4, color: g, direction: .down, kind: .rainbow, position: GridPoint(3, 0)),
-            P(id: 5, color: l, direction: .down, position: GridPoint(4, 0)),
-            P(id: 6, color: m, direction: .right, position: GridPoint(0, 1)),
-            P(id: 7, color: g, direction: .up, position: GridPoint(1, 1)),
-            P(id: showcaseMover, color: s, direction: .down, position: GridPoint(2, 1)),
-            P(id: 8, color: l, direction: .left, position: GridPoint(3, 1)),
-            P(id: 9, color: m, direction: .up, position: GridPoint(4, 1)),
-            P(id: 10, color: m, direction: .up, kind: .stone, position: GridPoint(0, 2)),
-            P(id: 11, color: l, direction: .down, kind: .bomb, position: GridPoint(1, 2)),
-            P(id: 12, color: m, direction: .right, position: GridPoint(3, 2)),
-            P(id: 13, color: g, direction: .down, position: GridPoint(4, 2)),
-            P(id: 14, color: l, direction: .left, position: GridPoint(0, 3)),
-            P(id: 15, color: m, direction: .up, position: GridPoint(1, 3)),
-            P(id: 16, color: g, direction: .up, position: GridPoint(3, 3)),
-            P(id: 17, color: l, direction: .left, position: GridPoint(4, 3)),
-            P(id: 18, color: s, direction: .up, position: GridPoint(0, 4)),
-            P(id: 19, color: s, direction: .right, position: GridPoint(1, 4)),
-            P(id: 20, color: s, direction: .left, position: GridPoint(3, 4)),
-            P(id: 21, color: s, direction: .up, position: GridPoint(4, 4)),
-        ])
-        game.score = 3140
-        game.popped = 52
-        game.moves = 61
-        game.elapsed = 184
-        game.combo = 4
-        game.bestCombo = 4
-        game.lastPopAt = 183
-        game.announcedStage = game.stage
-        return game
     }
 }

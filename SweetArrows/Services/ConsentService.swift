@@ -45,9 +45,9 @@ final class GoogleConsentService: ConsentService {
         #if canImport(UserMessagingPlatform)
         let parameters = RequestParameters()
         await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
-            ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { @Sendable _ in
-                onMain {
-                    ConsentForm.loadAndPresentIfRequired(from: UIApplication.topViewController()) { @Sendable _ in
+            ConsentInformation.shared.requestConsentInfoUpdate(with: parameters) { _ in
+                MainActor.assumeIsolated {
+                    ConsentForm.loadAndPresentIfRequired(from: UIApplication.topViewController()) { _ in
                         done.resume()
                     }
                 }
@@ -59,8 +59,7 @@ final class GoogleConsentService: ConsentService {
     func requestTracking() async {
         guard needsTrackingPrompt else { return }
         await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
-            // iOS answers on a background thread.
-            ATTrackingManager.requestTrackingAuthorization { @Sendable _ in done.resume() }
+            ATTrackingManager.requestTrackingAuthorization { _ in done.resume() }
         }
     }
 
