@@ -3,6 +3,7 @@
 
 Input:  docs/appstore/raw/<lang>-<n>-<name>.png  (from the "App Store screenshots" workflow)
 Output: docs/appstore/<lang>/<n>-<name>.png, 1320 x 2868 (6.9-inch iPhone, accepted for all iPhones)
+        docs/appstore/<lang>-6.3/<n>-<name>.png, 1206 x 2622 (the 6.1/6.3-inch slot)
 
 Run: python3 Tools/AppStore/frame_screenshots.py
 """
@@ -17,6 +18,7 @@ RAW = os.path.join(ROOT, "docs", "appstore", "raw")
 OUT = os.path.join(ROOT, "docs", "appstore")
 FONTS = os.path.join(ROOT, "SweetArrows", "Resources", "Fonts")
 W, H = 1320, 2868
+SMALL = (1206, 2622)  # iPhone 6.1"/6.3"
 
 # Order in the App Store, raw file name, background colors, headline and line below, per language.
 SHOTS = [
@@ -155,7 +157,12 @@ def main():
             image = sprinkles(gradient(*colors), seed=index)
             text_block(image, *texts[lang])
             phone(image, Image.open(source))
-            image.convert("RGB").save(os.path.join(OUT, lang, f"{name}.png"), optimize=True)
+            image = image.convert("RGB")
+            image.save(os.path.join(OUT, lang, f"{name}.png"), optimize=True)
+            # The same picture for the iPhone 6.1"/6.3" slot (App Store Connect takes 1206 x 2622 there).
+            small_dir = os.path.join(OUT, f"{lang}-6.3")
+            os.makedirs(small_dir, exist_ok=True)
+            image.resize(SMALL, Image.LANCZOS).save(os.path.join(small_dir, f"{name}.png"), optimize=True)
             made += 1
     print(f"made {made} screenshots")
 
