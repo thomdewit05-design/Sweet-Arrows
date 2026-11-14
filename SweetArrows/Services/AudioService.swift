@@ -39,8 +39,9 @@ protocol AudioService: AnyObject {
     func resume()
 }
 
-/// Plays preloaded effects through AVAudioPlayer. Uses the ambient session, so the
-/// silent switch is respected and the player's own music keeps playing.
+/// Plays preloaded effects through AVAudioPlayer. The game is heard even with the iPhone on silent
+/// (owner's choice: many players keep their phone on silent), and music from other apps keeps
+/// playing alongside it. Sound and music can each be turned off in Settings.
 @MainActor
 final class SoundEffectsService: AudioService {
     var soundEnabled = true
@@ -62,7 +63,7 @@ final class SoundEffectsService: AudioService {
     private var observers: [NSObjectProtocol] = []
 
     init(bundle: Bundle = .main) {
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
+        Self.configureSession()
         let names = SoundEffect.allCases.map(\.rawValue) + (1...Self.comboCount).map { "combo\($0)" }
         for name in names {
             guard let url = bundle.url(forResource: name, withExtension: "wav") else { continue }
@@ -96,9 +97,14 @@ final class SoundEffectsService: AudioService {
     }
 
     func resume() {
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
+        Self.configureSession()
         try? AVAudioSession.sharedInstance().setActive(true)
         updateMusic()
+    }
+
+    /// Playback (heard with the silent switch on) mixed with other apps' audio instead of stopping it.
+    private static func configureSession() {
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
     }
 
     func playMusic(_ track: MusicTrack) {

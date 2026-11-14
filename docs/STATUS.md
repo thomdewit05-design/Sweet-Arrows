@@ -231,6 +231,7 @@ door moedertaalsprekers nalezen voor de lancering.
 
 ## Besluiten van de eigenaar
 
+- **Geluid ook als de iPhone op stil staat** (november 2026): audiosessie `.playback` met `.mixWithOthers`, zodat muziek van andere apps blijft doorspelen. Uitzetten kan in Instellingen (Geluid / Muziek).
 - Uitgeven onder **eigen naam**: bundle-ID `com.lucthomasdewit.sweetarrows.com` (zo staat de app in App Store Connect;
   een bundle-ID kan daar niet meer veranderen). Team-ID `7BDZ6994AD`. Beide in `Config/Shared.xcconfig`.
 - Hoofdspel **Glijden & matchen**; de pijlpuzzels met levels zijn verwijderd.
