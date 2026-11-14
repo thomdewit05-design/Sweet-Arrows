@@ -133,7 +133,7 @@ private struct BoosterRow: View {
             }
             Spacer()
             Button(action: buy) {
-                Label("\(booster.price)", systemImage: "circle.fill")
+                CoinLabel(amount: booster.price, size: 16)
                     .font(Theme.heading(16))
             }
             .buttonStyle(CandyButtonStyle(color: Theme.gold, foreground: Theme.ink))
@@ -170,7 +170,7 @@ private struct CosmeticCard: View {
                     } else if owned {
                         Text("Use")
                     } else {
-                        Label("\(item.price)", systemImage: "circle.fill")
+                        CoinLabel(amount: item.price, size: 13)
                     }
                 }
                 .font(Theme.body(13))

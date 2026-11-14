@@ -144,7 +144,7 @@ struct EndlessView: View {
     /// Screenshot demo: the showcase move (a line of five in a combo), or straight to a record result.
     private func playDemo() {
         Task { @MainActor in
-            try? await Task.sleep(for: .seconds(1.5))
+            try? await Task.sleep(for: .seconds(Demo.showsResult ? 1.5 : 3))
             guard Demo.showsResult else {
                 scene?.handleTap(on: SlideGame.showcaseMover)
                 return

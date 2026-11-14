@@ -53,9 +53,9 @@ final class ScreenshotTests: XCTestCase {
 
         play.tap()
         XCTAssertTrue(app.descendants(matching: .any)["score"].waitForExistence(timeout: 10))
-        // The showcase move happens 1.5 s after the board appears; catch the celebration at many moments.
-        usleep(1_000_000)
-        for frame in 0..<12 {
+        // The showcase move happens 3 s after the board appears; catch the celebration at many moments.
+        usleep(2_400_000)
+        for frame in 0..<20 {
             save("\(language)-1-game-\(String(format: "%02d", frame))")
             usleep(100_000)
         }
