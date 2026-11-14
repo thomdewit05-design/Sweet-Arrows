@@ -147,16 +147,19 @@ The very first version of Sweet Arrows! Have fun popping.
 
 ## Screenshots
 
+In `docs/appstore/`: `nl/` en `en/` (1320 × 2868, iPhone 6,9 inch) en `nl-6.3/` en `en-6.3/`
+(1206 × 2622, iPhone 6,1/6,3 inch). Upload ze in deze volgorde:
+
 | # | Scherm | NL-kop | EN-kop |
 |---|---|---|---|
-| 1 | Spel, net een rij van 5 | Tik. Glijd. Plop! | Tap. Slide. Pop! |
-| 2 | Spel, Sugar rush-combo | Combo's vol suiker | Sugar-rush combos |
-| 3 | Hoofdscherm | Elke dag nieuwe opdrachten | New missions every day |
-| 4 | Nieuw record | Verbreek je record | Beat your record |
-| 5 | Seizoenspad | Gratis seizoensbeloningen | Free season rewards |
-| 6 | Stickeralbum | Verzamel alle stickers | Collect every sticker |
-| 7 | Gelukswiel | Draai elke dag aan het rad | Spin the wheel every day |
-| 8 | Weektoernooi | Elke week een toernooi | A tournament every week |
+| 1 | Spel, Suikerfeest-combo | Tik. Glijd. Plop! | Tap. Slide. Pop! |
+| 2 | Hoofdscherm | Elke dag nieuwe opdrachten | New missions every day |
+| 3 | Nieuw record | Verbreek je record | Beat your record |
+| 4 | Winkel | Nieuwe looks voor je snoep | New looks for your candy |
+| 5 | Dagelijks cadeau | Elke dag een cadeau | A gift every day |
 
-Apple toont de eerste drie het meest; houd 1–3 in deze volgorde. Opnieuw maken: start de workflow
-"App Store screenshots" en daarna `python3 Tools/AppStore/frame_screenshots.py`.
+Promotieafbeelding (banner, zonder tekst): `docs/appstore/banner/` in 3840 × 1646 en 5244 × 2950.
+
+Opnieuw maken: de workflow "App Store screenshots" draaien (of `SweetArrowsUITests/ScreenshotTests.swift`
+aanpassen en pushen), daarna `python3 Tools/AppStore/frame_screenshots.py`; de banner met
+`python3 Tools/AppStore/make_banner.py`.

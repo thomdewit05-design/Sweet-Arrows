@@ -22,7 +22,7 @@ SMALL = (1206, 2622)  # iPhone 6.1"/6.3"
 
 # Order in the App Store, raw file name, background colors, headline and line below, per language.
 SHOTS = [
-    ("1-game", "1-game-00", (0xFF5C8A, 0xA259FF), {
+    ("1-game", "1-game-01", (0xFF5C8A, 0xA259FF), {
         "nl": ("Tik. Glijd. Plop!", "Zet 3 snoepjes van een kleur op een rij"),
         "en": ("Tap. Slide. Pop!", "Line up 3 candies of a color"),
     }),
