@@ -211,8 +211,8 @@ Aanpak om de oorzaak te vinden, telkens één ding tegelijk:
 Zelf nog doen:
 1. GitHub → repository → Settings → Pages → Build and deployment → Source: **GitHub Actions**. Daarna
    Actions → Website → Run workflow (of wacht op de volgende merge met een wijziging in `docs/site`).
-2. Een apart supportadres aanmaken (bijv. een nieuw Gmail-adres) en doorgeven; nu staat er nog
-   `support@sweetarrowsgame.com` op de site en in de app (`Links.supportAddress`), dat bestaat niet.
+2. ✅ Supportadres: op verzoek van de eigenaar staat zijn eigen Gmail-adres op de site en in de app
+   (`Links.supportAddress`).
 3. In App Store Connect: Privacybeleid-URL = `…/Sweet-Arrows/privacy.html`, Support-URL = `…/Sweet-Arrows/`.
 4. `app-ads.txt`: AdMob zoekt dit bestand in de hoofdmap van je website-domein. Op een projectadres
    (`/Sweet-Arrows/`) vindt AdMob het niet; daarvoor is later een repository `thomdewit05-design.github.io` of een

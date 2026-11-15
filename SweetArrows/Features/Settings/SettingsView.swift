@@ -77,7 +77,7 @@ enum Links {
     private static var dutch: Bool { Locale.current.language.languageCode?.identifier == "nl" }
     static var privacy: URL { website.appendingPathComponent(dutch ? "privacy-nl.html" : "privacy.html") }
     static var terms: URL { website.appendingPathComponent(dutch ? "terms-nl.html" : "terms.html") }
-    static let supportAddress = "support@sweetarrowsgame.com"
+    static let supportAddress = "thomdewit05@gmail.com"
 
     /// A mail with app version and device already filled in.
     static func supportMail(version: String) -> URL {
